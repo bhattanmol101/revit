@@ -59,7 +59,7 @@ export default function PostModal(props: any) {
       loading: true,
     }));
 
-    const res = await savePostAction(globalState.user?.id, text, files);
+    const res = await savePostAction(String(globalState.user?.id), text, files);
 
     console.log(res);
 
@@ -99,11 +99,13 @@ export default function PostModal(props: any) {
         <ModalFooter className="flex flex-row justify-between">
           <div className="flex flex-row items-center gap-2">
             <FileInput
+            className=""
               accept="image/*"
               handleFileUpload={onFileChange}
               icon={<ImageIcon size={22} />}
             />
             <FileInput
+            className=""
               accept="video/*"
               handleFileUpload={onFileChange}
               icon={<VideoIcon size={26} />}
