@@ -101,7 +101,7 @@ export default function FeedItemModal({
     }));
 
     const review: ReviewReqest = {
-      userId: globalState.user?.id,
+      userId: String(globalState.user?.id),
       text: text,
       rating: rating,
     };
@@ -201,7 +201,7 @@ export default function FeedItemModal({
                 isBordered
                 radius="full"
                 size="md"
-                src={globalState.user?.profileImage}
+                src={String(globalState.user?.profileImage)}
               />
             </div>
             <Textarea
