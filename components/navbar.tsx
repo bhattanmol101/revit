@@ -32,6 +32,10 @@ export const Navbar = () => {
     router.push(String(key));
   };
 
+  const onSigninPress = () => {
+    router.push("/signin");
+  };
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -109,9 +113,8 @@ export const Navbar = () => {
               <Button
                 className="p-0"
                 color="primary"
-                href="/signin"
                 radius="full"
-                onPress={() => {}}
+                onPress={onSigninPress}
               >
                 Sign In
               </Button>
