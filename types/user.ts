@@ -7,9 +7,9 @@ export type User = {
   id: string;
   email: string;
   name: string;
-  profileImage?: string;
-  bio?: string;
-  dob?: Date;
+  profileImage?: string | null;
+  bio?: string | null;
+  dob?: Date | null;
   createdAt: Date;
 };
 
