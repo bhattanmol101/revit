@@ -73,10 +73,10 @@ export default function FeedFileSlider({ files }: { files: string[] }) {
   };
 
   return (
-    <div className="mt-1 flex flex-col items-center relative h-[36em] rounded-lg bg-default-100">
+    <div className="mt-1 flex flex-col items-center relative sm:h-[36em] rounded-lg bg-default-100">
       <Image
         alt="file"
-        className="w-auto h-[36em] object-cover"
+        className="w-auto sm:h-[36em] object-cover"
         height={720}
         src={files[currentIndex]}
         width={1080}

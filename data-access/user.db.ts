@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertProfile, profileTable } from "@/db/schema/user";
-import { User } from "@/types/user";
+import { UpdateUser, User } from "@/types/user";
 
 export async function fetchUserById(userId: string) {
   const rows = await db
@@ -34,6 +34,16 @@ export async function insertUserProfile(user: User) {
   const res = await db
     .insert(profileTable)
     .values(profileUser)
+    .returning({ userId: profileTable.id });
+
+  return res[0].userId;
+}
+
+export async function updateUserProfile(userId: string, user: UpdateUser) {
+  const res = await db
+    .update(profileTable)
+    .set(user)
+    .where(eq(profileTable.id, userId))
     .returning({ userId: profileTable.id });
 
   return res[0].userId;

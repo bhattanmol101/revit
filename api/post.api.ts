@@ -7,7 +7,7 @@ import {
   insertReviewForPost,
 } from "../data-access/post.db";
 
-import { PostRequest, Review, ReviewReqest } from "@/types/post";
+import { PostRequest, ReviewReqest } from "@/types/post";
 import { InsertPost } from "@/db/schema/post";
 import { InsertReview } from "@/db/schema/review";
 
@@ -53,7 +53,6 @@ export async function getAllUserReviews(userId: string) {
   }
 }
 
-
 export async function savePost(postRequest: PostRequest) {
   try {
     const insertPostT: InsertPost = {
@@ -74,16 +73,13 @@ export async function savePost(postRequest: PostRequest) {
   }
 }
 
-export async function addReviewToPost(
-  postId: string,
-  review: ReviewReqest,
-) {
- const insertReview: InsertReview = {
+export async function addReviewToPost(postId: string, review: ReviewReqest) {
+  const insertReview: InsertReview = {
     postId: postId,
     userId: review.userId,
     rating: review.rating,
     text: review.text,
-  }
+  };
 
   try {
     await insertReviewForPost(insertReview);

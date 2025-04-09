@@ -11,11 +11,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <Navbar />
       <div className="flex flex-row justify-center pt-16">
-        <div className="basis-2/12">
+        <div className="hidden sm:flex basis-2/12">
           <SideNavbar />
         </div>
-        <div className="basis-[36%]">{children}</div>
-        <div className="basis-3/12">
+        <div className="sm:basis-[36%]">{children}</div>
+        <div className="hidden sm:flex basis-3/12">
           <RightBar />
         </div>
       </div>
