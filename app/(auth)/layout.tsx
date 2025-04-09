@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           title="heroui.com homepage"
         >
           <span className="text-default-600">Powered by</span>
-          <p className="text-primary">HeroUI</p>
+          <p className="text-primary text-lg">aeradron</p>
         </Link>
       </footer>
     </div>

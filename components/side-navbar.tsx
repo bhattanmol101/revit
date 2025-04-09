@@ -39,15 +39,17 @@ export const SideNavbar = () => {
               </div>
             }
           />
-          <Tab
-            key="/profile"
-            title={
-              <div className="flex flex-row items-center gap-2">
-                <ProfileIcon />
-                <p className="text-md">Profile</p>
-              </div>
-            }
-          />
+          {globalState.auth && (
+            <Tab
+              key="/profile"
+              title={
+                <div className="flex flex-row items-center gap-2">
+                  <ProfileIcon />
+                  <p className="text-md">Profile</p>
+                </div>
+              }
+            />
+          )}
         </Tabs>
 
         {globalState.auth && (

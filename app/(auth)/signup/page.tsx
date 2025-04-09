@@ -52,10 +52,15 @@ export default function SignupPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-row items-center justify-evenly">
-      <div className="flex flex-col justify-center items-center text-center">
-        <div className="pb-12">
-          <Image alt="logo" height={100} src={logo} />
+    <section className="min-h-screen flex sm:flex-row flex-col items-center sm:justify-evenly pt-10 sm:pt-0">
+      <div className="flex flex-col justify-center items-center text-center sm:pb-0 pb-10">
+        <div className="sm:pb-12 pb-6">
+          <Image
+            alt="logo"
+            className="sm:h-full h-16"
+            height={100}
+            src={logo}
+          />
         </div>
         <div>
           <span className={title({ color: "yellow", size: "lg" })}>
@@ -67,7 +72,7 @@ export default function SignupPage() {
         </div>
         <Slider
           aria-label="Volume"
-          className="max-w-sm py-7"
+          className="max-w-sm sm:py-7 py-4"
           color="primary"
           defaultValue={2}
           maxValue={5}
@@ -84,7 +89,7 @@ export default function SignupPage() {
       <div className="flex flex-col justify-center items-center max-w-sm">
         {(signup.disabled || signup.error) && (
           <Alert
-            className="mb-5"
+            className="sm:mb-5 mb-2"
             color={signup.success ? "success" : "danger"}
             title={
               signup.success
@@ -94,7 +99,7 @@ export default function SignupPage() {
           />
         )}
         <Form
-          className="w-96 flex flex-col gap-4"
+          className="w-96 flex flex-col sm:gap-4 gap-2"
           validationBehavior="native"
           onSubmit={onSubmit}
         >
@@ -127,7 +132,7 @@ export default function SignupPage() {
             Sign Up
           </Button>
         </Form>
-        <div className="flex flex-row justify-center items-center max-w-sm my-10">
+        <div className="flex flex-row justify-center items-center max-w-sm sm:my-10 my-6">
           <Divider className="w-36 mr-5" />
           <span className="text-gray-500">OR</span>
           <Divider className="w-36 ml-5" />

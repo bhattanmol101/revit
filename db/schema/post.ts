@@ -1,8 +1,14 @@
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { profileTable } from "./user";
+
 export const postTable = pgTable("post", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("userId").notNull(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => profileTable.id, {
+      onDelete: "cascade",
+    }),
   text: text("text").default(""),
   files: text("files").array().default([]).notNull(),
   hashtags: text("hashtags").array().default([]).notNull(),

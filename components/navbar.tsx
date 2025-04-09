@@ -5,7 +5,6 @@ import {
   NavbarItem,
 } from "@heroui/navbar";
 import { Avatar } from "@heroui/avatar";
-import { Link } from "@heroui/link";
 import { Input } from "@heroui/input";
 import NextLink from "next/link";
 import { Divider } from "@heroui/divider";
@@ -94,7 +93,6 @@ export const Navbar = () => {
             <NavbarItem className="">
               <Button
                 isIconOnly
-                as={Link}
                 className="rounded-full"
                 color="primary"
                 href="#"
@@ -109,7 +107,6 @@ export const Navbar = () => {
             </NavbarItem>
             <NavbarItem>
               <Button
-                as={Link}
                 className="p-0"
                 color="primary"
                 href="/signin"
