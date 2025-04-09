@@ -44,9 +44,6 @@ export const signUpAction = async (email: string, password: string) => {
         email: data.user.user_metadata.email,
         name: data.user.user_metadata.email.split("@")[0],
         createdAt: new Date(data.user.created_at),
-        profileImage: "",
-        bio: "",
-        dob: "",
       };
 
       await insertUserProfile(user);
