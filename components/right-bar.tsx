@@ -27,7 +27,7 @@ export const RightBar = () => {
             variant="bordered"
             onPress={onOpen}
           >
-            Want something reviewd?
+            Want something reviewed...?
           </Button>
         )}
       </div>
