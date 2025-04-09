@@ -2,17 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { useDisclosure } from "@heroui/modal";
+import { Button } from "@heroui/button";
+import { Divider } from "@heroui/divider";
 
 import { getAllPostAction } from "./action";
 import { useFeedStore } from "./_store";
 import Loading from "./loading";
+import PostModal from "./post-modal";
 
 import FeedItemCard from "@/components/ui/feed-item-card";
 import FeedItemModal from "@/components/ui/feed-item-modal";
 import { Post } from "@/types/post";
+import { useGlobalStore } from "@/store";
 
 export default function HomePage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  const {
+    isOpen: isPostModalOpen,
+    onOpen: onPostModalOpen,
+    onOpenChange: onPostModalOpenChange,
+  } = useDisclosure();
+
+  const { globalState } = useGlobalStore((state) => state);
 
   const { feed, setFeed } = useFeedStore((state) => state);
 
@@ -42,6 +54,21 @@ export default function HomePage() {
   return (
     <div className="sm:px-5 px-1 h-screen w-full">
       {feed.loading && <Loading />}
+      {!feed.loading && globalState.auth && (
+        <div className="w-full flex flex-col sm:hidden mt-2">
+          <Button
+            fullWidth={true}
+            radius="full"
+            size="sm"
+            type="submit"
+            variant="shadow"
+            onPress={onPostModalOpen}
+          >
+            <p className="text-sm">Want something reviewed...?</p>
+          </Button>
+          <Divider className="w-[98vw] mt-2" />
+        </div>
+      )}
       {!feed.loading && feed.data.length == 0 && (
         <p className="text-center mt-2 text-default-500 text-sm">
           No posts yet...
@@ -63,6 +90,10 @@ export default function HomePage() {
           onOpenChange={onOpenChange}
         />
       )}
+      <PostModal
+        isOpen={isPostModalOpen}
+        onOpenChange={onPostModalOpenChange}
+      />
     </div>
   );
 }
