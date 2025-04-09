@@ -38,7 +38,6 @@ export default function EditProfileModal(props: any) {
 
   const onDobChange = (value: CalendarDate | null) => {
     if (value) {
-      console.log("dob", value.toString(), new Date(value.toString()));
       setDob(new Date(value.toString()));
     }
   };

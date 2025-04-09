@@ -103,8 +103,8 @@ function ProfilePage() {
                     isIconOnly
                     color="default"
                     isDisabled={logoutLoading}
+                    isLoading={logoutLoading}
                     size="sm"
-                    spinner={logoutLoading}
                     spinnerPlacement="end"
                     onPress={onLogoutPress}
                   >
