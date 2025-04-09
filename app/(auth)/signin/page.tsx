@@ -44,7 +44,7 @@ export default function Main() {
     }));
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget)
+      new FormData(e.currentTarget),
     ) as SignupUser;
 
     const res = await signInAction(data);
