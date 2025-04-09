@@ -22,8 +22,6 @@ export async function GET(request: Request) {
         name: data.user.user_metadata.name,
         createdAt: new Date(data.user.created_at),
         profileImage: data.user.user_metadata.picture,
-        bio: "",
-        dob: "",
       };
 
       await insertUserProfile(user);
