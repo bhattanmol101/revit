@@ -7,7 +7,7 @@ export const FeedReview = ({ review }: { review: Review }) => {
   return (
     <div className="flex flex-row w-full gap-3 mb-1">
       <div className="mt-1">
-        <Avatar src={String(review.userProfileImage)} />
+        <Avatar showFallback src={String(review.userProfileImage)} />
       </div>
       <div className="flex flex-col justify-center items-start w-full bg-default-100 rounded-xl px-3 py-2">
         <Slider

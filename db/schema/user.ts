@@ -21,7 +21,7 @@ export const profileTable = pgTable("profile", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   profileImage: text("profile_image").default(""),
-  dob: date("dob"),
+  dob: date("dob", { mode: "date" }),
   bio: text("bio").default(""),
   createdAt: timestamp("created_at").notNull(),
 });

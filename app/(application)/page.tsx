@@ -27,8 +27,6 @@ export default function HomePage() {
     const fetchPosts = async () => {
       const resp = await getAllPostAction("123");
 
-      console.log(resp)
-
       setFeed({
         ...feed,
         loading: false,
@@ -42,9 +40,13 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="px-5 h-screen">
+    <div className="sm:px-5 px-1 h-screen w-full">
       {feed.loading && <Loading />}
-      {!feed.loading && feed.data.length == 0 && <p className="text-center mt-2 text-default-500 text-sm">No posts yet...</p>}
+      {!feed.loading && feed.data.length == 0 && (
+        <p className="text-center mt-2 text-default-500 text-sm">
+          No posts yet...
+        </p>
+      )}
       {!feed.loading &&
         feed.data.map((post) => (
           <FeedItemCard

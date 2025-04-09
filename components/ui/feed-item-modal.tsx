@@ -198,6 +198,7 @@ export default function FeedItemModal({
             <div>
               <Avatar
                 isBordered
+                showFallback
                 radius="full"
                 size="md"
                 src={String(globalState.user?.profileImage)}

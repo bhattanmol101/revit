@@ -1,13 +1,9 @@
+import { updateUserProfile } from "@/data-access/user.db";
 import { UpdateUser } from "@/types/user";
-import { createClient } from "@/utils/supabase/server";
 
-export async function updateUser(userRequest: UpdateUser) {
+export async function updateUser(userId: string, userRequest: UpdateUser) {
   try {
-    const supabase = await createClient();
-
-    const resp = await supabase.auth.updateUser({
-      data: userRequest,
-    });
+    await updateUserProfile(userId, userRequest);
 
     return { success: true, error: "" };
   } catch (e: any) {

@@ -7,27 +7,27 @@ import {
   ModalBody,
   ModalFooter,
 } from "@heroui/modal";
-import {DateInput} from "@heroui/date-input";
-import {CalendarDate, parseDate} from "@internationalized/date";
+import { DateInput } from "@heroui/date-input";
+import { CalendarDate, parseDate } from "@internationalized/date";
 import { useState } from "react";
+import { Avatar } from "@heroui/avatar";
+
+import { updateUserAction } from "../action";
 
 import { PageState } from "@/types";
 import { initPostState } from "@/utils/utils";
-import { Avatar } from "@heroui/avatar";
 import FileInput from "@/components/ui/FileInput";
 import { UpdateUser } from "@/types/user";
-import { updateUserAction } from "../action";
 
 export default function EditProfileModal(props: any) {
-  const { isOpen, onOpenChange, user} = props;
+  const { isOpen, onOpenChange, user } = props;
 
   const [pageState, setPageState] = useState<PageState>(initPostState());
 
   const [file, setFile] = useState<Blob>();
 
-  const [profileImage, setProfileImage] = useState<string>(user.profileImage);
   const [name, setName] = useState<string>(user.name);
-  const [dob, setDob] = useState<string>(user.dob);
+  const [dob, setDob] = useState<Date>(user.dob);
   const [bio, setBio] = useState<string>(user.bio);
 
   const onProfileImageChange = (e: any) => {
@@ -37,11 +37,11 @@ export default function EditProfileModal(props: any) {
   };
 
   const onDobChange = (value: CalendarDate | null) => {
-    if(value){
-      console.log("dob", value.toString())
-      setDob(value.toString())
+    if (value) {
+      console.log("dob", value.toString(), new Date(value.toString()));
+      setDob(new Date(value.toString()));
     }
-  }
+  };
 
   const onModalOpenChange = () => {
     if (!pageState.disabled) {
@@ -60,12 +60,10 @@ export default function EditProfileModal(props: any) {
       name: name,
       dob: dob,
       bio: bio,
-      profileImage: profileImage
-    }
+      profileImage: user.profileImage,
+    };
 
-    const res = await updateUserAction(updateUser, file);
-
-    console.log(res);
+    const res = await updateUserAction(user.id, updateUser, file);
 
     setPageState((prevState) => ({
       ...prevState,
@@ -90,37 +88,48 @@ export default function EditProfileModal(props: any) {
       <ModalContent>
         <ModalHeader>Edit Profile</ModalHeader>
         <ModalBody className="flex flex-col items-center">
-        <FileInput
-              className="w-36 h-36 rounded-full"
-              accept="image/*"
-              handleFileUpload={onProfileImageChange}
-              icon={<Avatar
+          <FileInput
+            accept="image/*"
+            className="w-36 h-36 rounded-full"
+            handleFileUpload={onProfileImageChange}
+            icon={
+              <Avatar
+                showFallback
                 className="w-36 h-36"
-                src={file ? URL.createObjectURL(file) : profileImage}
-              />}
-            />
-        <Input
+                src={file ? URL.createObjectURL(file) : user.profileImage}
+              />
+            }
+          />
+          <Input
             errorMessage="Please enter a valid name"
             label="Name"
             name="name"
-            variant="bordered"
             type="text"
             value={name}
+            variant="bordered"
             onValueChange={setName}
           />
           <DateInput
-        defaultValue={parseDate("2024-04-04")}
-        label="Date of Birth"
-        variant="bordered"
-        value={dob ? new CalendarDate(new Date(dob).getFullYear(), new Date(dob).getMonth(), new Date(dob).getDate()) : new CalendarDate(1995, 11, 6)}
-        placeholderValue={new CalendarDate(1995, 11, 6)}
-        onChange={onDobChange}
-      />
+            defaultValue={parseDate("2024-04-04")}
+            label="Date of Birth"
+            placeholderValue={new CalendarDate(1995, 11, 6)}
+            value={
+              dob
+                ? new CalendarDate(
+                    dob.getFullYear(),
+                    dob.getMonth() + 1,
+                    dob.getDate()
+                  )
+                : new CalendarDate(1995, 11, 6)
+            }
+            variant="bordered"
+            onChange={onDobChange}
+          />
           <Textarea
             aria-label="Bio"
             className="col-span-4 md:col-span-4 mb-6 md:mb-0"
-            maxRows={2}
             label="Bio"
+            maxRows={2}
             value={bio ? bio : ""}
             variant="bordered"
             onValueChange={setBio}
