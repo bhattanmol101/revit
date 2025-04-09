@@ -7,8 +7,6 @@ import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-import { User } from "@/types/user";
-
 import { fetchUserAction } from "./action";
 
 import { useGlobalStore } from "@/store";
@@ -34,10 +32,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   React.useEffect(() => {
     const fetchUser = async () => {
       const user = await fetchUserAction();
+
       if (user) {
-        setGlobalState({ auth: true, user: user});
-      } else{
-        setGlobalState({ auth: false});
+        setGlobalState({ auth: true, user: user });
+      } else {
+        setGlobalState({ auth: false });
       }
     };
 

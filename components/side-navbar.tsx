@@ -1,10 +1,10 @@
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { useRouter } from "next/navigation";
 
-import { ChatIcon, HomeIcon, NotificationIcon } from "./icons";
+import { HomeIcon, NotificationIcon } from "./icons";
 
 import { useGlobalStore } from "@/store";
-import { useRouter } from "next/navigation";
 
 export const SideNavbar = () => {
   const router = useRouter();
@@ -18,7 +18,9 @@ export const SideNavbar = () => {
           color="default"
           startContent={<HomeIcon />}
           variant="light"
-          onPress={() => {router.push("/");}}
+          onPress={() => {
+            router.push("/");
+          }}
         >
           Home
         </Button>
@@ -45,7 +47,9 @@ export const SideNavbar = () => {
               color="default"
               startContent={<NotificationIcon />}
               variant="light"
-              onPress={() => {router.push("/profile");}}
+              onPress={() => {
+                router.push("/profile");
+              }}
             >
               Profile
             </Button>

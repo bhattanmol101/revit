@@ -8,12 +8,11 @@ export const fetchUserAction = async () => {
   const supabase = await createClient();
 
   const resp = await supabase.auth.getUser();
-  
-  let user: User | null = null
-  
-  if (!resp.error && resp.data.user) {
 
-    user = await fetchUserById(resp.data.user.id)
+  let user: User | null = null;
+
+  if (!resp.error && resp.data.user) {
+    user = await fetchUserById(resp.data.user.id);
   }
 
   return user;

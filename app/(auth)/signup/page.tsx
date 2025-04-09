@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import logo from "../../../public/assets/revit-logo.svg";
+import { signInWithGoogleAction } from "../signin/action";
 
 import { signUpAction } from "./action";
 
@@ -36,7 +37,9 @@ export default function SignupPage() {
       loading: true,
     }));
 
-    const data = Object.fromEntries(new FormData(e.currentTarget)) as SignupUser;
+    const data = Object.fromEntries(
+      new FormData(e.currentTarget)
+    ) as SignupUser;
 
     const res = await signUpAction(data.email, data.password);
 
@@ -134,6 +137,7 @@ export default function SignupPage() {
           color="default"
           fullWidth={true}
           startContent={<GoogleIcon size={22} />}
+          onPress={signInWithGoogleAction}
         >
           Signup with Google
         </Button>

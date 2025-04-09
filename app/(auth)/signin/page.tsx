@@ -13,7 +13,7 @@ import Image from "next/image";
 
 import logo from "../../../public/assets/revit-logo.svg";
 
-import { signInAction } from "./action";
+import { signInAction, signInWithGoogleAction } from "./action";
 
 import { title } from "@/components/primitives";
 import { GoogleIcon } from "@/components/icons";
@@ -21,7 +21,7 @@ import { PageState } from "@/types";
 import { useGlobalStore } from "@/store";
 import { validateEmail, validatePassword } from "@/utils/validators";
 import { fetchUserAction } from "@/app/action";
-import { SignupUser, User } from "@/types/user";
+import { SignupUser } from "@/types/user";
 
 export default function Main() {
   const router = useRouter();
@@ -43,7 +43,9 @@ export default function Main() {
       loading: true,
     }));
 
-    const data = Object.fromEntries(new FormData(e.currentTarget)) as SignupUser;
+    const data = Object.fromEntries(
+      new FormData(e.currentTarget)
+    ) as SignupUser;
 
     const res = await signInAction(data);
 
@@ -56,8 +58,9 @@ export default function Main() {
 
     if (res.success) {
       const user = await fetchUserAction();
+
       if (user) {
-        setGlobalState({ auth: true, user: user});
+        setGlobalState({ auth: true, user: user });
         router.replace("/");
       }
     }
@@ -67,7 +70,7 @@ export default function Main() {
     <section className="min-h-screen flex flex-row items-center justify-evenly">
       <div className="flex flex-col justify-center items-center text-center">
         <div className="pb-12">
-          <Image alt="logo" height={80} src={logo} />
+          <Image alt="logo" height={100} src={logo} />
         </div>
         <div>
           <span className={title({ color: "yellow", size: "lg" })}>
@@ -145,6 +148,7 @@ export default function Main() {
           color="default"
           fullWidth={true}
           startContent={<GoogleIcon size={22} />}
+          onPress={signInWithGoogleAction}
         >
           Login with Google
         </Button>

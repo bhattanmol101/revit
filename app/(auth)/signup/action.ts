@@ -4,11 +4,12 @@ import { sql } from "drizzle-orm";
 
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/db";
-import { InsertProfile, profileTable } from "@/db/schema/user";
+import { insertUserProfile } from "@/data-access/user.db";
+import { User } from "@/types/user";
 
 export const signUpAction = async (email: string, password: string) => {
   const user = await db.execute(
-    sql`select au.id from auth.users au where au.email = ${email}`,
+    sql`select au.id from auth.users au where au.email = ${email}`
   );
 
   if (user.length > 0) {
@@ -37,21 +38,24 @@ export const signUpAction = async (email: string, password: string) => {
       },
     };
   } else {
-    if(data.user){
-    // save the details in the profile table as well
-    const profileUser : InsertProfile =  {
-      id: data.user.id,
-      email: email,
-      name: email.split("@")[0],
-      createdAt: new Date(data.user.created_at),
+    if (data.user) {
+      const user: User = {
+        id: data.user.id,
+        email: data.user.user_metadata.email,
+        name: data.user.user_metadata.email.split("@")[0],
+        createdAt: new Date(data.user.created_at),
+        profileImage: "",
+        bio: "",
+        dob: "",
+      };
+
+      await insertUserProfile(user);
+
+      return {
+        success: true,
+        error: null,
+      };
     }
-  
-    await db.insert(profileTable).values(profileUser)
-  
-    return {
-      success: true,
-      error: null,
-    };}
 
     return {
       success: false,

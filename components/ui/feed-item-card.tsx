@@ -21,15 +21,16 @@ export default function FeedItemCard({
   post: Post;
   onFeedModalOpen?: (post: Post) => void;
 }) {
-
   const { globalState } = useGlobalStore((state) => state);
 
   const onOpen = () => {
     onFeedModalOpen && onFeedModalOpen(post);
   };
 
-  const rating = post.rating ? Number(post.rating)/Number(post.totalReviews) : 0
-  
+  const rating = post.rating
+    ? Number(post.rating) / Number(post.totalReviews)
+    : 0;
+
   return (
     <>
       <Card className="w-full my-2">
@@ -37,13 +38,19 @@ export default function FeedItemCard({
           <User
             avatarProps={{
               src: String(post.userProfileImage),
-              showFallback:true
+              showFallback: true,
             }}
             description={getPostDateString(post.createdAt)}
             name={post.userName}
           />
 
-          <Button isIconOnly aria-label="menu" size="sm" variant="light" isDisabled={!globalState.auth}>
+          <Button
+            isIconOnly
+            aria-label="menu"
+            isDisabled={!globalState.auth}
+            size="sm"
+            variant="light"
+          >
             <MenuIcon size={24} />
           </Button>
         </CardHeader>
@@ -72,11 +79,11 @@ export default function FeedItemCard({
             </p>
           </div>
           <Button
+            isDisabled={!globalState.auth}
             radius="full"
             size="sm"
             startContent={<RevitIcon size={30} />}
             variant="light"
-            isDisabled={!globalState.auth}
             onPress={onOpen}
           >
             <p className="text-default-500 text-sm -ml-1">revit</p>
