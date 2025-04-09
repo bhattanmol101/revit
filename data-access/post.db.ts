@@ -1,4 +1,4 @@
-import { count, desc, eq, sql, sum } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertPost, postTable } from "@/db/schema/post";

@@ -21,7 +21,7 @@ import { FeedReview } from "./feed-review";
 import FeedFileSlider from "./feed-file-slider";
 import AlertModal from "./alert-modal";
 
-import { Post, Review, ReviewReqest } from "@/types/post";
+import { Post, ReviewReqest } from "@/types/post";
 import {
   addReviewToPostAction,
   getPostReviewsByIdAction,
@@ -44,12 +44,14 @@ export default function FeedItemModal({
     data: feedPost,
   });
 
-  const {globalState} = useGlobalStore((state) => state)
+  const { globalState } = useGlobalStore((state) => state);
 
   const [text, setText] = useState("");
   const [rating, setRating] = useState(0);
 
-  const postRating = post.data.rating  ? Number(post.data.rating)/Number(post.data.totalReviews) : 0
+  const postRating = post.data.rating
+    ? Number(post.data.rating) / Number(post.data.totalReviews)
+    : 0;
 
   const {
     isOpen: isAlertOpen,
@@ -72,7 +74,7 @@ export default function FeedItemModal({
         setPost({
           ...post,
           loading: false,
-          data: {...feedPost, reviews: resp.reviews},
+          data: { ...feedPost, reviews: resp.reviews },
         });
       }
     };
@@ -106,10 +108,7 @@ export default function FeedItemModal({
       rating: rating,
     };
 
-    const res = await addReviewToPostAction(
-      post.data.id,
-      review,
-    );
+    const res = await addReviewToPostAction(post.data.id, review);
 
     setPageState((prevState) => ({
       ...prevState,
@@ -119,7 +118,7 @@ export default function FeedItemModal({
       error: res.error,
     }));
 
-    onOpenChange()
+    onOpenChange();
   };
 
   return (
@@ -132,7 +131,7 @@ export default function FeedItemModal({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-        Your review for {post.data.userName}&apos;s post
+          Your review for {post.data.userName}&apos;s post
         </ModalHeader>
         <ModalBody key={post.data.id}>
           <div className="flex flex-row justify-between">

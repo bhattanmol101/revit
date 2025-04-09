@@ -7,7 +7,7 @@ export function FileInput({
   accept,
   handleFileUpload,
 }: {
-  className: string,
+  className: string;
   icon: ReactNode;
   accept: string;
   handleFileUpload: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -31,7 +31,12 @@ export function FileInput({
         onChange={handleFileUpload}
       />
       <label htmlFor="contained-button-file">
-        <Button className={className} isIconOnly variant="light" onPress={handleButtonClick}>
+        <Button
+          isIconOnly
+          className={className}
+          variant="light"
+          onPress={handleButtonClick}
+        >
           {icon}
         </Button>
       </label>

@@ -1,0 +1,3 @@
+enabled = true
+client_id = "557334331998-c1vdm1ufvsah8nlbgiif1dphi6hub3n0.apps.googleusercontent.com"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"

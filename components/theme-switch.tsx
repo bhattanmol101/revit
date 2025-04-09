@@ -23,18 +23,12 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
     theme === "light" ? setTheme("dark") : setTheme("light");
   };
 
-  const {
-    Component,
-    slots,
-    isSelected,
-    getBaseProps,
-    getInputProps,
-    getWrapperProps,
-  } = useSwitch({
-    isSelected: theme === "light" || isSSR,
-    "aria-label": `Switch to ${theme === "light" || isSSR ? "dark" : "light"} mode`,
-    onChange,
-  });
+  const { Component, slots, getBaseProps, getInputProps, getWrapperProps } =
+    useSwitch({
+      isSelected: theme === "light" || isSSR,
+      "aria-label": `Switch to ${theme === "light" || isSSR ? "dark" : "light"} mode`,
+      onChange,
+    });
 
   return (
     <Component
@@ -67,8 +61,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
             classNames?.wrapper,
           ),
         })}
-      >
-      </div>
+      />
     </Component>
   );
 };
