@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 // The client you created from the Server-Side Auth instructions
 import { createClient } from "@/utils/supabase/server";
-import { insertUserProfile } from "@/data-access/user.db";
+import { fetchUserById, insertUserProfile } from "@/data-access/user.db";
 import { User } from "@/types/user";
 
 export async function GET(request: Request) {
@@ -16,15 +16,19 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      const user: User = {
-        id: data.user.id,
-        email: data.user.user_metadata.email,
-        name: data.user.user_metadata.name,
-        createdAt: new Date(data.user.created_at),
-        profileImage: data.user.user_metadata.picture,
-      };
+      const resp = await fetchUserById(data.user.id);
 
-      await insertUserProfile(user);
+      if (!resp) {
+        const user: User = {
+          id: data.user.id,
+          email: data.user.user_metadata.email,
+          name: data.user.user_metadata.name,
+          createdAt: new Date(data.user.created_at),
+          profileImage: data.user.user_metadata.picture,
+        };
+
+        await insertUserProfile(user);
+      }
 
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
