@@ -58,7 +58,7 @@ export const Navbar = () => {
         <NavbarContent justify="start">
           <NavbarBrand as="li" className="gap-3 max-w-fit">
             <NextLink href="/">
-              <Image alt="logo" height={40} src={logo} />
+              <Image priority alt="logo" height={40} src={logo} />
             </NextLink>
           </NavbarBrand>
         </NavbarContent>

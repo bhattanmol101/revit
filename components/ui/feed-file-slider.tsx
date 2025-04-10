@@ -65,7 +65,7 @@ export default function FeedFileSlider({ files }: { files: string[] }) {
         className={cn(
           "h-2 w-2 rounded-full",
           isActive && "bg-gradient-to-br from-indigo-500 to-pink-500 font-bold",
-          !isActive && "bg-default-200",
+          !isActive && "bg-default-200"
         )}
         onClick={() => setPage(value)}
       />
@@ -75,6 +75,7 @@ export default function FeedFileSlider({ files }: { files: string[] }) {
   return (
     <div className="mt-1 flex flex-col items-center relative sm:h-[36em] rounded-lg bg-default-100">
       <Image
+        priority
         alt="file"
         className="w-auto sm:h-[36em] object-cover"
         height={720}

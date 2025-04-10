@@ -71,6 +71,7 @@ export default function Main() {
       <div className="flex flex-col justify-center items-center text-center sm:pb-0 pb-10">
         <div className="sm:pb-12 pb-6">
           <Image
+            priority
             alt="logo"
             className="sm:h-full h-16"
             height={100}
