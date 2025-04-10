@@ -6,11 +6,15 @@ import {
   getPostReviewsById,
   savePost,
 } from "@/api/post.api";
-import { PostRequest, Review, ReviewReqest } from "@/types/post";
+import { PostRequest, ReviewReqest } from "@/types/post";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
 
-export const savePostAction = async (userId:string, text: string, files: Blob[]) => {
+export const savePostAction = async (
+  userId: string,
+  text: string,
+  files: Blob[]
+) => {
   const supabase = await createClient();
 
   const fileList: string[] = [];
@@ -63,7 +67,7 @@ export const getAllPostAction = async (userId: string) => {
 
 export const addReviewToPostAction = async (
   postId: string,
-  review: ReviewReqest,
+  review: ReviewReqest
 ) => {
   const resp = await addReviewToPost(postId, review);
 
@@ -79,7 +83,8 @@ export const addReviewToPostAction = async (
 export const getPostReviewsByIdAction = async (postId: string) => {
   const resp = await getPostReviewsById(postId, "");
 
-  console.log(resp)
+  console.log(resp);
+
   return {
     success: resp.success,
     error: {
