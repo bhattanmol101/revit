@@ -66,3 +66,9 @@ function createRandomString(length: number) {
 
   return result;
 }
+
+export function getRating(totalRating: number, totalReviews: number) {
+  const rating = totalRating / totalReviews;
+
+  return Number(rating.toPrecision(1));
+}
