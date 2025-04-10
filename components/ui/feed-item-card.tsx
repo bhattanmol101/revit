@@ -13,6 +13,7 @@ import FeedFileSlider from "./feed-file-slider";
 import { Post } from "@/types/post";
 import { useGlobalStore } from "@/store";
 import { getPostDateString } from "@/utils/date-utils";
+import { getRating } from "@/utils/utils";
 
 export default function FeedItemCard({
   post,
@@ -28,7 +29,7 @@ export default function FeedItemCard({
   };
 
   const rating = post.rating
-    ? Number(post.rating) / Number(post.totalReviews)
+    ? getRating(Number(post.rating), Number(post.totalReviews))
     : 0;
 
   return (

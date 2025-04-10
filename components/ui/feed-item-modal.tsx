@@ -29,6 +29,7 @@ import {
 import { PageState } from "@/types";
 import { getPostDateString } from "@/utils/date-utils";
 import { useGlobalStore } from "@/store";
+import { getRating } from "@/utils/utils";
 
 export default function FeedItemModal({
   isOpen,
@@ -50,7 +51,7 @@ export default function FeedItemModal({
   const [rating, setRating] = useState(0);
 
   const postRating = post.data.rating
-    ? Number(post.data.rating) / Number(post.data.totalReviews)
+    ? getRating(Number(post.data.rating), Number(post.data.totalReviews))
     : 0;
 
   const {
