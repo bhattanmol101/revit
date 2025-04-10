@@ -70,5 +70,5 @@ function createRandomString(length: number) {
 export function getRating(totalRating: number, totalReviews: number) {
   const rating = totalRating / totalReviews;
 
-  return Number(rating.toPrecision(1));
+  return Number(rating.toPrecision(2));
 }
