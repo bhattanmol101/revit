@@ -37,7 +37,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const limit = globalState.auth ? 5 : 3;
+      const limit = globalState.auth ? 8 : 3;
+
       const resp = await getAllPostAction(String(globalState.user?.id), limit);
 
       setFeed({
@@ -50,7 +51,7 @@ export default function HomePage() {
     };
 
     fetchPosts();
-  }, []);
+  }, [globalState.auth]);
 
   return (
     <div className="sm:px-2 px-1 h-screen w-full">
