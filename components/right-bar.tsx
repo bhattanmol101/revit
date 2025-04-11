@@ -31,6 +31,14 @@ export const RightBar = () => {
           </Button>
         )}
       </div>
+      <ins
+        className="adsbygoogle"
+        data-ad-client="ca-pub-7974532258496573"
+        data-ad-format="auto"
+        data-ad-slot="6377418070"
+        data-full-width-responsive="true"
+        style={{ display: "block" }}
+      />
       <PostModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </div>
   );
