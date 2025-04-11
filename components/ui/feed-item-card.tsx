@@ -6,9 +6,10 @@ import { Slider } from "@heroui/slider";
 import { Divider } from "@heroui/divider";
 import { User } from "@heroui/user";
 
-import { MenuIcon, RevitIcon } from "../icons";
+import { RevitIcon } from "../icons";
 
 import FeedFileSlider from "./feed-file-slider";
+import FeedItemMenu from "./feed-item-menu";
 
 import { Post } from "@/types/post";
 import { useGlobalStore } from "@/store";
@@ -44,16 +45,7 @@ export default function FeedItemCard({
             description={getPostDateString(post.createdAt)}
             name={post.userName}
           />
-
-          <Button
-            isIconOnly
-            aria-label="menu"
-            isDisabled={!globalState.auth}
-            size="sm"
-            variant="light"
-          >
-            <MenuIcon size={24} />
-          </Button>
+          <FeedItemMenu post={post} />
         </CardHeader>
         <CardBody className="overflow-visible px-3 py-0">
           <p className="text-small text-default-600">{post.text}</p>

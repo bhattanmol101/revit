@@ -22,7 +22,7 @@ import { useGlobalStore } from "@/store";
 export default function PostModal(props: any) {
   const { isOpen, onOpenChange } = props;
 
-  const {globalState} = useGlobalStore((state) => state)
+  const { globalState } = useGlobalStore((state) => state);
 
   const [pageState, setPageState] = useState<PageState>(initPostState());
 
@@ -52,7 +52,6 @@ export default function PostModal(props: any) {
   };
 
   const onSubmit = async () => {
-    console.log(text);
     setPageState((prevState) => ({
       ...prevState,
       disabled: true,
@@ -60,8 +59,6 @@ export default function PostModal(props: any) {
     }));
 
     const res = await savePostAction(String(globalState.user?.id), text, files);
-
-    console.log(res);
 
     setPageState((prevState) => ({
       ...prevState,
@@ -99,14 +96,14 @@ export default function PostModal(props: any) {
         <ModalFooter className="flex flex-row justify-between">
           <div className="flex flex-row items-center gap-2">
             <FileInput
-            className=""
               accept="image/*"
+              className=""
               handleFileUpload={onFileChange}
               icon={<ImageIcon size={22} />}
             />
             <FileInput
-            className=""
               accept="video/*"
+              className=""
               handleFileUpload={onFileChange}
               icon={<VideoIcon size={26} />}
             />

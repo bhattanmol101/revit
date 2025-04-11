@@ -37,7 +37,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const resp = await getAllPostAction("123");
+      const resp = await getAllPostAction(String(globalState.user?.id));
 
       setFeed({
         ...feed,

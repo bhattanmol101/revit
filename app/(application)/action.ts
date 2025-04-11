@@ -1,11 +1,7 @@
 "use server";
 
-import {
-  addReviewToPost,
-  getAllPost,
-  getPostReviewsById,
-  savePost,
-} from "@/api/post.api";
+import { deletePost, getAllPost, savePost } from "@/api/post.api";
+import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
 import { PostRequest, ReviewReqest } from "@/types/post";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
@@ -83,8 +79,6 @@ export const addReviewToPostAction = async (
 export const getPostReviewsByIdAction = async (postId: string) => {
   const resp = await getPostReviewsById(postId, "");
 
-  console.log(resp);
-
   return {
     success: resp.success,
     error: {
@@ -92,5 +86,17 @@ export const getPostReviewsByIdAction = async (postId: string) => {
       message: resp.error,
     },
     reviews: resp.reviews,
+  };
+};
+
+export const deletePostAction = async (postId: string) => {
+  const resp = await deletePost(postId);
+
+  return {
+    success: resp.success,
+    error: {
+      code: 102,
+      message: resp.error,
+    },
   };
 };

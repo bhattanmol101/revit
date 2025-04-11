@@ -2,7 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertPost, postTable } from "@/db/schema/post";
-import { InsertReview, reviewTable } from "@/db/schema/review";
+import { reviewTable } from "@/db/schema/review";
 import { profileTable } from "@/db/schema/user";
 
 export async function insertPost(post: InsertPost) {
@@ -36,6 +36,16 @@ export async function fetchPostById(postId: string) {
   return rows[0];
 }
 
+export async function deletePostById(postId: string) {
+  await db.transaction(async (tx) => {
+    await tx.delete(postTable).where(eq(postTable.id, postId));
+
+    await tx.delete(reviewTable).where(eq(reviewTable.postId, postId));
+  });
+
+  return;
+}
+
 export async function fetchAllPostByUserId(userId: string) {
   const rows = await db
     .select({
@@ -59,62 +69,6 @@ export async function fetchAllPostByUserId(userId: string) {
 
   return rows;
 }
-
-export async function fetchPostReviewsById(postId: string) {
-  const rows = await db
-    .select({
-      id: reviewTable.id,
-      userId: profileTable.id,
-      userName: profileTable.name,
-      userProfileImage: profileTable.profileImage,
-      text: reviewTable.text,
-      rating: reviewTable.rating,
-      createdAt: reviewTable.createdAt,
-    })
-    .from(reviewTable)
-    .innerJoin(profileTable, eq(reviewTable.userId, profileTable.id))
-    .where(eq(reviewTable.postId, postId));
-
-  return rows;
-}
-
-export async function fetchAllReviewsByUserId(userId: string) {
-  const rows = await db
-    .select({
-      id: reviewTable.id,
-      userId: profileTable.id,
-      userName: profileTable.name,
-      userProfileImage: profileTable.profileImage,
-      text: reviewTable.text,
-      rating: reviewTable.rating,
-      createdAt: reviewTable.createdAt,
-    })
-    .from(reviewTable)
-    .innerJoin(profileTable, eq(reviewTable.userId, profileTable.id))
-    .where(eq(reviewTable.userId, userId))
-    .orderBy(desc(reviewTable.createdAt));
-
-  return rows;
-}
-
-export async function insertReviewForPost(review: InsertReview) {
-  const res = await db
-    .insert(reviewTable)
-    .values(review)
-    .returning({ reviewId: reviewTable.id });
-
-  return res[0].reviewId;
-}
-
-// export async function updatePost(postId: string, review: Review[]) {
-//   const res = await db
-//     .update(postTable)
-//     .set({ reviews: review })
-//     .where(eq(postTable.id, postId))
-//     .returning({ postId: postTable.id });
-
-//   return res[0].postId;
-// }
 
 export async function fetchAllPosts(userId: string) {
   const rows = await db
