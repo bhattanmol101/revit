@@ -51,9 +51,11 @@ function FeedItemMenu({
         <Button
           isIconOnly
           aria-label="menu"
+          className="hidden sm:flex"
           isDisabled={!globalState.auth}
           size="sm"
           variant="light"
+          onPress={() => {}}
         >
           <MenuIcon size={24} />
         </Button>

@@ -14,11 +14,14 @@ import { Tab, Tabs } from "@heroui/tabs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Key } from "@react-types/shared";
+import { Spinner } from "@heroui/spinner";
 
 import logo from "../public/assets/revit-logo.svg";
 
 import { HomeIcon, ProfileIcon, SearchIcon } from "@/components/icons";
 import { useGlobalStore } from "@/store";
+import { getAllPostByTextAction } from "@/app/(application)/action";
+import { useFeedStore } from "@/app/(application)/_store";
 
 export const Navbar = () => {
   const router = useRouter();
@@ -27,6 +30,10 @@ export const Navbar = () => {
 
   const { globalState } = useGlobalStore((state) => state);
 
+  const { feed, setFeed } = useFeedStore((state) => state);
+
+  const [loading, setLoading] = useState(false);
+
   const onSelectionChange = (key: Key) => {
     setKey(key);
     router.push(String(key));
@@ -34,6 +41,19 @@ export const Navbar = () => {
 
   const onSigninPress = () => {
     router.push("/signin");
+  };
+
+  const onSearch = async (value: string) => {
+    setLoading(true);
+    const text = value.trim();
+
+    const resp = await getAllPostByTextAction(text);
+
+    setLoading(false);
+    setFeed({
+      ...feed,
+      data: resp.posts,
+    });
   };
 
   const searchInput = (
@@ -46,9 +66,14 @@ export const Navbar = () => {
       labelPlacement="outside"
       placeholder="Search..."
       startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+        loading ? (
+          <Spinner />
+        ) : (
+          <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+        )
       }
       type="search"
+      onValueChange={onSearch}
     />
   );
 

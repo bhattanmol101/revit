@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, like, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertPost, postTable } from "@/db/schema/post";
@@ -70,7 +70,7 @@ export async function fetchAllPostByUserId(userId: string) {
   return rows;
 }
 
-export async function fetchAllPosts(userId: string) {
+export async function fetchAllPosts(userId: string, limit: number = 5) {
   const rows = await db
     .select({
       id: postTable.id,
@@ -88,7 +88,35 @@ export async function fetchAllPosts(userId: string) {
     .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
     .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
     .groupBy(postTable.id, profileTable.id)
-    .orderBy(desc(postTable.createdAt));
+    .orderBy(desc(postTable.createdAt))
+    .limit(limit);
+
+  return {
+    items: rows,
+  };
+}
+
+export async function fetchAllPostsByText(text: string) {
+  const rows = await db
+    .select({
+      id: postTable.id,
+      userId: profileTable.id,
+      userName: profileTable.name,
+      userProfileImage: profileTable.profileImage,
+      text: postTable.text,
+      fileList: postTable.files,
+      rating: sql<number>`sum(${reviewTable.rating})`,
+      totalReviews: sql<number>`count(${reviewTable.id})`,
+      hashtags: postTable.hashtags,
+      createdAt: postTable.createdAt,
+    })
+    .from(postTable)
+    .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
+    .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
+    .where(like(postTable.text, `%${text}%`))
+    .groupBy(postTable.id, profileTable.id)
+    .orderBy(desc(postTable.createdAt))
+    .limit(5);
 
   return {
     items: rows,

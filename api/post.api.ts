@@ -2,15 +2,16 @@ import {
   deletePostById,
   fetchAllPostByUserId,
   fetchAllPosts,
+  fetchAllPostsByText,
   insertPost,
 } from "../data-access/post.db";
 
 import { PostRequest } from "@/types/post";
 import { InsertPost } from "@/db/schema/post";
 
-export async function getAllPost(userId: string) {
+export async function getAllPost(userId: string, limit: number) {
   try {
-    const resp = await fetchAllPosts(userId);
+    const resp = await fetchAllPosts(userId, limit);
 
     return { success: true, posts: resp.items };
   } catch (e: any) {
@@ -65,6 +66,20 @@ export async function deletePost(postId: string) {
     return {
       success: false,
       error: e.message,
+    };
+  }
+}
+
+export async function getAllPostByText(text: string) {
+  try {
+    const resp = await fetchAllPostsByText(text);
+
+    return { success: true, posts: resp.items };
+  } catch (e: any) {
+    return {
+      success: false,
+      error: e.message,
+      posts: [],
     };
   }
 }

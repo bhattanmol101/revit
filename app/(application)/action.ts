@@ -1,6 +1,11 @@
 "use server";
 
-import { deletePost, getAllPost, savePost } from "@/api/post.api";
+import {
+  deletePost,
+  getAllPost,
+  getAllPostByText,
+  savePost,
+} from "@/api/post.api";
 import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
 import { PostRequest, ReviewReqest } from "@/types/post";
 import { createClient } from "@/utils/supabase/server";
@@ -48,8 +53,8 @@ export const savePostAction = async (
   };
 };
 
-export const getAllPostAction = async (userId: string) => {
-  const resp = await getAllPost(userId);
+export const getAllPostAction = async (userId: string, limit: number) => {
+  const resp = await getAllPost(userId, limit);
 
   return {
     success: resp.success,
@@ -98,5 +103,18 @@ export const deletePostAction = async (postId: string) => {
       code: 102,
       message: resp.error,
     },
+  };
+};
+
+export const getAllPostByTextAction = async (text: string) => {
+  const resp = await getAllPostByText(text);
+
+  return {
+    success: resp.success,
+    error: {
+      code: 102,
+      message: resp.error,
+    },
+    posts: resp.posts,
   };
 };

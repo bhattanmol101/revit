@@ -5,10 +5,10 @@ import { postTable } from "./post";
 
 export const reviewTable = pgTable("review", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("userId")
+  userId: uuid("user_id")
     .notNull()
     .references(() => profileTable.id, { onDelete: "cascade" }),
-  postId: uuid("postId")
+  postId: uuid("post_id")
     .notNull()
     .references(() => postTable.id, { onDelete: "cascade" }),
   text: text("text").default(""),
