@@ -21,6 +21,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7974532258496573"
         />
+        <script
+          async
+          crossOrigin="anonymous"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7974532258496573"
+        />
       </head>
       <body
         className={clsx(

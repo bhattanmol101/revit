@@ -1,11 +1,12 @@
 "use server";
 
 import {
-  addReviewToPost,
+  deletePost,
   getAllPost,
-  getPostReviewsById,
+  getAllPostByText,
   savePost,
 } from "@/api/post.api";
+import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
 import { PostRequest, ReviewReqest } from "@/types/post";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
@@ -52,8 +53,8 @@ export const savePostAction = async (
   };
 };
 
-export const getAllPostAction = async (userId: string) => {
-  const resp = await getAllPost(userId);
+export const getAllPostAction = async (userId: string, limit: number) => {
+  const resp = await getAllPost(userId, limit);
 
   return {
     success: resp.success,
@@ -83,8 +84,6 @@ export const addReviewToPostAction = async (
 export const getPostReviewsByIdAction = async (postId: string) => {
   const resp = await getPostReviewsById(postId, "");
 
-  console.log(resp);
-
   return {
     success: resp.success,
     error: {
@@ -92,5 +91,30 @@ export const getPostReviewsByIdAction = async (postId: string) => {
       message: resp.error,
     },
     reviews: resp.reviews,
+  };
+};
+
+export const deletePostAction = async (postId: string) => {
+  const resp = await deletePost(postId);
+
+  return {
+    success: resp.success,
+    error: {
+      code: 102,
+      message: resp.error,
+    },
+  };
+};
+
+export const getAllPostByTextAction = async (text: string) => {
+  const resp = await getAllPostByText(text);
+
+  return {
+    success: resp.success,
+    error: {
+      code: 102,
+      message: resp.error,
+    },
+    posts: resp.posts,
   };
 };

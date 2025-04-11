@@ -15,11 +15,10 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@heroui/spinner";
 import { User } from "@heroui/user";
 
-import { MenuIcon } from "../icons";
-
 import { FeedReview } from "./feed-review";
 import FeedFileSlider from "./feed-file-slider";
 import AlertModal from "./alert-modal";
+import FeedItemMenu from "./feed-item-menu";
 
 import { Post, ReviewReqest } from "@/types/post";
 import {
@@ -143,9 +142,8 @@ export default function FeedItemModal({
               description={getPostDateString(post.data.createdAt)}
               name={post.data.userName}
             />
-            <Button isIconOnly aria-label="menu" size="sm" variant="light">
-              <MenuIcon size={24} />
-            </Button>
+
+            <FeedItemMenu post={post.data} onModalChange={onOpenChange} />
           </div>
           <div className="overflow-visible">
             <p className="text-small text-default-600">{post.data.text}</p>

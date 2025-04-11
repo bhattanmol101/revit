@@ -4,7 +4,7 @@ import { profileTable } from "./user";
 
 export const postTable = pgTable("post", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("userId")
+  userId: uuid("user_id")
     .notNull()
     .references(() => profileTable.id, {
       onDelete: "cascade",

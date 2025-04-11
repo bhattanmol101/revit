@@ -4,7 +4,8 @@ import { UpdateUser } from "@/types/user";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
 import { updateUser } from "@/api/user.api";
-import { getAllUserPost, getAllUserReviews } from "@/api/post.api";
+import { getAllUserPost } from "@/api/post.api";
+import { getAllUserReviews } from "@/api/review.api";
 
 export const updateUserAction = async (
   userId: string,

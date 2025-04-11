@@ -1,8 +1,8 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, like, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertPost, postTable } from "@/db/schema/post";
-import { InsertReview, reviewTable } from "@/db/schema/review";
+import { reviewTable } from "@/db/schema/review";
 import { profileTable } from "@/db/schema/user";
 
 export async function insertPost(post: InsertPost) {
@@ -36,6 +36,16 @@ export async function fetchPostById(postId: string) {
   return rows[0];
 }
 
+export async function deletePostById(postId: string) {
+  await db.transaction(async (tx) => {
+    await tx.delete(postTable).where(eq(postTable.id, postId));
+
+    await tx.delete(reviewTable).where(eq(reviewTable.postId, postId));
+  });
+
+  return;
+}
+
 export async function fetchAllPostByUserId(userId: string) {
   const rows = await db
     .select({
@@ -60,63 +70,7 @@ export async function fetchAllPostByUserId(userId: string) {
   return rows;
 }
 
-export async function fetchPostReviewsById(postId: string) {
-  const rows = await db
-    .select({
-      id: reviewTable.id,
-      userId: profileTable.id,
-      userName: profileTable.name,
-      userProfileImage: profileTable.profileImage,
-      text: reviewTable.text,
-      rating: reviewTable.rating,
-      createdAt: reviewTable.createdAt,
-    })
-    .from(reviewTable)
-    .innerJoin(profileTable, eq(reviewTable.userId, profileTable.id))
-    .where(eq(reviewTable.postId, postId));
-
-  return rows;
-}
-
-export async function fetchAllReviewsByUserId(userId: string) {
-  const rows = await db
-    .select({
-      id: reviewTable.id,
-      userId: profileTable.id,
-      userName: profileTable.name,
-      userProfileImage: profileTable.profileImage,
-      text: reviewTable.text,
-      rating: reviewTable.rating,
-      createdAt: reviewTable.createdAt,
-    })
-    .from(reviewTable)
-    .innerJoin(profileTable, eq(reviewTable.userId, profileTable.id))
-    .where(eq(reviewTable.userId, userId))
-    .orderBy(desc(reviewTable.createdAt));
-
-  return rows;
-}
-
-export async function insertReviewForPost(review: InsertReview) {
-  const res = await db
-    .insert(reviewTable)
-    .values(review)
-    .returning({ reviewId: reviewTable.id });
-
-  return res[0].reviewId;
-}
-
-// export async function updatePost(postId: string, review: Review[]) {
-//   const res = await db
-//     .update(postTable)
-//     .set({ reviews: review })
-//     .where(eq(postTable.id, postId))
-//     .returning({ postId: postTable.id });
-
-//   return res[0].postId;
-// }
-
-export async function fetchAllPosts(userId: string) {
+export async function fetchAllPosts(userId: string, limit: number = 5) {
   const rows = await db
     .select({
       id: postTable.id,
@@ -134,7 +88,35 @@ export async function fetchAllPosts(userId: string) {
     .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
     .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
     .groupBy(postTable.id, profileTable.id)
-    .orderBy(desc(postTable.createdAt));
+    .orderBy(desc(postTable.createdAt))
+    .limit(limit);
+
+  return {
+    items: rows,
+  };
+}
+
+export async function fetchAllPostsByText(text: string) {
+  const rows = await db
+    .select({
+      id: postTable.id,
+      userId: profileTable.id,
+      userName: profileTable.name,
+      userProfileImage: profileTable.profileImage,
+      text: postTable.text,
+      fileList: postTable.files,
+      rating: sql<number>`sum(${reviewTable.rating})`,
+      totalReviews: sql<number>`count(${reviewTable.id})`,
+      hashtags: postTable.hashtags,
+      createdAt: postTable.createdAt,
+    })
+    .from(postTable)
+    .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
+    .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
+    .where(like(postTable.text, `%${text}%`))
+    .groupBy(postTable.id, profileTable.id)
+    .orderBy(desc(postTable.createdAt))
+    .limit(5);
 
   return {
     items: rows,

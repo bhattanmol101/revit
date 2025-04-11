@@ -37,7 +37,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const resp = await getAllPostAction("123");
+      const limit = globalState.auth ? 5 : 3;
+      const resp = await getAllPostAction(String(globalState.user?.id), limit);
 
       setFeed({
         ...feed,
@@ -52,7 +53,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="sm:px-5 px-1 h-screen w-full">
+    <div className="sm:px-2 px-1 h-screen w-full">
       {feed.loading && <Loading />}
       {!feed.loading && globalState.auth && (
         <div className="w-full flex flex-col sm:hidden mt-2">
@@ -74,14 +75,26 @@ export default function HomePage() {
           No posts yet...
         </p>
       )}
-      {!feed.loading &&
-        feed.data.map((post) => (
-          <FeedItemCard
-            key={post.id}
-            post={post}
-            onFeedModalOpen={onFeedModalOpen}
-          />
-        ))}
+      {!feed.loading && (
+        <>
+          {feed.data.map((post) => (
+            <FeedItemCard
+              key={post.id}
+              post={post}
+              onFeedModalOpen={onFeedModalOpen}
+            />
+          ))}
+          {!globalState.auth && (
+            <p className="text-center pt-2 pb-5 text-default-500 text-base">
+              See more reviews or share your experience{" "}
+              <span className="text-primary-500">
+                <a href="/signup">sigup</a>
+              </span>{" "}
+              now on revit...
+            </p>
+          )}
+        </>
+      )}
       {isOpen && (
         <FeedItemModal
           key={currentPost.id}
