@@ -77,6 +77,16 @@ export default function HomePage() {
       )}
       {!feed.loading && (
         <>
+          <div>
+            <ins
+              className="adsbygoogle"
+              data-ad-client="ca-pub-7974532258496573"
+              data-ad-format="fluid"
+              data-ad-layout-key="+2t+rl+2h-1m-4u"
+              data-ad-slot="3581469001"
+              style={{ display: "block" }}
+            />
+          </div>
           {feed.data.map((post) => (
             <FeedItemCard
               key={post.id}
