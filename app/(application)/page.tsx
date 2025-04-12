@@ -78,6 +78,13 @@ export default function HomePage() {
       )}
       {!feed.loading && (
         <>
+          {feed.data.map((post) => (
+            <FeedItemCard
+              key={post.id}
+              post={post}
+              onFeedModalOpen={onFeedModalOpen}
+            />
+          ))}
           <div>
             <ins
               className="adsbygoogle"
@@ -88,13 +95,6 @@ export default function HomePage() {
               style={{ display: "block" }}
             />
           </div>
-          {feed.data.map((post) => (
-            <FeedItemCard
-              key={post.id}
-              post={post}
-              onFeedModalOpen={onFeedModalOpen}
-            />
-          ))}
           {!globalState.auth && (
             <p className="text-center pt-2 pb-5 text-default-500 text-base">
               See more reviews or share your experience{" "}
