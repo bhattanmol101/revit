@@ -9,7 +9,7 @@ import {
 } from "@heroui/modal";
 import { useState } from "react";
 
-import { ImageIcon, VideoIcon } from "../../components/icons";
+import { ImageIcon } from "../../components/icons";
 import { FileInput } from "../../components/ui/FileInput";
 
 import FileSlider from "./file-slider";
@@ -101,12 +101,12 @@ export default function PostModal(props: any) {
               handleFileUpload={onFileChange}
               icon={<ImageIcon size={22} />}
             />
-            <FileInput
+            {/* <FileInput
               accept="video/*"
               className=""
               handleFileUpload={onFileChange}
               icon={<VideoIcon size={26} />}
-            />
+            /> */}
           </div>
           <Button
             color="primary"
