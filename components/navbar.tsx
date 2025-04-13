@@ -49,11 +49,12 @@ export const Navbar = () => {
 
     const resp = await getAllPostByTextAction(text);
 
-    setLoading(false);
     setFeed({
       ...feed,
       data: resp.posts,
     });
+
+    setLoading(false);
   };
 
   const searchInput = (
