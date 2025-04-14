@@ -100,7 +100,7 @@ export default function SignupPage() {
           />
         )}
         <Form
-          className="w-96 flex flex-col sm:gap-4 gap-2"
+          className="w-96 flex flex-col items-center sm:gap-4 gap-2"
           validationBehavior="native"
           onSubmit={onSubmit}
         >
@@ -132,6 +132,12 @@ export default function SignupPage() {
           >
             Sign Up
           </Button>
+          <p className="text-default-400 text-tiny">
+            By signing up you agree to our{" "}
+            <a className="text-primary-300" href="/terms">
+              terms & conditions
+            </a>
+          </p>
         </Form>
         <div className="flex flex-row justify-center items-center max-w-sm sm:my-10 my-6">
           <Divider className="w-36 mr-5" />
