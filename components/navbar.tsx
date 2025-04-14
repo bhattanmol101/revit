@@ -16,7 +16,7 @@ import { useState } from "react";
 import { Key } from "@react-types/shared";
 import { Spinner } from "@heroui/spinner";
 
-import logo from "../public/assets/revit-logo.svg";
+import logo from "../public/assets/revit-logo-small.svg";
 
 import { HomeIcon, ProfileIcon, SearchIcon } from "@/components/icons";
 import { useGlobalStore } from "@/store";
@@ -84,7 +84,7 @@ export const Navbar = () => {
         <NavbarContent justify="start">
           <NavbarBrand as="li" className="gap-3 max-w-fit">
             <NextLink href="/">
-              <Image priority alt="logo" height={40} src={logo} />
+              <Image priority alt="logo" height={50} src={logo} />
             </NextLink>
           </NavbarBrand>
         </NavbarContent>
