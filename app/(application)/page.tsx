@@ -37,7 +37,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const limit = globalState.auth ? 8 : 3;
+      const limit = globalState.auth ? 8 : 10; //TODO need to change this
 
       const resp = await getAllPostAction(String(globalState.user?.id), limit);
 
