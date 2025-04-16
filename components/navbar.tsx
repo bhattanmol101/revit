@@ -13,7 +13,7 @@ import Image from "next/image";
 import { Tab, Tabs } from "@heroui/tabs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Key } from "@react-types/shared";
+import { Key, KeyboardEvent } from "@react-types/shared";
 import { Spinner } from "@heroui/spinner";
 
 import logo from "../public/assets/revit-logo-small.svg";
@@ -28,9 +28,11 @@ export const Navbar = () => {
 
   const [key, setKey] = useState<Key>("/");
 
+  const [text, setText] = useState<string>("");
+
   const { globalState } = useGlobalStore((state) => state);
 
-  const { feed, setFeed } = useFeedStore((state) => state);
+  const { searchFeed, setSearchFeed } = useFeedStore((state) => state);
 
   const [loading, setLoading] = useState(false);
 
@@ -43,14 +45,25 @@ export const Navbar = () => {
     router.push("/signin");
   };
 
-  const onSearch = async (value: string) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch(text);
+    }
+  };
+
+  const onValueChange = (value: string) => {
+    setText(value.trim());
+  };
+
+  const handleSearch = async (text: string) => {
     setLoading(true);
-    const text = value.trim();
+
+    router.push("/search");
 
     const resp = await getAllPostByTextAction(text);
 
-    setFeed({
-      ...feed,
+    setSearchFeed({
+      ...searchFeed,
       data: resp.posts,
     });
 
@@ -74,7 +87,8 @@ export const Navbar = () => {
         )
       }
       type="search"
-      onValueChange={onSearch}
+      onKeyDown={handleKeyPress}
+      onValueChange={onValueChange}
     />
   );
 

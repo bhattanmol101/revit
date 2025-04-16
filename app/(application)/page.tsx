@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useDisclosure } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { useInView } from "react-intersection-observer";
+import { Spinner } from "@heroui/spinner";
 
-import { getAllPostAction } from "./action";
+import { getPostsAction } from "./action";
 import { useFeedStore } from "./_store";
 import Loading from "./loading";
 import PostModal from "./post-modal";
@@ -18,6 +20,8 @@ import { useGlobalStore } from "@/store";
 export default function HomePage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+  const { ref, inView } = useInView();
+
   const {
     isOpen: isPostModalOpen,
     onOpen: onPostModalOpen,
@@ -26,7 +30,9 @@ export default function HomePage() {
 
   const { globalState } = useGlobalStore((state) => state);
 
-  const { feed, setFeed } = useFeedStore((state) => state);
+  const { feed, setFeed, page, setPage } = useFeedStore((state) => state);
+
+  const [isMoreLoading, setIsMoreLoading] = useState<boolean>(false);
 
   const [currentPost, setCurrentPost] = useState<Post>(feed.data[0]);
 
@@ -36,27 +42,61 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const limit = globalState.auth ? 8 : 10; //TODO need to change this
+    const fetchPosts = async (page: number) => {
+      if (page != 0) {
+        if (!globalState.auth) {
+          return;
+        }
+        setIsMoreLoading(true);
+      }
+      const resp = await getPostsAction("", page);
 
-      const resp = await getAllPostAction(String(globalState.user?.id), limit);
-
-      setFeed({
-        ...feed,
-        loading: false,
-        success: resp.success,
-        error: String(resp.error.message),
-        data: resp.posts,
-      });
+      if (resp) {
+        setIsMoreLoading(false);
+        setFeed({
+          ...feed,
+          loading: false,
+          success: true,
+          error: "",
+          data: [...feed.data, ...resp],
+        });
+      }
     };
 
-    fetchPosts();
-  }, [globalState.auth]);
+    fetchPosts(page);
+  }, [globalState.auth, page]);
+
+  useEffect(() => {
+    if (inView) {
+      setPage(page + 1);
+    }
+  }, [inView]);
+
+  if (page == 0 && feed.loading) {
+    return <Loading />;
+  }
+
+  if (!feed.loading && feed.data.length == 0) {
+    return (
+      <p className="text-center mt-2 text-default-500 text-sm">
+        No posts yet...
+      </p>
+    );
+  }
+
+  const renderPosts = (post: Post) => {
+    return (
+      <FeedItemCard
+        key={post.id}
+        post={post}
+        onFeedModalOpen={onFeedModalOpen}
+      />
+    );
+  };
 
   return (
     <div className="sm:px-2 px-1 h-screen w-full">
-      {feed.loading && <Loading />}
-      {!feed.loading && globalState.auth && (
+      {globalState.auth && (
         <div className="w-full flex flex-col sm:hidden mt-2">
           <Button
             fullWidth={true}
@@ -71,41 +111,31 @@ export default function HomePage() {
           <Divider className="w-[98vw] mt-2" />
         </div>
       )}
-      {!feed.loading && feed.data.length == 0 && (
-        <p className="text-center mt-2 text-default-500 text-sm">
-          No posts yet...
+
+      {feed.data.flatMap(renderPosts)}
+      <div ref={ref} className="flex flex-col justify-center items-center py-2">
+        {inView && isMoreLoading && <Spinner />}
+      </div>
+      <div>
+        <ins
+          className="adsbygoogle"
+          data-ad-client="ca-pub-7974532258496573"
+          data-ad-format="fluid"
+          data-ad-layout-key="+2t+rl+2h-1m-4u"
+          data-ad-slot="3581469001"
+          style={{ display: "block" }}
+        />
+      </div>
+      {!globalState.auth && (
+        <p className="text-center pt-2 pb-5 text-default-500 text-base">
+          See more reviews or share your experience{" "}
+          <span className="text-primary-500">
+            <a href="/signup">sigup</a>
+          </span>{" "}
+          now on revit...
         </p>
       )}
-      {!feed.loading && (
-        <>
-          {feed.data.map((post) => (
-            <FeedItemCard
-              key={post.id}
-              post={post}
-              onFeedModalOpen={onFeedModalOpen}
-            />
-          ))}
-          <div>
-            <ins
-              className="adsbygoogle"
-              data-ad-client="ca-pub-7974532258496573"
-              data-ad-format="fluid"
-              data-ad-layout-key="+2t+rl+2h-1m-4u"
-              data-ad-slot="3581469001"
-              style={{ display: "block" }}
-            />
-          </div>
-          {!globalState.auth && (
-            <p className="text-center pt-2 pb-5 text-default-500 text-base">
-              See more reviews or share your experience{" "}
-              <span className="text-primary-500">
-                <a href="/signup">sigup</a>
-              </span>{" "}
-              now on revit...
-            </p>
-          )}
-        </>
-      )}
+
       {isOpen && (
         <FeedItemModal
           key={currentPost.id}
