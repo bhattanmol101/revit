@@ -8,6 +8,7 @@ import {
 } from "@/api/post.api";
 import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
 import { PostRequest, ReviewReqest } from "@/types/post";
+import { POST_LIMIT } from "@/utils/constants";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
 
@@ -53,17 +54,15 @@ export const savePostAction = async (
   };
 };
 
-export const getAllPostAction = async (userId: string, limit: number) => {
-  const resp = await getAllPost(userId, limit);
+export const getPostsAction = async (userId: string, page: number) => {
+  let offset = page * POST_LIMIT;
+  const resp = await getAllPost(userId, offset, POST_LIMIT);
 
-  return {
-    success: resp.success,
-    error: {
-      code: 102,
-      message: resp.error,
-    },
-    posts: resp.posts,
-  };
+  if (!resp.success) {
+    throw resp.error;
+  }
+
+  return resp.posts;
 };
 
 export const addReviewToPostAction = async (

@@ -9,9 +9,13 @@ import {
 import { PostRequest } from "@/types/post";
 import { InsertPost } from "@/db/schema/post";
 
-export async function getAllPost(userId: string, limit: number) {
+export async function getAllPost(
+  userId: string,
+  offset: number,
+  limit: number
+) {
   try {
-    const resp = await fetchAllPosts(userId, limit);
+    const resp = await fetchAllPosts(userId, offset, limit);
 
     return { success: true, posts: resp.items };
   } catch (e: any) {

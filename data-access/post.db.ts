@@ -70,7 +70,11 @@ export async function fetchAllPostByUserId(userId: string) {
   return rows;
 }
 
-export async function fetchAllPosts(userId: string, limit: number = 5) {
+export async function fetchAllPosts(
+  userId: string,
+  offset: number,
+  limit: number
+) {
   const rows = await db
     .select({
       id: postTable.id,
@@ -89,6 +93,7 @@ export async function fetchAllPosts(userId: string, limit: number = 5) {
     .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
     .groupBy(postTable.id, profileTable.id)
     .orderBy(desc(postTable.createdAt))
+    .offset(offset)
     .limit(limit);
 
   return {
