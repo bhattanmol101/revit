@@ -17,7 +17,8 @@ export async function fetchPostReviewsById(postId: string) {
     })
     .from(reviewTable)
     .innerJoin(profileTable, eq(reviewTable.userId, profileTable.id))
-    .where(eq(reviewTable.postId, postId));
+    .where(eq(reviewTable.postId, postId))
+    .orderBy(desc(reviewTable.createdAt));
 
   return rows;
 }

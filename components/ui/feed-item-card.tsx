@@ -48,7 +48,9 @@ export default function FeedItemCard({
           <FeedItemMenu post={post} />
         </CardHeader>
         <CardBody className="overflow-visible px-3 py-0">
-          <p className="text-small text-default-600">{post.text}</p>
+          <p className="text-small text-default-600 whitespace-pre">
+            {post.text}
+          </p>
           {post.hashtags.map((item) => (
             <span key={item}>{item}</span>
           ))}

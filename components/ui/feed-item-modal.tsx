@@ -146,7 +146,9 @@ export default function FeedItemModal({
             <FeedItemMenu post={post.data} onModalChange={onOpenChange} />
           </div>
           <div className="overflow-visible">
-            <p className="text-small text-default-600">{post.data.text}</p>
+            <p className="text-small text-default-600 whitespace-pre">
+              {post.data.text}
+            </p>
             {post.data.hashtags.map((item) => (
               <span key={item}>{item}</span>
             ))}

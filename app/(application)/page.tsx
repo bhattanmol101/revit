@@ -130,7 +130,7 @@ export default function HomePage() {
         <p className="text-center pt-2 pb-5 text-default-500 text-base">
           See more reviews or share your experience{" "}
           <span className="text-primary-500">
-            <a href="/signup">sigup</a>
+            <a href="/signup">signup</a>
           </span>{" "}
           now on revit...
         </p>
