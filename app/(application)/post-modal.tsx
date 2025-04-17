@@ -85,7 +85,7 @@ export default function PostModal(props: any) {
         <ModalBody>
           <Textarea
             aria-label="Description"
-            className="col-span-12 md:col-span-6 mb-6 md:mb-0"
+            className="col-span-12 md:col-span-6 mb-6 md:mb-0 whitespace-pre"
             maxRows={100}
             placeholder="What to review today..."
             variant="underlined"
