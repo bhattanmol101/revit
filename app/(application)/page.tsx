@@ -16,6 +16,7 @@ import FeedItemCard from "@/components/ui/feed-item-card";
 import FeedItemModal from "@/components/ui/feed-item-modal";
 import { Post } from "@/types/post";
 import { useGlobalStore } from "@/store";
+import { POST_LIMIT } from "@/utils/constants";
 
 export default function HomePage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -43,12 +44,21 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async (page: number) => {
+      console.log(page);
+
       if (page != 0) {
         if (!globalState.auth) {
           return;
         }
         setIsMoreLoading(true);
       }
+
+      if (feed.data.length > page * POST_LIMIT) {
+        setIsMoreLoading(false);
+
+        return;
+      }
+
       const resp = await getPostsAction("", page);
 
       if (resp) {
@@ -68,7 +78,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (inView) {
-      setPage(page + 1);
+      setPage(Math.floor(feed.data.length / POST_LIMIT));
     }
   }, [inView]);
 
@@ -95,7 +105,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="sm:px-2 px-1 h-screen w-full">
+    <div className="sm:px-2 px-1 h-screen w-full py-1">
       {globalState.auth && (
         <div className="w-full flex flex-col sm:hidden mt-2">
           <Button

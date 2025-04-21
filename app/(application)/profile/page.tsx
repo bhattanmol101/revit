@@ -73,11 +73,11 @@ function ProfilePage() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center sm:w-full w-screen sm:p-5 p-3">
+    <div className="flex flex-col items-center sm:w-full w-screen sm:py-5 py-3 px-2">
       {loading && <Spinner />}
       {!loading && (
         <div className="w-full">
-          <div className="flex flex-row justify-start items-center w-full">
+          <div className="flex flex-row justify-start items-center w-full px-1">
             <div className="sm:basis-1/3 ">
               <Avatar
                 showFallback

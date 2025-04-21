@@ -3,11 +3,13 @@ import {
   fetchAllPostByUserId,
   fetchAllPosts,
   fetchAllPostsByText,
+  fetchTopPost,
   insertPost,
 } from "../data-access/post.db";
 
-import { PostRequest } from "@/types/post";
+import { Post, PostRequest } from "@/types/post";
 import { InsertPost } from "@/db/schema/post";
+import { getRating } from "@/utils/utils";
 
 export async function getAllPost(
   userId: string,
@@ -84,6 +86,42 @@ export async function getAllPostByText(text: string) {
       success: false,
       error: e.message,
       posts: [],
+    };
+  }
+}
+
+export async function getTopPost(userId: string) {
+  try {
+    const resp = await fetchTopPost(userId);
+
+    if (resp && resp.items) {
+      let maxRating = 0;
+      let maxPost: Post | undefined;
+
+      resp.items.forEach((item) => {
+        let currRating = getRating(
+          Number(item.rating),
+          Number(item.totalReviews)
+        );
+
+        if (maxRating < currRating) {
+          maxRating = currRating;
+          maxPost = item;
+        }
+      });
+
+      return {
+        success: true,
+        error: "",
+        post: maxPost,
+      };
+    }
+
+    return { success: true, posts: resp.items };
+  } catch (e: any) {
+    return {
+      success: false,
+      error: e.message,
     };
   }
 }

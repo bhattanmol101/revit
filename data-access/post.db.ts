@@ -127,3 +127,29 @@ export async function fetchAllPostsByText(text: string) {
     items: rows,
   };
 }
+
+export async function fetchTopPost(userId: string) {
+  const rows = await db
+    .select({
+      id: postTable.id,
+      userId: profileTable.id,
+      userName: profileTable.name,
+      userProfileImage: profileTable.profileImage,
+      text: postTable.text,
+      fileList: postTable.files,
+      rating: sql<number>`sum(${reviewTable.rating})`,
+      totalReviews: sql<number>`count(${reviewTable.id})`,
+      hashtags: postTable.hashtags,
+      createdAt: postTable.createdAt,
+    })
+    .from(postTable)
+    .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
+    .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
+    .groupBy(postTable.id, profileTable.id)
+    .orderBy(desc(postTable.createdAt))
+    .limit(100);
+
+  return {
+    items: rows,
+  };
+}
