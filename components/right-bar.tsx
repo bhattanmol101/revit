@@ -39,9 +39,9 @@ export const RightBar = () => {
     <div className="flex flex-row h-full fixed w-3/12">
       <Divider orientation="vertical" />
       <div className="flex flex-col h-full w-full">
-        <div className="flex flex-row">
-          <div className="w-full p-2">
-            {globalState.auth && (
+        <div className="w-full p-2">
+          {globalState.auth && (
+            <>
               <Button
                 fullWidth={true}
                 size="lg"
@@ -51,8 +51,9 @@ export const RightBar = () => {
               >
                 Want something reviewed...?
               </Button>
-            )}
-          </div>
+              <Divider className="my-3" />
+            </>
+          )}
           <ins
             className="adsbygoogle"
             data-ad-client="ca-pub-7974532258496573"
@@ -63,7 +64,7 @@ export const RightBar = () => {
           />
           <PostModal isOpen={isOpen} onOpenChange={onOpenChange} />
         </div>
-        <Divider className="my-3" />
+
         <div className="flex flex-col justify-center items-center px-2">
           <p className="mb-2 py-1 text-sm text-white bg-gray-500 w-full text-center rounded-sm">
             Top trending review
