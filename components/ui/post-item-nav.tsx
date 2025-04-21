@@ -1,34 +1,17 @@
 "use client";
 
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Button } from "@heroui/button";
 import { Slider } from "@heroui/slider";
 import { Divider } from "@heroui/divider";
 import { User } from "@heroui/user";
 
-import { RevitIcon } from "../icons";
-
 import FeedFileSlider from "./feed-file-slider";
-import FeedItemMenu from "./feed-item-menu";
 
 import { Post } from "@/types/post";
-import { useGlobalStore } from "@/store";
 import { getPostDateString } from "@/utils/date-utils";
 import { getRating } from "@/utils/utils";
 
-export default function FeedItemCard({
-  post,
-  onFeedModalOpen,
-}: {
-  post: Post;
-  onFeedModalOpen?: (post: Post) => void;
-}) {
-  const { globalState } = useGlobalStore((state) => state);
-
-  const onOpen = () => {
-    onFeedModalOpen && onFeedModalOpen(post);
-  };
-
+export default function PostItemNav({ post }: { post: Post }) {
   const rating = post.rating
     ? getRating(Number(post.rating), Number(post.totalReviews))
     : 0;
@@ -44,7 +27,6 @@ export default function FeedItemCard({
           description={getPostDateString(post.createdAt)}
           name={post.userName}
         />
-        <FeedItemMenu post={post} />
       </CardHeader>
       <CardBody className="overflow-visible px-3 py-0">
         <p className="text-small text-default-600 whitespace-pre-line">
@@ -72,16 +54,6 @@ export default function FeedItemCard({
             <span>({post.totalReviews})</span>
           </p>
         </div>
-        <Button
-          isDisabled={!globalState.auth}
-          radius="full"
-          size="sm"
-          startContent={<RevitIcon size={30} />}
-          variant="light"
-          onPress={onOpen}
-        >
-          <p className="text-default-500 text-sm -ml-1">revit</p>
-        </Button>
       </CardFooter>
     </Card>
   );

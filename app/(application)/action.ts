@@ -4,6 +4,7 @@ import {
   deletePost,
   getAllPost,
   getAllPostByText,
+  getTopPost,
   savePost,
 } from "@/api/post.api";
 import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
@@ -116,4 +117,14 @@ export const getAllPostByTextAction = async (text: string) => {
     },
     posts: resp.posts,
   };
+};
+
+export const getTopPostsAction = async (userId: string) => {
+  const resp = await getTopPost(userId);
+
+  if (!resp.success) {
+    throw resp.error;
+  }
+
+  return resp.post;
 };
