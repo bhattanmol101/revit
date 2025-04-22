@@ -9,7 +9,7 @@ import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
 import { useRouter } from "next/navigation";
 
-import EditProfileModal from "./_component/edit-profile-modal";
+import EditProfileModal from "./_components/edit-profile-modal";
 import {
   getAllUserPostAction,
   getAllUserReviewsAction,

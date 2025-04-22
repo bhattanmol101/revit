@@ -10,7 +10,7 @@ import { Spinner } from "@heroui/spinner";
 import { getPostsAction } from "./action";
 import { useFeedStore } from "./_store";
 import Loading from "./loading";
-import PostModal from "./post-modal";
+import PostModal from "./_components/post-modal";
 
 import FeedItemCard from "@/components/ui/feed-item-card";
 import FeedItemModal from "@/components/ui/feed-item-modal";
@@ -44,8 +44,6 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchPosts = async (page: number) => {
-      console.log(page);
-
       if (page != 0) {
         if (!globalState.auth) {
           return;

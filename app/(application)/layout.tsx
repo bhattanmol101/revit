@@ -2,9 +2,9 @@
 
 import "@/styles/globals.css";
 
-import { RightBar } from "@/components/right-bar";
-import { SideNavbar } from "@/components/side-navbar";
-import { Navbar } from "@/components/navbar";
+import { RightBar } from "@/app/(application)/_components/right-bar";
+import { SideNavbar } from "@/app/(application)/_components/side-navbar";
+import { Navbar } from "@/app/(application)/_components/navbar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

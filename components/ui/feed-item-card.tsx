@@ -80,7 +80,7 @@ export default function FeedItemCard({
           variant="light"
           onPress={onOpen}
         >
-          <p className="text-default-500 text-sm -ml-1">revit</p>
+          <p className="text-default-500 text-sm -ml-1">Revit</p>
         </Button>
       </CardFooter>
     </Card>

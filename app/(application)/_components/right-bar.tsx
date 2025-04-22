@@ -6,9 +6,9 @@ import { useDisclosure } from "@heroui/modal";
 import { useEffect, useState } from "react";
 import { Spinner } from "@heroui/spinner";
 
-import PostModal from "../app/(application)/post-modal";
+import PostItemNav from "../../../components/ui/post-item-nav";
 
-import PostItemNav from "./ui/post-item-nav";
+import PostModal from "./post-modal";
 
 import { useGlobalStore } from "@/store";
 import { getTopPostsAction } from "@/app/(application)/action";
@@ -69,7 +69,7 @@ export const RightBar = () => {
           <p className="mb-2 py-1 text-sm text-white bg-gray-500 w-full text-center rounded-sm">
             Top trending review
           </p>
-          {loading && <Spinner />}
+          {loading && <Spinner size="sm" />}
           {post && <PostItemNav post={post} />}
         </div>
       </div>

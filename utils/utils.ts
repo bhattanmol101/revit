@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { POST_BUCKET, POST_BUCKET_URL } from "./constants";
+import { POST_BUCKET, POST_BUCKET_URL, QR_CODE_GEN_URL } from "./constants";
 
 import { PageState } from "@/types";
 
@@ -71,4 +71,8 @@ export function getRating(totalRating: number, totalReviews: number) {
   const rating = totalRating / totalReviews;
 
   return Number(rating.toPrecision(2));
+}
+
+export function getQRCodeURL(url: string) {
+  return `${QR_CODE_GEN_URL}/?data=${url}&size=512x512`;
 }

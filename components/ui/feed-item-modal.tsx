@@ -207,9 +207,9 @@ export default function FeedItemModal({
             </div>
             <Textarea
               aria-label="review"
-              errorMessage="Please enter a valid email"
+              errorMessage="Please enter a valid review"
               minRows={1}
-              name="email"
+              name="review"
               placeholder="Add your review...."
               type="text"
               onValueChange={onTextChange}

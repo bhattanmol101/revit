@@ -16,7 +16,7 @@ import { useState } from "react";
 import { Key, KeyboardEvent } from "@react-types/shared";
 import { Spinner } from "@heroui/spinner";
 
-import logo from "../public/assets/revit-logo-small.svg";
+import logo from "../../../public/assets/revit-logo-small.svg";
 
 import { HomeIcon, ProfileIcon, SearchIcon } from "@/components/icons";
 import { useGlobalStore } from "@/store";

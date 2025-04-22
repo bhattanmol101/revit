@@ -47,7 +47,7 @@ export async function savePost(postRequest: PostRequest) {
   try {
     const insertPostT: InsertPost = {
       userId: postRequest.userId,
-      text: postRequest.text,
+      text: postRequest.text?.trim(),
       files: postRequest.fileList,
       hashtags: postRequest.hashtags,
     };

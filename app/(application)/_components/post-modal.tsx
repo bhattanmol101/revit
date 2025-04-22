@@ -9,11 +9,11 @@ import {
 } from "@heroui/modal";
 import { useState } from "react";
 
-import { ImageIcon } from "../../components/icons";
-import { FileInput } from "../../components/ui/FileInput";
+import { ImageIcon } from "../../../components/icons";
+import { FileInput } from "../../../components/ui/FileInput";
+import { savePostAction } from "../action";
 
 import FileSlider from "./file-slider";
-import { savePostAction } from "./action";
 
 import { PageState } from "@/types";
 import { initPostState } from "@/utils/utils";
