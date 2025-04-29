@@ -43,6 +43,7 @@ export const RightBar = () => {
           {globalState.auth && (
             <>
               <Button
+                className="sm:text-tiny lg:text-base"
                 fullWidth={true}
                 size="lg"
                 type="submit"

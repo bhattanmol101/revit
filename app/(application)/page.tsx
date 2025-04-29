@@ -103,7 +103,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="sm:px-2 px-1 h-screen w-full py-1">
+    <div className="h-screen w-full">
       {globalState.auth && (
         <div className="w-full flex flex-col sm:hidden mt-2">
           <Button

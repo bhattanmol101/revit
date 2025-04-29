@@ -20,7 +20,7 @@ import FeedFileSlider from "./feed-file-slider";
 import AlertModal from "./alert-modal";
 import FeedItemMenu from "./feed-item-menu";
 
-import { Post, ReviewReqest } from "@/types/post";
+import { Post } from "@/types/post";
 import {
   addReviewToPostAction,
   getPostReviewsByIdAction,
@@ -29,6 +29,7 @@ import { PageState } from "@/types";
 import { getPostDateString } from "@/utils/date-utils";
 import { useGlobalStore } from "@/store";
 import { getRating } from "@/utils/utils";
+import { ReviewRequest } from "@/types/review";
 
 export default function FeedItemModal({
   isOpen,
@@ -102,7 +103,7 @@ export default function FeedItemModal({
       loading: true,
     }));
 
-    const review: ReviewReqest = {
+    const review: ReviewRequest = {
       userId: String(globalState.user?.id),
       text: text,
       rating: rating,

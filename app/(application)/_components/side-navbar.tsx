@@ -32,15 +32,15 @@ export const SideNavbar = () => {
   };
 
   return (
-    <div className="flex flex-col h-full fixed w-2/12">
-      <div className="flex flex-row h-full">
+    <div className="flex flex-row h-full fixed w-2/12">
+      <div className="flex flex-col h-full w-full">
         <div className="flex flex-col flex-1 items-start gap-2 h-full py-10 px-2">
           <Tabs
             fullWidth
             isVertical
             aria-label="Options"
             classNames={{
-              tab: "flex flex-row items-center justify-start",
+              tab: "flex flex-row items-center justify-start sm:text-sm lg:text-base",
             }}
             selectedKey={key}
             variant="light"
@@ -116,7 +116,7 @@ export const SideNavbar = () => {
               variant="faded"
               // onPress={onOpen}
             >
-              <p className="text-sm">Create a revit forum</p>
+              <p className="lg:text-sm text-tiny">Create a revit forum</p>
             </Button>
           </div>
           <Divider />
@@ -127,14 +127,12 @@ export const SideNavbar = () => {
               variant="faded"
               onPress={onAddBusinessPress}
             >
-              <p className="text-sm">Grow your business on revit</p>
+              <p className="lg:text-sm text-tiny">Grow business on revit</p>
             </Button>
           </div>
         </div>
-        <div>
-          <Divider orientation="vertical" />
-        </div>
       </div>
+      <Divider orientation="vertical" />
     </div>
   );
 };

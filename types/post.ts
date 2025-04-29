@@ -1,18 +1,4 @@
-export interface Review {
-  id: string;
-  userId: string;
-  userName: string;
-  userProfileImage: string | null;
-  text: string | null;
-  rating: number;
-  createdAt?: Date;
-}
-
-export interface ReviewReqest {
-  userId: string;
-  text: string | null;
-  rating: number;
-}
+import { Review } from "./review";
 
 export interface Post {
   id: string;

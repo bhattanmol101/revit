@@ -18,9 +18,8 @@ import { updateBusinessAction } from "../business/action";
 
 import { PageState } from "@/types";
 import { initPostState } from "@/utils/utils";
-import { useGlobalStore } from "@/store";
 import { INDUSTRIES } from "@/utils/constants";
-import { Business, BusinessRequest } from "@/types/business";
+import { Business, UpdateBusiness } from "@/types/business";
 import { validateContact } from "@/utils/validators";
 
 export default function UpdateBusinessModal({
@@ -32,8 +31,6 @@ export default function UpdateBusinessModal({
   onOpenChange: () => void;
   business: Business;
 }) {
-  const { globalState } = useGlobalStore((state) => state);
-
   const [pageState, setPageState] = useState<PageState>(initPostState());
 
   const [name, setName] = useState<string>(business.name);
@@ -77,8 +74,7 @@ export default function UpdateBusinessModal({
       loading: true,
     }));
 
-    const businessRequest: BusinessRequest = {
-      adminId: String(globalState.user?.id),
+    const updateBusinessR: UpdateBusiness = {
       name: name,
       ownerName: ownerName,
       description: description,
@@ -88,10 +84,7 @@ export default function UpdateBusinessModal({
       industry: industry,
     };
 
-    console.log(businessRequest);
-
-    // TODO need to fix this
-    const res = await updateBusinessAction(businessRequest, logo);
+    const res = await updateBusinessAction(business.id, updateBusinessR, logo);
 
     setPageState((prevState) => ({
       ...prevState,
@@ -130,7 +123,13 @@ export default function UpdateBusinessModal({
               icon={
                 <Avatar
                   className="w-28 h-28"
-                  src={logo && URL.createObjectURL(logo)}
+                  src={
+                    logo
+                      ? URL.createObjectURL(logo)
+                      : business.logo
+                        ? business.logo
+                        : ""
+                  }
                 />
               }
             />

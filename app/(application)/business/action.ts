@@ -1,7 +1,12 @@
 "use server";
 
-import { getBusinessById, saveBusiness } from "@/api/business.api";
-import { BusinessRequest } from "@/types/business";
+import {
+  getAllBusiness,
+  getBusinessById,
+  saveBusiness,
+  updateBusinessById,
+} from "@/api/business.api";
+import { BusinessRequest, UpdateBusiness } from "@/types/business";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
 
@@ -50,7 +55,8 @@ export const fetchBusinessByIdAction = async (businessId: string) => {
 };
 
 export const updateBusinessAction = async (
-  businessRequest: BusinessRequest,
+  businessId: string,
+  updateBusinessR: UpdateBusiness,
   logo?: Blob
 ) => {
   if (logo) {
@@ -68,10 +74,10 @@ export const updateBusinessAction = async (
       };
     }
 
-    businessRequest.logo = furesp.fileUrl;
+    updateBusinessR.logo = furesp.fileUrl;
   }
 
-  const resp = await saveBusiness(businessRequest);
+  const resp = await updateBusinessById(businessId, updateBusinessR);
 
   return {
     success: resp.success,
@@ -79,6 +85,17 @@ export const updateBusinessAction = async (
       code: 102,
       message: resp.error,
     },
-    id: resp.id,
   };
+};
+
+export const fetchAllBusinessAction = async (userId: string) => {
+  const resp = await getAllBusiness(userId);
+
+  console.log(resp);
+
+  if (!resp.success) {
+    return undefined;
+  }
+
+  return resp.forums;
 };

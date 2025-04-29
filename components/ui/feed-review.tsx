@@ -1,7 +1,7 @@
 import { Slider } from "@heroui/slider";
 import { Avatar } from "@heroui/avatar";
 
-import { Review } from "@/types/post";
+import { Review } from "@/types/review";
 
 export const FeedReview = ({ review }: { review: Review }) => {
   return (

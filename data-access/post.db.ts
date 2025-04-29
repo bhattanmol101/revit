@@ -1,4 +1,4 @@
-import { desc, eq, like, sql } from "drizzle-orm";
+import { desc, eq, ilike, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { InsertPost, postTable } from "@/db/schema/post";
@@ -118,7 +118,7 @@ export async function fetchAllPostsByText(text: string) {
     .from(postTable)
     .innerJoin(profileTable, eq(postTable.userId, profileTable.id))
     .leftJoin(reviewTable, eq(reviewTable.postId, postTable.id))
-    .where(like(postTable.text, `%${text}%`))
+    .where(ilike(postTable.text, `%${text}%`))
     .groupBy(postTable.id, profileTable.id)
     .orderBy(desc(postTable.createdAt))
     .limit(5);

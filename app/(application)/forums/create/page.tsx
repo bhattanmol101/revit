@@ -9,16 +9,16 @@ import { Form } from "@heroui/form";
 import { useRouter } from "next/navigation";
 
 import { FileInput } from "../../../../components/ui/FileInput";
-import { saveBusinessAction } from "../action";
+import { saveForumAction } from "../action";
 
 import { PageState } from "@/types";
 import { initPostState } from "@/utils/utils";
 import { useGlobalStore } from "@/store";
 import { INDUSTRIES } from "@/utils/constants";
-import { BusinessRequest } from "@/types/business";
-import { validateContact } from "@/utils/validators";
+import { ForumForm } from "@/types/form";
+import { ForumRequest } from "@/types/forum";
 
-export default function CreateBusinessPage() {
+export default function CreateReviewForumPage() {
   const { globalState } = useGlobalStore((state) => state);
 
   const router = useRouter();
@@ -36,9 +36,9 @@ export default function CreateBusinessPage() {
   const onSubmit = async (e: any) => {
     e.preventDefault();
 
-    const businessRequest = Object.fromEntries(
+    const forumData = Object.fromEntries(
       new FormData(e.currentTarget)
-    ) as BusinessRequest;
+    ) as ForumForm;
 
     setPageState((prevState) => ({
       ...prevState,
@@ -46,9 +46,14 @@ export default function CreateBusinessPage() {
       loading: true,
     }));
 
-    businessRequest.adminId = String(globalState.user?.id);
+    let forumRequest: ForumRequest = {
+      adminId: String(globalState.user?.id),
+      name: forumData.name,
+      description: forumData.description,
+      industry: forumData.industry,
+    };
 
-    const res = await saveBusinessAction(businessRequest, logo);
+    const res = await saveForumAction(forumRequest, logo);
 
     setPageState((prevState) => ({
       ...prevState,
@@ -59,19 +64,19 @@ export default function CreateBusinessPage() {
     }));
 
     if (res.success) {
-      router.replace(`/business/${res.id}`);
+      router.replace(`/forums/${res.id}`);
     }
   };
 
   return (
     <div className="py-3 px-2">
       <div className="bg-default-100 rounded-md py-2 px-3 font-semibold">
-        Add your business details
+        Create your own Review Forum
       </div>
       <div className="py-6">
         <Form
           className="flex flex-col items-center"
-          id="addBusinessForm"
+          id="addForumForm"
           onSubmit={onSubmit}
         >
           <FileInput
@@ -85,7 +90,7 @@ export default function CreateBusinessPage() {
               />
             }
           />
-          <p className="text-default-700 text-small pb-2">Add Logo</p>
+          <p className="text-default-700 text-small pb-2">Add Image</p>
           <div className="flex flex-row items-center gap-2 w-full">
             <Input
               isRequired
@@ -94,56 +99,6 @@ export default function CreateBusinessPage() {
               name="name"
               placeholder="e.g. aeradron"
               type="text"
-              variant="faded"
-            />
-            <Input
-              isRequired
-              errorMessage="Please enter a valid name"
-              label="Owner Name"
-              name="ownerName"
-              placeholder="e.g. Anmol Bhat"
-              type="text"
-              variant="faded"
-            />
-          </div>
-          <Textarea
-            isRequired
-            aria-label="Description"
-            className="col-span-12 md:col-span-6 mb-6 md:mb-0 whitespace-pre"
-            errorMessage="Please enter valid description"
-            maxRows={100}
-            name="description"
-            placeholder="Tell in brief about the business"
-            variant="faded"
-          />
-          <div className="flex flex-row items-center gap-2 w-full">
-            <Input
-              isRequired
-              errorMessage="Please enter a valid location"
-              label="Location"
-              name="location"
-              placeholder="e.g. Bangalore, Karnataka"
-              type="text"
-              variant="faded"
-            />
-            <Input
-              errorMessage="Please enter a valid website"
-              label="Website"
-              name="website"
-              placeholder="e.g. https://aeradron.in"
-              type="text"
-              variant="faded"
-            />
-          </div>
-          <div className="flex flex-row items-center gap-2 w-full">
-            <Input
-              isRequired
-              errorMessage="Please enter a valid contact"
-              label="Contact"
-              name="contact"
-              placeholder="e.g. 7889922321"
-              type="text"
-              validate={validateContact}
               variant="faded"
             />
             <Select
@@ -157,10 +112,20 @@ export default function CreateBusinessPage() {
               ))}
             </Select>
           </div>
+          <Textarea
+            isRequired
+            aria-label="Description"
+            className="col-span-12 md:col-span-6 mb-6 md:mb-0 whitespace-pre"
+            errorMessage="Please enter valid description"
+            maxRows={100}
+            name="description"
+            placeholder="Tell in brief about the forum"
+            variant="faded"
+          />
         </Form>
       </div>
       <p className="text-default-400 text-tiny pb-5 pl-1">
-        By creating your business you agree to our{" "}
+        By creating your revit forum you agree to our{" "}
         <a className="text-primary-300" href="/terms">
           terms & conditions
         </a>
@@ -168,7 +133,7 @@ export default function CreateBusinessPage() {
       <Button
         fullWidth
         color="primary"
-        form="addBusinessForm"
+        form="addForumForm"
         isDisabled={pageState.disabled}
         isLoading={pageState.loading}
         spinnerPlacement="end"

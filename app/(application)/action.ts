@@ -8,7 +8,8 @@ import {
   savePost,
 } from "@/api/post.api";
 import { addReviewToPost, getPostReviewsById } from "@/api/review.api";
-import { PostRequest, ReviewReqest } from "@/types/post";
+import { PostRequest } from "@/types/post";
+import { ReviewRequest } from "@/types/review";
 import { POST_LIMIT } from "@/utils/constants";
 import { createClient } from "@/utils/supabase/server";
 import { uploadFile } from "@/utils/utils";
@@ -68,7 +69,7 @@ export const getPostsAction = async (userId: string, page: number) => {
 
 export const addReviewToPostAction = async (
   postId: string,
-  review: ReviewReqest
+  review: ReviewRequest
 ) => {
   const resp = await addReviewToPost(postId, review);
 

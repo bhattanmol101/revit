@@ -18,11 +18,12 @@ import {
 
 import { fetchUserAction } from "@/app/action";
 import { User } from "@/types/user";
-import { Post, Review } from "@/types/post";
+import { Post } from "@/types/post";
 import FeedItemCard from "@/components/ui/feed-item-card";
 import { getJoingDateString, getPostDateString } from "@/utils/date-utils";
 import { FeedReview } from "@/components/ui/feed-review";
 import { EditIcon, LogoutIcon } from "@/components/icons";
+import { Review } from "@/types/review";
 
 function ProfilePage() {
   const router = useRouter();
@@ -73,7 +74,7 @@ function ProfilePage() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center sm:w-full w-screen sm:py-5 py-3 px-2">
+    <div className="flex flex-col items-center sm:w-full w-screen py-2">
       {loading && <Spinner />}
       {!loading && (
         <div className="w-full">

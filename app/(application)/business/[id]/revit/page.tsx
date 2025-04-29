@@ -1,97 +1,97 @@
 "use client";
 
-import { useDisclosure } from "@heroui/modal";
-import { SliderValue } from "@heroui/slider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Spinner } from "@heroui/spinner";
+import { Avatar } from "@heroui/avatar";
+import { Divider } from "@heroui/divider";
 
-import AlertModal from "../../../../../components/ui/alert-modal";
+import { fetchBusinessByIdAction } from "../../action";
 
-import { ReviewReqest } from "@/types/post";
-import { addReviewToPostAction } from "@/app/(application)/action";
-import { PageState } from "@/types";
-import { useGlobalStore } from "@/store";
 import FnBForm from "@/components/forms/fnb";
+import { Business } from "@/types/business";
+import { getJoingDateString } from "@/utils/date-utils";
+import { ContactIcon, LocationIcon, WebsiteIcon } from "@/components/icons";
+import { useGlobalStore } from "@/store";
 
-export default function BusinessReviewPage({
-  isOpen,
-  onOpenChange,
-}: {
-  isOpen: boolean;
-  onOpenChange: () => void;
-}) {
+export default function BusinessReviewPage() {
+  const { id } = useParams();
+
   const { globalState } = useGlobalStore((state) => state);
 
-  const [text, setText] = useState("");
-  const [rating, setRating] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState<Business>();
 
-  const {
-    isOpen: isAlertOpen,
-    onOpen: onAlertOpen,
-    onOpenChange: onAlertOpenChange,
-  } = useDisclosure();
+  useEffect(() => {
+    const fetchBusiness = async () => {
+      const business = await fetchBusinessByIdAction(String(id));
 
-  const [pageState, setPageState] = useState<PageState>({
-    loading: false,
-    disabled: false,
-    success: false,
-    error: null,
-  });
-
-  const onRatingChange = (value: SliderValue) => {
-    setRating(Array.isArray(value) ? value[0] : value);
-  };
-
-  const onTextChange = (value: string) => {
-    setText(value);
-  };
-
-  const onSubmit = async () => {
-    if (rating == 0 && !isAlertOpen) {
-      onAlertOpen();
-
-      return;
-    }
-    setPageState((prevState) => ({
-      ...prevState,
-      disabled: true,
-      loading: true,
-    }));
-
-    const review: ReviewReqest = {
-      userId: String(globalState.user?.id),
-      text: text,
-      rating: rating,
+      setLoading(false);
+      if (business) {
+        setBusiness(business);
+      }
     };
 
-    const res = await addReviewToPostAction("post.data.id", review);
+    fetchBusiness();
+  }, []);
 
-    setPageState((prevState) => ({
-      ...prevState,
-      disabled: false,
-      loading: false,
-      success: res.success,
-      error: res.error,
-    }));
+  if (loading) {
+    return <Spinner className="pt-4" />;
+  }
 
-    onOpenChange();
-  };
+  if (!business) {
+    return <p>Could not fetch the business</p>;
+  }
 
   return (
-    <div className="p-6">
-      <div className="bg-default-100 rounded-md py-2 px-3">
-        Your review for {"post.data.userName"}
+    <div className="p-2">
+      <div className="flex flex-row items-center">
+        <Avatar
+          showFallback
+          className="sm:w-24 sm:h-24 h-20 w-20"
+          src={String(business?.logo)}
+        />
+        <div className="pl-5">
+          <p className="sm:text-xl font-bold">{business?.name}</p>
+          <p className="text-default-600 sm:text-sm text-sm">
+            Since:{" "}
+            {business && getJoingDateString(new Date(business.createdAt))}
+          </p>
+        </div>
       </div>
+
+      <Divider className="my-3" />
+      <div className="flex flex-row justify-evenly items-center px-4">
+        {business.website && (
+          <div className="flex flex-row items-center gap-2">
+            <WebsiteIcon size={22} />
+            <p className="text-default-600 sm:text-sm text-sm">
+              {business.website}
+            </p>
+          </div>
+        )}
+        <div className="flex flex-row items-center gap-2">
+          <LocationIcon size={22} />
+          <p className="text-default-600 sm:text-sm text-sm">
+            {business.location}
+          </p>
+        </div>
+        <div className="flex flex-row items-center gap-2">
+          <ContactIcon size={22} />
+          <p className="text-default-600 sm:text-sm text-sm">
+            {business.contact}
+          </p>
+        </div>
+      </div>
+
+      <Divider className="my-3" />
+      <p className="bg-default-100 rounded-md py-2 px-3 font-semibold">
+        Your review for{" "}
+        <span className="text-primary-500">{business.name}</span>
+      </p>
       <div className="py-6">
-        <FnBForm />
+        <FnBForm business={business} user={globalState.user} />
       </div>
-      <AlertModal
-        description="You are about to give this post a zero rating."
-        isOpen={isAlertOpen}
-        pageState={pageState}
-        title="Post Rating"
-        onContinue={onSubmit}
-        onOpenChange={onAlertOpenChange}
-      />
     </div>
   );
 }

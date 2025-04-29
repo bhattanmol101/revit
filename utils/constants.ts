@@ -23,3 +23,20 @@ export const INDUSTRIES = [
   { key: "music", label: "Music" },
   { key: "sports", label: "Sports & Fitness" },
 ];
+
+export const PRICE_PP = [
+  { key: 1, label: "100-300" },
+  { key: 2, label: "500-800" },
+  { key: 3, label: "900-1200" },
+  { key: 4, label: "1300-1600" },
+  { key: 5, label: "1700-2000" },
+  { key: 6, label: "2000-3000" },
+  { key: 7, label: "3000+" },
+];
+
+export const VISIT = [
+  { key: 1, label: "Breakfast" },
+  { key: 2, label: "Lunch" },
+  { key: 3, label: "High Tea" },
+  { key: 4, label: "Dinner" },
+];

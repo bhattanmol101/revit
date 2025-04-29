@@ -1,5 +1,6 @@
 "use server";
 
+import { getBusinessReviewsById } from "@/api/review.api";
 import { getQRCodeURL } from "@/utils/utils";
 
 export const fetchQRCodeAction = async (businessId: string) => {
@@ -12,4 +13,14 @@ export const fetchQRCodeAction = async (businessId: string) => {
   });
 
   return resp.blob();
+};
+
+export const fetchBusinessReviewsByIdAction = async (businessId: string) => {
+  const resp = await getBusinessReviewsById(businessId);
+
+  if (!resp.success) {
+    return resp.error;
+  }
+
+  return resp.reviews;
 };

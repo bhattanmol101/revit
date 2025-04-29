@@ -6,57 +6,90 @@ import { Form } from "@heroui/form";
 import { useState } from "react";
 import { Alert } from "@heroui/alert";
 import { Select, SelectItem } from "@heroui/select";
-import { SharedSelection } from "@heroui/system";
 import { Slider } from "@heroui/slider";
+import { useDisclosure } from "@heroui/modal";
 
-import { SignupUser } from "@/types/user";
+import AlertModal from "../ui/alert-modal";
+
 import { PageState } from "@/types";
-import { INDUSTRIES } from "@/utils/constants";
+import { PRICE_PP, VISIT } from "@/utils/constants";
+import { Business } from "@/types/business";
+import { FnBReview } from "@/types/form";
+import { BusinessReviewRequest } from "@/types/review";
+import { saveReviewForBusinessAction } from "@/app/(application)/business/[id]/revit/action";
+import { User } from "@/types/user";
 
-export default function FnBForm() {
-  const [signup, updateSignup] = useState<PageState>({
+export default function FnBForm({
+  business,
+  user,
+}: {
+  business: Business;
+  user?: User;
+}) {
+  const [review, updateReview] = useState<PageState>({
     disabled: false,
     loading: false,
     success: false,
     error: null,
   });
 
-  const [description, setDescription] = useState<string>("");
-
-  const onSelectionChange = (keys: SharedSelection) => {
-    console.log(keys);
-  };
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
 
-    updateSignup((signup) => ({
-      ...signup,
+    // if (rating == 0 && !isOpen) {
+    //   onOpen();
+
+    //   return;
+    // }
+
+    // await onRatingSubmit();
+
+    updateReview((review) => ({
+      ...review,
       loading: true,
     }));
 
-    const data = Object.fromEntries(
-      new FormData(e.currentTarget)
-    ) as SignupUser;
+    const data = Object.fromEntries(new FormData(e.currentTarget)) as FnBReview;
 
-    // updateSignup({
-    //   disabled: res.success,
-    //   loading: false,
-    //   success: res.success,
-    //   error: res.error,
-    // });
+    const businessReview: BusinessReviewRequest = {
+      businessId: business.id,
+      rating: Number(data.rating),
+      text: data.text,
+      userName: data.name,
+      userId: user?.id,
+      json: {
+        food: Number(data.food),
+        ambience: Number(data.ambience),
+        service: Number(data.service),
+        vibe: Number(data.vibe),
+        price: data.price,
+        servicePerson: data.servicePerson,
+        visit: data.visit,
+      },
+    };
+
+    const resp = await saveReviewForBusinessAction(business.id, businessReview);
+
+    updateReview((review) => ({
+      ...review,
+      loading: false,
+      success: resp.success,
+      error: resp.error,
+    }));
   };
 
   return (
     <div className="flex flex-col justify-center items-center">
-      {(signup.disabled || signup.error) && (
+      {(review.disabled || review.error) && (
         <Alert
           className="sm:mb-5 mb-2"
-          color={signup.success ? "success" : "danger"}
+          color={review.success ? "success" : "danger"}
           title={
-            signup.success
-              ? "Thanks for signing up! Please check your email for verification link."
-              : signup.error?.message
+            review.success
+              ? "Thank you for your review!"
+              : review.error?.message
           }
         />
       )}
@@ -68,111 +101,95 @@ export default function FnBForm() {
         <Slider
           className="w-full"
           color="primary"
-          label="What would you rate it?"
+          label="Overall Rating"
           maxValue={5}
           minValue={0}
+          name="rating"
           size="sm"
           step={0.5}
-          //   value={rating}
-          //   onChange={onRatingChange}
         />
         <div className="flex flex-row items-start gap-4 w-full">
           <Slider
             className="w-full pb-1"
             color="primary"
-            label="How was the food?"
+            label="Food"
             maxValue={5}
             minValue={0}
+            name="food"
             size="sm"
             step={0.5}
-            //   value={rating}
-            //   onChange={onRatingChange}
           />
           <Slider
             className="w-full pb-1"
             color="primary"
-            label="What was the ambience like?"
+            label="Ambience"
             maxValue={5}
             minValue={0}
+            name="ambience"
             size="sm"
             step={0.5}
-            //   value={rating}
-            //   onChange={onRatingChange}
           />
         </div>
         <div className="flex flex-row items-start gap-4 w-full">
           <Slider
             className="w-full pb-1"
             color="primary"
-            label="Was the service good?"
+            label="Service"
             maxValue={5}
             minValue={0}
+            name="service"
             size="sm"
             step={0.5}
-            //   value={rating}
-            //   onChange={onRatingChange}
           />
           <Slider
             className="w-full pb-1"
             color="primary"
-            label="How was the vibe?"
+            label="Vibe"
             maxValue={5}
             minValue={0}
+            name="vibe"
             size="sm"
             step={0.5}
-            //   value={rating}
-            //   onChange={onRatingChange}
           />
         </div>
         <Textarea
           aria-label="Description"
           className="col-span-12 md:col-span-6 mb-6 md:mb-0 whitespace-pre"
           maxRows={100}
+          name="text"
           placeholder="Tell in brief about your expirience"
           variant="faded"
-          onValueChange={setDescription}
         />
         <div className="flex flex-row items-start gap-2 w-full">
           <Input
-            description="Empty for anonymous"
+            description={!user && "Empty for anonymous"}
             errorMessage="Please enter a valid name"
             label="Name"
             name="name"
             placeholder="e.g. Anmol Bhat"
-            type="name"
+            type="text"
+            value={user && user.name}
             variant="faded"
           />
 
-          <Select
-            label="Price per person"
-            name="industry"
-            variant="faded"
-            onSelectionChange={onSelectionChange}
-          >
-            {INDUSTRIES.map((item) => (
+          <Select label="Price per person" name="price" variant="faded">
+            {PRICE_PP.map((item) => (
               <SelectItem key={item.key}>{item.label}</SelectItem>
             ))}
           </Select>
         </div>
 
         <div className="flex flex-row items-start gap-2 w-full">
-          <Select
-            label="Did you dine-in?"
-            name="industry"
+          <Input
+            errorMessage="Please enter a valid name"
+            label="Service Person"
+            name="servicePerson"
+            placeholder="e.g. Anmol Bhat"
+            type="text"
             variant="faded"
-            onSelectionChange={onSelectionChange}
-          >
-            {INDUSTRIES.map((item) => (
-              <SelectItem key={item.key}>{item.label}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="When did you visit?"
-            name="industry"
-            variant="faded"
-            onSelectionChange={onSelectionChange}
-          >
-            {INDUSTRIES.map((item) => (
+          />
+          <Select label="When did you visit?" name="visit" variant="faded">
+            {VISIT.map((item) => (
               <SelectItem key={item.key}>{item.label}</SelectItem>
             ))}
           </Select>
@@ -181,15 +198,22 @@ export default function FnBForm() {
           className="mt-2"
           color="primary"
           fullWidth={true}
-          isDisabled={signup.disabled}
-          isLoading={signup.loading}
-          size="sm"
+          isDisabled={review.disabled}
+          isLoading={review.loading}
           spinnerPlacement="end"
           type="submit"
         >
           Post
         </Button>
       </Form>
+      <AlertModal
+        description="You are about to give this business a zero rating"
+        isOpen={isOpen}
+        pageState={review}
+        title={`${business.name}'s Review`}
+        onContinue={onSubmit}
+        onOpenChange={onOpenChange}
+      />
     </div>
   );
 }
