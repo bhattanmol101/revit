@@ -1,0 +1,36 @@
+{
+  "name": "revit-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "cd ../.. && yarn build && cd apps/web && next build",
+    "start": "next start",
+    "serve": "NODE_ENV=production next start --port 8151",
+    "lint": "next lint",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@revit/app": "0.0.0",
+    "@tamagui/config": "^1.132.23",
+    "@tamagui/next-theme": "^1.132.23",
+    "framer-motion": "^12.23.12",
+    "next": "15.5.2",
+    "raf": "^3.4.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-svg": "^15.12.1",
+    "react-native-web": "^0.21.1",
+    "tamagui": "^1.132.23",
+    "vercel": "latest"
+  },
+  "devDependencies": {
+    "@tamagui/next-plugin": "^1.132.23",
+    "eslint-config-next": "^15.5.2",
+    "next-compose-plugins": "^2.2.1",
+    "next-transpile-modules": "^10.0.1",
+    "tree-kill": "^1.2.2",
+    "vitest": "^3.2.4"
+  }
+}
