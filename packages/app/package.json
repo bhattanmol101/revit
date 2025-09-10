@@ -8,7 +8,8 @@
   ],
   "dependencies": {
     "@react-navigation/native": "^7.1.17",
-    "@revit/ui": "0.0.1",
+    "@revit/shared": "*",
+    "@revit/ui": "*",
     "@tamagui/animations-react-native": "^1.132.23",
     "@tamagui/colors": "^1.132.23",
     "@tamagui/font-inter": "^1.132.23",

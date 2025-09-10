@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { NextTamaguiProvider } from '@revit/app/provider/NextTamaguiProvider'
-import { createSupabaseClient } from '@revit/api/utils/supabase'
 
 export const metadata: Metadata = {
   title: 'Tamagui • App Router',

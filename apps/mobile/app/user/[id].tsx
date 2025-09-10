@@ -1,4 +1,4 @@
-import { UserDetailScreen } from '@revit/app/features/user/detail-screen'
+// import { UserDetailScreen } from '@revit/app/features/user/detail-screen'
 import { Stack } from 'expo-router'
 import { useParams } from 'solito/navigation'
 
@@ -15,7 +15,7 @@ export default function Screen() {
           gestureDirection: 'horizontal',
         }}
       />
-      <UserDetailScreen id={id as string} />
+      {/* <UserDetailScreen id={id as string} /> */}
     </>
   )
 }

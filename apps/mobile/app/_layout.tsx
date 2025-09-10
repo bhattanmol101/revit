@@ -37,7 +37,10 @@ function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={DarkTheme}>
-        <Stack />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="signup" />
+        </Stack>
         <NativeToast />
       </ThemeProvider>
     </Provider>

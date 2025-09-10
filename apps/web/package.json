@@ -11,7 +11,10 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@revit/app": "0.0.0",
+    "@revit/api": "*",
+    "@revit/app": "*",
+    "@revit/shared": "*",
+    "@revit/ui": "*",
     "@tamagui/config": "^1.132.23",
     "@tamagui/next-theme": "^1.132.23",
     "framer-motion": "^12.23.12",
@@ -22,7 +25,6 @@
     "react-native": "0.79.6",
     "react-native-svg": "^15.12.1",
     "react-native-web": "^0.21.1",
-    "tamagui": "^1.132.23",
     "vercel": "latest"
   },
   "devDependencies": {

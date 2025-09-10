@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
-import PostCard from '@revit/app/components/post/Card'
-
-import CreatePost from '@revit/app/components/post/Create'
+import SigninPage from '@/app/pages/Signin'
 
 export const metadata: Metadata = {
   title: 'Revit - All in one place for reviews',
@@ -11,9 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function Main() {
-  return (
-    <main>
-      <CreatePost />
-    </main>
-  )
+  return <SigninPage />
 }

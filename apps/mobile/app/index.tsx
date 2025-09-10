@@ -1,19 +1,11 @@
-import { HomeScreen } from '@revit/app/features/home/screen'
-import { Stack } from 'expo-router'
-import { createSupabaseClient } from '@revit/api/utils/supabase'
-import PostCard from '@revit/app/components/post/Card'
-import CreatePost from '@revit/app/components/post/Create'
+import { signIn } from '@revit/api/signin'
+import Signin from '@revit/app/components/signin'
+import { YStack } from '@revit/ui'
 
 export default function Screen() {
-  createSupabaseClient()
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'Home',
-        }}
-      />
-      <CreatePost />
-    </>
+    <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal="30">
+      <Signin handleSignin={signIn} />
+    </YStack>
   )
 }
