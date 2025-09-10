@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@revit/api": "*",
-    "@revit/app": "*",
     "@revit/shared": "*",
     "@revit/ui": "*",
     "@tamagui/config": "^1.132.23",

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import RevitLogo from '@revit/app/assets/logo/revit.svg'
+import RevitLogo from '@revit/shared/assets/logo/revit.svg'
 import { Avatar, Button, XStack } from '@revit/ui'
 
 export default function Header() {

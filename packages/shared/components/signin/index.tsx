@@ -2,10 +2,10 @@
 
 import { useLink, useRouter } from 'solito/navigation'
 import { Button, Input, Text, XStack, YStack } from '@revit/ui'
+import { useState } from 'react'
 import Revit from '../icons/Revit'
 import Google from '../icons/Google'
-import { useState } from 'react'
-import { UserSigninT } from '@revit/shared/types/user'
+import { UserSigninT } from '../../types/user'
 
 interface SigninProps {
   // handleGoogleSignin: () => void

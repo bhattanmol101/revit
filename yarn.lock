@@ -3190,24 +3190,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@revit/api@npm:*, @revit/api@npm:0.0.0, @revit/api@workspace:packages/api":
+"@revit/api@npm:*, @revit/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@revit/api@workspace:packages/api"
   dependencies:
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
-    "@revit/shared": "npm:0.0.0"
+    "@revit/shared": "npm:*"
     "@supabase/ssr": "npm:^0.7.0"
     "@supabase/supabase-js": "npm:^2.57.2"
     react-native-url-polyfill: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
 
-"@revit/app@npm:*, @revit/app@npm:0.0.0, @revit/app@workspace:packages/app":
+"@revit/config@npm:0.0.1, @revit/config@workspace:packages/config":
   version: 0.0.0-use.local
-  resolution: "@revit/app@workspace:packages/app"
+  resolution: "@revit/config@workspace:packages/config"
+  dependencies:
+    "@tamagui/animations-react-native": "npm:^1.132.23"
+    "@tamagui/build": "npm:^1.132.23"
+    "@tamagui/font-inter": "npm:^1.132.23"
+    "@tamagui/shorthands": "npm:^1.132.23"
+    "@tamagui/themes": "npm:^1.132.23"
+    tamagui: "npm:^1.132.23"
+  languageName: unknown
+  linkType: soft
+
+"@revit/shared@npm:*, @revit/shared@workspace:packages/shared":
+  version: 0.0.0-use.local
+  resolution: "@revit/shared@workspace:packages/shared"
   dependencies:
     "@react-navigation/native": "npm:^7.1.17"
-    "@revit/shared": "npm:*"
     "@revit/ui": "npm:*"
     "@tamagui/animations-react-native": "npm:^1.132.23"
     "@tamagui/colors": "npm:^1.132.23"
@@ -3225,26 +3237,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@revit/config@npm:0.0.1, @revit/config@workspace:packages/config":
-  version: 0.0.0-use.local
-  resolution: "@revit/config@workspace:packages/config"
-  dependencies:
-    "@tamagui/animations-react-native": "npm:^1.132.23"
-    "@tamagui/build": "npm:^1.132.23"
-    "@tamagui/font-inter": "npm:^1.132.23"
-    "@tamagui/shorthands": "npm:^1.132.23"
-    "@tamagui/themes": "npm:^1.132.23"
-    tamagui: "npm:^1.132.23"
-  languageName: unknown
-  linkType: soft
-
-"@revit/shared@npm:*, @revit/shared@npm:0.0.0, @revit/shared@workspace:packages/shared":
-  version: 0.0.0-use.local
-  resolution: "@revit/shared@workspace:packages/shared"
-  languageName: unknown
-  linkType: soft
-
-"@revit/ui@npm:*, @revit/ui@npm:0.0.1, @revit/ui@workspace:packages/ui":
+"@revit/ui@npm:*, @revit/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@revit/ui@workspace:packages/ui"
   dependencies:
@@ -14940,9 +14933,9 @@ __metadata:
     "@expo/metro-config": "npm:~0.20.17"
     "@react-navigation/bottom-tabs": "npm:^7.4.7"
     "@react-navigation/native": "npm:^7.1.17"
-    "@revit/api": "npm:0.0.0"
-    "@revit/app": "npm:0.0.0"
-    "@revit/ui": "npm:0.0.1"
+    "@revit/api": "npm:*"
+    "@revit/shared": "npm:*"
+    "@revit/ui": "npm:*"
     "@tamagui/babel-plugin": "npm:^1.132.23"
     babel-plugin-module-resolver: "npm:^5.0.2"
     burnt: "npm:^0.13.0"
@@ -14972,7 +14965,6 @@ __metadata:
   resolution: "revit-web@workspace:apps/web"
   dependencies:
     "@revit/api": "npm:*"
-    "@revit/app": "npm:*"
     "@revit/shared": "npm:*"
     "@revit/ui": "npm:*"
     "@tamagui/config": "npm:^1.132.23"

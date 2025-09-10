@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { DarkTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
-import { Provider } from '@revit/app/provider'
+import { Provider } from '@revit/shared/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
 
 export const unstable_settings = {

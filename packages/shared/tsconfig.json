@@ -5,8 +5,8 @@
     "composite": true,
     "jsx": "react-jsx",
     "paths": {
-      "app/*": ["./packages/app/*"],
-      "@revit/ui/*": ["./packages/ui/*"]
+      "@revit/ui/*": ["./packages/ui/*"],
+      "@/*": ["./*"]
     }
   },
   "references": []

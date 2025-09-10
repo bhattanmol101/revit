@@ -9,7 +9,7 @@ module.exports = (api) => {
           root: ['../..'],
           alias: {
             // define aliases to shorten the import paths
-            '@revit/app': '../../packages/app',
+            '@revit/shared': '../../packages/shared',
             '@revit/ui': '../../packages/ui',
           },
           extensions: ['.js', '.jsx', '.tsx', '.ios.js', '.android.js'],

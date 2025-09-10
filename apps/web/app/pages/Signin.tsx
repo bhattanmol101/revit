@@ -1,10 +1,10 @@
 'use client'
 
-import Signin from '@revit/app/components/signin'
+import Signin from '@revit/shared/components/signin'
 import { UserSigninT } from '@revit/shared/types/user'
 import { signInAction } from '@/app/action'
 import { XStack, YStack } from '@revit/ui'
-import MainImage from '@revit/app/assets/images/Main'
+import MainImage from '@revit/shared/assets/images/Main'
 
 export default function SigninPage() {
   const siginInHandler = async (userSignin: UserSigninT) => {

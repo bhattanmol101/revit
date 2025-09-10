@@ -1,10 +1,10 @@
 {
   "name": "@revit/api",
   "packageManager": "yarn@4.5.0",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
-    "@revit/shared": "0.0.0",
+    "@revit/shared": "*",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.2",
     "react-native-url-polyfill": "^2.0.0"

@@ -1,4 +1,4 @@
-import Signup from '@revit/app/components/signup'
+import Signup from '@revit/shared/components/signup'
 
 export default function Main() {
   return (
