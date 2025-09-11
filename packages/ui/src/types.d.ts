@@ -1,4 +1,4 @@
-import { config } from '@revit/config'
+import { config } from '@revit/ui'
 
 export type Conf = typeof config
 

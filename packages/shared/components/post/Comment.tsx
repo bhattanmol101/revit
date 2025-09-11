@@ -32,7 +32,7 @@ const Comment = ({ post }: { post: any }) => {
       ))}
 
       {/* Add Comment */}
-      <XStack items="center" paddingTop="$2" gap="$2">
+      <XStack alignItems="center" paddingTop="$2" gap="$2">
         <Input flex={1} borderWidth={1} placeholder="Add a comment..." />
         <Button circular icon={Send} padding="$2" onPress={() => {}} />
       </XStack>

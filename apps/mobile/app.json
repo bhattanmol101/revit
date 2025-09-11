@@ -25,7 +25,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.yourprojectsname.app"
+      "package": "com.yourprojectsname.app",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"

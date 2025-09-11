@@ -15,8 +15,12 @@ SplashScreen.preventAutoHideAsync()
 
 export default function App() {
   const [interLoaded, interError] = useFonts({
-    Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
-    InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
+    'NotoSans-Regular': require('@revit/ui/fonts/NotoSans-Regular.ttf'),
+    'NotoSans-Medium': require('@revit/ui/fonts/NotoSans-Medium.ttf'),
+    'NotoSans-Light': require('@revit/ui/fonts/NotoSans-Light.ttf'),
+    'NotoSans-SemiBold': require('@revit/ui/fonts/NotoSans-SemiBold.ttf'),
+    'NotoSans-Bold': require('@revit/ui/fonts/NotoSans-Bold.ttf'),
+    'NotoSans-ExtraBold': require('@revit/ui/fonts/NotoSans-ExtraBold.ttf'),
   })
 
   useEffect(() => {

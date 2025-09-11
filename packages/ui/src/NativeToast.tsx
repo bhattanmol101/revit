@@ -1,8 +1,16 @@
 import { Toast, useToastState } from '@tamagui/toast'
-import { YStack } from 'tamagui'
+import { Theme, YStack } from 'tamagui'
 
 export const NativeToast = () => {
   const currentToast = useToastState()
+
+  let isSuccess: boolean = false
+  let isDanger: boolean = false
+
+  if (currentToast && currentToast.customData) {
+    isDanger = currentToast.customData?.type === 'error'
+    isSuccess = currentToast.customData?.type === 'success'
+  }
 
   if (!currentToast || currentToast.isHandledNatively) {
     return null
@@ -19,10 +27,15 @@ export const NativeToast = () => {
       opacity={1}
       scale={1}
       animation="quick"
+      backgroundColor={isSuccess ? '$green11' : isDanger ? '$red11' : '$background'}
     >
       <YStack py="$1.5" px="$2">
-        <Toast.Title lineHeight="$1">{currentToast.title}</Toast.Title>
-        {!!currentToast.message && <Toast.Description>{currentToast.message}</Toast.Description>}
+        <Toast.Title color={isSuccess ? '$green6' : isDanger ? '$red6' : '$background'}>
+          {currentToast.title}
+        </Toast.Title>
+        {!!currentToast.message && (
+          <Toast.Description color="white">{currentToast.message}</Toast.Description>
+        )}
       </YStack>
     </Toast>
   )

@@ -12,7 +12,7 @@ const disableExtraction =
 
 const plugins = [
   withTamagui({
-    config: '../../packages/config/src/tamagui.config.ts',
+    config: '../../packages/ui/src/tamagui.config.ts',
     components: ['@revit/ui'],
     appDir: true,
     importsWhitelist: ['constants.js', 'colors.js'],
@@ -41,6 +41,7 @@ module.exports = () => {
       'expo-linking',
       'expo-constants',
       'expo-modules-core',
+      'react-native-reanimated',
     ],
     experimental: {
       scrollRestoration: true,

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import SigninPage from '@/app/pages/Signin'
+import SigninPage from '@/components/pages/Signin'
 
 export const metadata: Metadata = {
   title: 'Revit - All in one place for reviews',

@@ -23,6 +23,7 @@
     "check-tamagui": "tamagui check",
     "test": "vitest run",
     "test:watch": "vitest",
+    "setup": "yarn create tamagui --template takeout-starter --info",
     "prepare": "husky"
   },
   "resolutions": {

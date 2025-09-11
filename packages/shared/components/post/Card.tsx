@@ -4,6 +4,7 @@ import { MessageCircle, MoreVertical, Share2, Star } from '@tamagui/lucide-icons
 import { Avatar, Button, Card, Image, Text, View, XStack, YStack } from '@revit/ui'
 import Comment from './Comment'
 import Rating from './Rating'
+import StarRating from '../common/Rating'
 
 const PostCard = () => {
   const post = {
@@ -33,30 +34,30 @@ const PostCard = () => {
     ],
   }
 
-  const renderStars = (rating: number) => {
-    const stars = []
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 >= 0.5
+  // const renderStars = (rating: number) => {
+  //   const stars = []
+  //   const fullStars = Math.floor(rating)
+  //   const hasHalfStar = rating % 1 >= 0.5
 
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
-      } else {
-        stars.push(<Star key={i} size={22} color="#fbbf24" />)
-      }
-    }
+  //   for (let i = 0; i < 5; i++) {
+  //     if (i < fullStars) {
+  //       stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
+  //     } else if (i === fullStars && hasHalfStar) {
+  //       stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
+  //     } else {
+  //       stars.push(<Star key={i} size={22} color="#fbbf24" />)
+  //     }
+  //   }
 
-    return (
-      <XStack display="flex" gap="$1" items="center" justify="flex-start">
-        {stars}
-        <Text fontWeight="$3" marginLeft="$2">
-          {rating.toFixed(1)}
-        </Text>
-      </XStack>
-    )
-  }
+  //   return (
+  //     <XStack display="flex" gap="$1" alignItems="center" justifyContent="flex-start">
+  //       {stars}
+  //       <Text fontWeight="$3" marginLeft="$2">
+  //         {rating.toFixed(1)}
+  //       </Text>
+  //     </XStack>
+  //   )
+  // }
 
   return (
     <Card>
@@ -64,11 +65,11 @@ const PostCard = () => {
       <Card.Header
         display="flex"
         flexDirection="row"
-        justify="space-between"
-        items="center"
+        justifyContent="space-between"
+        alignItems="center"
         paddingBottom="$2"
       >
-        <XStack items="center" gap="$2">
+        <XStack alignItems="center" gap="$2">
           <Avatar circular size="$4">
             <Avatar.Fallback borderColor="red" />
             <Avatar.Image src={post.userAvatar} />
@@ -92,7 +93,7 @@ const PostCard = () => {
         {/* Tags */}
         <XStack gap="$2" flexWrap="wrap">
           {post.tags.map((tag, index) => (
-            <Text key={index} color="$accent11" fontSize="$3" fontWeight="bold">
+            <Text key={index} color="$black11" fontSize="$3" fontWeight="bold">
               #{tag}
             </Text>
           ))}
@@ -111,12 +112,12 @@ const PostCard = () => {
       {/* Post Actions */}
       <Card.Footer
         display="flex"
-        items="center"
-        justify="space-between"
+        alignItems="center"
+        justifyContent="space-between"
         paddingVertical="$2"
         paddingHorizontal="$3"
       >
-        <View>{renderStars(post.rating)}</View>
+        <StarRating rating={post.rating} />
 
         <XStack padding="$2" gap="$1">
           <Button chromeless padding="$3">

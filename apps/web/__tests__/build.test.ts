@@ -42,7 +42,6 @@ test('Next.js build completes', async () => {
     const result = await buildOutput
 
     // Check for yarn build output
-    expect(result).toContain('built @revit/config')
     expect(result).toContain('built @revit/ui')
 
     // Check for Next.js version and build process
