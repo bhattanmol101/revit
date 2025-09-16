@@ -1,3 +1,5 @@
+'use client'
+
 import { getFontSized } from '@tamagui/get-font-sized'
 import { getSpace } from '@tamagui/get-token'
 import type { SizeVariantSpreadFunction } from '@tamagui/web'

@@ -1,3 +1,5 @@
+'use client'
+
 import type { SizeTokens } from 'tamagui'
 import { Theme, View } from 'tamagui'
 import { Input } from '../elements/inputParts'
@@ -48,8 +50,8 @@ export function InputField({
                 onChangeText={onChangeText}
               />
             </Input.Box>
+            <FieldError message={error} />
           </Shake>
-          <FieldError message={error} />
         </Input>
       </View>
     </Theme>

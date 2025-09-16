@@ -13,7 +13,6 @@ import {
   Separator,
   Paragraph,
   SizableText,
-  Anchor,
   H1,
 } from '@revit/ui'
 import { useState } from 'react'
@@ -22,7 +21,7 @@ import Google from '../icons/Google'
 import { UserSigninT } from '../../types/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SigninFormType, signinSchema } from '../../schema/UserSchema'
+import { SigninFormType, signinSchema } from '../../validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
 
 interface SigninProps {

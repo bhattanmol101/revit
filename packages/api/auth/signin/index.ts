@@ -1,9 +1,9 @@
 import { UserSigninT } from '@revit/shared/types/user'
-import { createSupabaseClient } from '../utils/supabase'
+import { useSupabase } from '@revit/supabase/utils/supabase/useSupabase'
 
 export const signIn = async ({ email, password }: UserSigninT) => {
   try {
-    const supabase = await createSupabaseClient()
+    const supabase = await useSupabase()
 
     const { error } = await supabase.auth.signInWithPassword({
       email,

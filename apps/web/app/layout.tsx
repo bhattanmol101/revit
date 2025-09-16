@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { NextTamaguiProvider } from '@revit/shared/provider/NextTamaguiProvider'
+import ContextProvider from '@/components/Provider/ContextProvider'
 
 export const metadata: Metadata = {
   title: 'Tamagui • App Router',
@@ -12,7 +13,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // You can use `suppressHydrationWarning` to avoid the warning about mismatched content during hydration in dev mode
     <html lang="en" suppressHydrationWarning>
       <body>
-        <NextTamaguiProvider>{children}</NextTamaguiProvider>
+        <NextTamaguiProvider>
+          <ContextProvider>{children}</ContextProvider>
+        </NextTamaguiProvider>
       </body>
     </html>
   )

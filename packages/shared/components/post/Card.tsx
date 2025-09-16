@@ -1,12 +1,14 @@
 'use client'
 
-import { MessageCircle, MoreVertical, Share2, Star } from '@tamagui/lucide-icons'
-import { Avatar, Button, Card, Image, Text, View, XStack, YStack } from '@revit/ui'
-import Comment from './Comment'
-import Rating from './Rating'
-import StarRating from '../common/Rating'
+import { useState } from 'react'
+import { MessageCircle } from '@tamagui/lucide-icons'
+import { Avatar, Button, Card, Image, Paragraph, Text, XStack, YStack } from '@revit/ui'
+import Rating from '../common/Rating'
+import { PostMenu } from './Menu'
+import Comment from '../comment'
 
 const PostCard = () => {
+  const [showComments, setShowComments] = useState(false)
   const post = {
     id: '1',
     username: 'Alex Johnson',
@@ -34,33 +36,8 @@ const PostCard = () => {
     ],
   }
 
-  // const renderStars = (rating: number) => {
-  //   const stars = []
-  //   const fullStars = Math.floor(rating)
-  //   const hasHalfStar = rating % 1 >= 0.5
-
-  //   for (let i = 0; i < 5; i++) {
-  //     if (i < fullStars) {
-  //       stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
-  //     } else if (i === fullStars && hasHalfStar) {
-  //       stars.push(<Star key={i} size={22} color="#fbbf24" fill="#fbbf24" />)
-  //     } else {
-  //       stars.push(<Star key={i} size={22} color="#fbbf24" />)
-  //     }
-  //   }
-
-  //   return (
-  //     <XStack display="flex" gap="$1" alignItems="center" justifyContent="flex-start">
-  //       {stars}
-  //       <Text fontWeight="$3" marginLeft="$2">
-  //         {rating.toFixed(1)}
-  //       </Text>
-  //     </XStack>
-  //   )
-  // }
-
   return (
-    <Card>
+    <Card my="$1">
       {/* Post Header */}
       <Card.Header
         display="flex"
@@ -70,30 +47,28 @@ const PostCard = () => {
         paddingBottom="$2"
       >
         <XStack alignItems="center" gap="$2">
-          <Avatar circular size="$4">
+          <Avatar circular size="$3">
             <Avatar.Fallback borderColor="red" />
             <Avatar.Image src={post.userAvatar} />
           </Avatar>
           <YStack>
-            <Text fontWeight="bold">{post.username}</Text>
-            <Text fontSize="$3" color="$black11">
+            <Text fontSize="$2">{post.username}</Text>
+            <Text fontSize="$1" color="$black11">
               {post.timestamp}
             </Text>
           </YStack>
         </XStack>
-        <Button padding="$2" chromeless>
-          <MoreVertical color="#d1d5db" size={20} />
-        </Button>
+        <PostMenu placement="bottom" />
       </Card.Header>
 
       {/* Post Content */}
-      <YStack paddingHorizontal="$2" paddingBottom="$3" gap="$2">
-        <Text className="text-gray-300 mb-2">{post.content}</Text>
+      <YStack paddingHorizontal="$3" paddingBottom="$2" gap="$2">
+        <Paragraph fontWeight={400}>{post.content}</Paragraph>
 
         {/* Tags */}
         <XStack gap="$2" flexWrap="wrap">
           {post.tags.map((tag, index) => (
-            <Text key={index} color="$black11" fontSize="$3" fontWeight="bold">
+            <Text key={index} color="$blue9" fontSize="$2" fontWeight="bold">
               #{tag}
             </Text>
           ))}
@@ -101,10 +76,9 @@ const PostCard = () => {
       </YStack>
 
       {/* Post Image */}
-
       <Image
-        source={{ width: 200, height: 200, uri: post.image }}
-        height="40rem"
+        source={{ width: 500, height: 500, uri: post.image }}
+        height="35rem"
         width="100%"
         alt="feed"
       />
@@ -114,24 +88,24 @@ const PostCard = () => {
         display="flex"
         alignItems="center"
         justifyContent="space-between"
-        paddingVertical="$2"
+        py="$1.5"
         paddingHorizontal="$3"
       >
-        <StarRating rating={post.rating} />
+        <Rating rating={post.rating} size={18} />
 
-        <XStack padding="$2" gap="$1">
-          <Button chromeless padding="$3">
-            <MessageCircle color="#d1d5db" size={22} />
-            <Text>{post.comments.length}</Text>
-          </Button>
-          <Button chromeless padding="$3">
-            <Share2 color="#d1d5db" size={22} />
-            <Text>{post.shares}</Text>
-          </Button>
-        </XStack>
+        <Button
+          chromeless
+          onPress={() => {
+            setShowComments(!showComments)
+          }}
+        >
+          <Button.Icon>
+            <MessageCircle color="#d1d5db" size={18} />
+          </Button.Icon>
+          <Button.Text>{post.comments.length}</Button.Text>
+        </Button>
       </Card.Footer>
-      <Rating post={post} />
-      <Comment post={post} />
+      {showComments && <Comment post={post} />}
     </Card>
   )
 }

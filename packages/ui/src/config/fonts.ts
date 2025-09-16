@@ -1,4 +1,21 @@
-import { createFont, isWeb } from 'tamagui'
+import { createFont, createTokens, isWeb } from 'tamagui'
+
+export const defaultTokens = createTokens({
+  size: {
+    // Define various sizes, with 'true' marking your base default
+    1: 10,
+    2: 12,
+    true: 14, // This sets 16px as your default font size
+    3: 16,
+    4: 28,
+  },
+  weight: {
+    1: '300',
+    true: '400',
+    2: '500',
+    3: '700',
+  },
+})
 
 const notoSansFace = {
   normal: { normal: 'NotoSans-Regular' },
@@ -20,6 +37,7 @@ export const headingFont = createFont({
     4: 26,
     5: 28,
     6: 30,
+    true: 20,
   },
   transform: {
     6: 'uppercase',
@@ -28,6 +46,7 @@ export const headingFont = createFont({
   weight: {
     3: '500',
     4: '700',
+    true: 600,
   },
   face: notoSansFace,
 })
@@ -35,22 +54,24 @@ export const headingFont = createFont({
 export const bodyFont = createFont({
   family: isWeb ? 'Noto Sans, serif' : 'OpenSans',
   size: {
-    1: 12,
-    2: 14,
-    3: 16,
-    4: 18,
-    5: 20,
-    6: 22,
-    7: 24,
-    8: 26,
-    9: 28,
-    10: 30,
+    1: 10,
+    2: 12,
+    3: 14,
+    4: 16,
+    5: 18,
+    6: 20,
+    7: 22,
+    8: 24,
+    9: 26,
+    10: 28,
+    true: 14,
   },
   weight: {
     1: '300',
     2: '400',
     3: '500',
     4: '700',
+    true: '400',
   },
   face: notoSansFace,
 })

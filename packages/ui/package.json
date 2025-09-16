@@ -19,6 +19,8 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
     "@tamagui/toast": "^1.132.23",
+    "expo-image-picker": "^17.0.8",
+    "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.62.0",
     "tamagui": "^1.132.23",
     "zod": "^4.1.7"

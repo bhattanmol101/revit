@@ -1,3 +1,5 @@
+'use client'
+
 import { Checkbox, CheckboxProps, Label, XStack } from 'tamagui'
 import { Check as CheckIcon } from '@tamagui/lucide-icons'
 

@@ -1,0 +1,59 @@
+'use client'
+
+import { useRouter, usePathname } from 'next/navigation'
+import { Home, Search, Bell, User, LogOut } from '@tamagui/lucide-icons'
+import { Button, Separator, View, YStack } from '@revit/ui'
+import CreateForumDialog from '@revit/shared/components/forum/Create'
+
+const navItems = [
+  { href: '/home', label: 'Home', icon: Home },
+  { href: '/explore', label: 'Explore', icon: Search },
+  { href: '/forums', label: 'Forums', icon: Bell },
+  { href: '/profile', label: 'Profile', icon: User },
+]
+
+export default function LeftNav() {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const handleRouteClick = (pathname: string) => router.push(pathname)
+
+  return (
+    <YStack
+      borderRightWidth={1}
+      minHeight="100%"
+      borderRightColor="$black4"
+      pt="$8"
+      pb="$12"
+      px="$6"
+      justifyContent="space-between"
+    >
+      <YStack gap="$6">
+        <YStack gap="$4">
+          {navItems.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname.includes(href)
+
+            return (
+              <Button key={href} onPress={() => handleRouteClick(href)} chromeless={!isActive}>
+                <Button.Icon>
+                  <Icon size={24} />
+                </Button.Icon>
+                <Button.Text>{label}</Button.Text>
+              </Button>
+            )
+          })}
+        </YStack>
+        <Separator />
+        <CreateForumDialog />
+      </YStack>
+      <View>
+        <Button chromeless>
+          <Button.Icon>
+            <LogOut color="$red10" size={24} />
+          </Button.Icon>
+          <Button.Text color="$red10">Logout</Button.Text>
+        </Button>
+      </View>
+    </YStack>
+  )
+}

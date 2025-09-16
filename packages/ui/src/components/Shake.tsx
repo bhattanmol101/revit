@@ -1,3 +1,5 @@
+'use client'
+
 import { useConfiguration } from '@tamagui/web'
 import { useEffect } from 'react'
 

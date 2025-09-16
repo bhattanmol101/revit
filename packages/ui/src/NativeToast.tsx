@@ -21,20 +21,31 @@ export const NativeToast = () => {
       key={currentToast.id}
       duration={currentToast.duration}
       viewportName={currentToast.viewportName}
+      flexWrap="wrap"
       enterStyle={{ opacity: 0, scale: 0.5, y: -25 }}
       exitStyle={{ opacity: 0, scale: 1, y: -20 }}
-      y={0}
+      y={50}
+      borderRadius={10}
       opacity={1}
       scale={1}
       animation="quick"
-      backgroundColor={isSuccess ? '$green11' : isDanger ? '$red11' : '$background'}
+      backgroundColor={isSuccess ? '$green12' : isDanger ? '$red12' : '$background'}
     >
-      <YStack py="$1.5" px="$2">
-        <Toast.Title color={isSuccess ? '$green6' : isDanger ? '$red6' : '$background'}>
+      <YStack py="$1.5" gap="$1.5">
+        <Toast.Title
+          fontSize="$3"
+          color={isSuccess ? '$green10' : isDanger ? '$red10' : '$background'}
+        >
           {currentToast.title}
         </Toast.Title>
         {!!currentToast.message && (
-          <Toast.Description color="white">{currentToast.message}</Toast.Description>
+          <Toast.Description
+            color={isSuccess ? '$green9' : isDanger ? '$red9' : 'white'}
+            fontWeight={400}
+            fontSize="$2"
+          >
+            {currentToast.message}
+          </Toast.Description>
         )}
       </YStack>
     </Toast>

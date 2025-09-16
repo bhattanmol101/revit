@@ -1,3 +1,5 @@
+'use client'
+
 import { AnimatePresence, Paragraph } from 'tamagui'
 
 type FieldErrorProps = {
