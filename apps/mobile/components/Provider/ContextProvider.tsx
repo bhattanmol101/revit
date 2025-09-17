@@ -1,8 +1,6 @@
-'use client'
-
-import { fetchLoggedInUserAction } from '@/app/action'
+import { fetchLoggedInUser } from '@revit/api/auth/user'
 import { UserT } from '@revit/shared/types/user'
-import { Spinner } from '@revit/ui'
+import { Spinner, View } from '@revit/ui'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type MaybeUser = UserT | null
@@ -21,7 +19,7 @@ export default function ContextProvider({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const getUser = async () => {
-      const { user, error } = await fetchLoggedInUserAction()
+      const { user, error } = await fetchLoggedInUser()
       if (error) {
         //TODO need to see what to do in this case
       }
@@ -37,9 +35,9 @@ export default function ContextProvider({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center">
+      <View flex={1} alignItems="center" justifyContent="center">
         <Spinner size="large" />
-      </div>
+      </View>
     )
   }
 

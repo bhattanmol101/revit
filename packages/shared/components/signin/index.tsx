@@ -14,6 +14,7 @@ import {
   Paragraph,
   SizableText,
   H1,
+  useToastController,
 } from '@revit/ui'
 import { useState } from 'react'
 import Revit from '../icons/Revit'
@@ -23,46 +24,39 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SigninFormType, signinSchema } from '../../validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
+import { CheckCircle } from '@tamagui/lucide-icons'
 
 interface SigninProps {
   // handleGoogleSignin: () => void
-  handleSignin: ({ email, password }: UserSigninT) => Promise<any>
-}
-
-function useSignIn() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
-
-  return {
-    status: status,
-    signIn: () => {
-      setStatus('loading')
-      setTimeout(() => {
-        setStatus('success')
-      }, 2000)
-    },
-  }
+  handleSignin: ({ email, password }: UserSigninT) => Promise<Error | undefined>
 }
 
 export default function Signin({ handleSignin }: SigninProps) {
-  const { signIn, status } = useSignIn()
+  const router = useRouter()
+  const toast = useToastController()
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SigninFormType>({
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+
+  const { control, handleSubmit } = useForm<SigninFormType>({
     resolver: zodResolver(signinSchema),
   })
 
-  const onSubmit: SubmitHandler<SigninFormType> = (data: SigninFormType) => {
-    console.log(data)
-    signIn()
-    handleSignin(data as UserSigninT)
-  }
+  //Test User: locoj23912@insfou.com
 
-  const linkProps = useLink({
-    href: '/signup',
-  })
+  const onSubmit: SubmitHandler<SigninFormType> = async (data: SigninFormType) => {
+    setStatus('loading')
+    const error = await handleSignin(data as UserSigninT)
+    setStatus('idle')
+    if (!error) {
+      setStatus('success')
+      router.push('/home')
+    } else {
+      toast.show('Invalid Credentials!', {
+        message: 'Please provide correct details.',
+        customData: { type: 'error' },
+      })
+    }
+  }
 
   const handleGoogleSignin = async () => {
     console.log('here 1')
@@ -91,7 +85,7 @@ export default function Signin({ handleSignin }: SigninProps) {
           <H1 fontSize="$6">Welcome back to Revit!</H1>
         </YStack>
         <YStack gap="$3">
-          <Text fontSize="$4" alignSelf="center">
+          <Text fontSize="$5" alignSelf="center" marginBottom="$5">
             Sign in to your account
           </Text>
           <Controller
@@ -135,10 +129,10 @@ export default function Signin({ handleSignin }: SigninProps) {
             minWidth="100%"
             iconAfter={
               <AnimatePresence>
-                {status === 'loading' && (
+                {status === 'loading' ? (
                   <Spinner
                     color="$color"
-                    key="loading-spinner"
+                    key="signin-loading-spinner"
                     opacity={1}
                     scale={1}
                     animation="quick"
@@ -146,12 +140,21 @@ export default function Signin({ handleSignin }: SigninProps) {
                       opacity: 0,
                       scale: 0.5,
                     }}
-                    exitStyle={{
+                  />
+                ) : status == 'success' ? (
+                  <CheckCircle
+                    color="$green10"
+                    size="$1"
+                    key="signin-success"
+                    opacity={1}
+                    scale={1}
+                    animation="quick"
+                    enterStyle={{
                       opacity: 0,
                       scale: 0.5,
                     }}
                   />
-                )}
+                ) : null}
               </AnimatePresence>
             }
           >
@@ -187,20 +190,11 @@ export default function Signin({ handleSignin }: SigninProps) {
   )
 }
 
-// Swap for your own Link
-const Link = ({ href, children }: { href: string; children: React.ReactNode }) => {
-  return (
-    <View href={href} tag="a">
-      {children}
-    </View>
-  )
-}
-
 const SignUpLink = () => {
   const router = useRouter()
   return (
     <Paragraph
-      size="$1"
+      size="$2"
       textDecorationStyle="unset"
       ta="center"
       onPress={() => router.push('/signup')}
@@ -213,6 +207,7 @@ const SignUpLink = () => {
           color: '$colorHover',
         }}
         textDecorationLine="underline"
+        size="$2"
       >
         Sign up
       </SizableText>
@@ -229,7 +224,7 @@ const ForgotPasswordLink = () => {
         color: '$gray12',
       }}
       alignSelf="flex-end"
-      size="$1"
+      size="$2"
       marginTop="$1"
       onPress={() => router.push('/forgot-password')}
       cursor="pointer"

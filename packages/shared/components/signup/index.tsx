@@ -16,6 +16,7 @@ import {
   H1,
   CheckboxWithLabel,
   ScrollView,
+  useToastController,
 } from '@revit/ui'
 import { useState } from 'react'
 import Revit from '../icons/Revit'
@@ -25,37 +26,33 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SignupFormType, signupSchema } from '../../validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
+import { CheckCircle } from '@tamagui/lucide-icons'
 
 interface SignupProps {
   // handleGoogleSignin: () => void
   handleSignup: ({ name, email, password }: UserSignupT) => Promise<any>
 }
 
-function useSignIn() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
-
-  return {
-    status: status,
-    signIn: () => {
-      setStatus('loading')
-      setTimeout(() => {
-        setStatus('success')
-      }, 2000)
-    },
-  }
-}
-
 export default function Signup({ handleSignup }: SignupProps) {
-  const { signIn, status } = useSignIn()
+  const toast = useToastController()
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
 
   const { control, handleSubmit } = useForm<SignupFormType>({
     resolver: zodResolver(signupSchema),
   })
 
-  const onSubmit: SubmitHandler<SignupFormType> = (data: SignupFormType) => {
-    console.log(data)
-    signIn()
-    handleSignup(data as UserSignupT)
+  const onSubmit: SubmitHandler<SignupFormType> = async (data: SignupFormType) => {
+    setStatus('loading')
+    const error = await handleSignup(data as UserSignupT)
+    setStatus('idle')
+    if (!error) {
+      setStatus('success')
+    } else {
+      toast.show('Invalid Credentials!', {
+        message: 'Please provide correct details.',
+        customData: { type: 'error' },
+      })
+    }
   }
 
   const handleGoogleSignin = async () => {
@@ -70,6 +67,10 @@ export default function Signup({ handleSignup }: SignupProps) {
     // console.log(data, error)
   }
 
+  if (status === 'success') {
+    return <ConfirmEmail />
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -79,7 +80,7 @@ export default function Signup({ handleSignup }: SignupProps) {
         alignItems: 'center',
       }}
     >
-      <ScrollView width="100%">
+      <ScrollView width="100%" px="$1">
         <YStack width="100%" gap="$3">
           <YStack gap="$6" paddingBottom="$5" alignItems="center" justifyContent="center">
             <Revit height={90} width={90} />
@@ -88,12 +89,12 @@ export default function Signup({ handleSignup }: SignupProps) {
           <YStack gap="$3">
             <Text fontSize="$4" alignSelf="center">
               Create your revit account
-            </Text>{' '}
+            </Text>
             <Controller
               control={control}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <InputField
-                  id="name"
+                  id="signup_name"
                   label="Name"
                   placeholder="John Doe"
                   onChangeText={onChange}
@@ -107,7 +108,7 @@ export default function Signup({ handleSignup }: SignupProps) {
               control={control}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <InputField
-                  id="email"
+                  id="signup_email"
                   label="E-mail"
                   placeholder="john.doe@aeradron.com"
                   onChangeText={onChange}
@@ -121,7 +122,7 @@ export default function Signup({ handleSignup }: SignupProps) {
               control={control}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <InputField
-                  id="password"
+                  id="signup_password"
                   label="Password"
                   textContentType="password"
                   secureTextEntry
@@ -137,11 +138,12 @@ export default function Signup({ handleSignup }: SignupProps) {
               control={control}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <CheckboxWithLabel
-                  size="$1"
+                  size="$3"
+                  fontSize="$2"
                   borderColor={error ? '$red10' : 'unset'}
                   label="Agree to our terms & conditions"
                   onCheckedChange={onChange}
-                  value={value}
+                  checked={value}
                 />
               )}
               name="check"
@@ -156,10 +158,10 @@ export default function Signup({ handleSignup }: SignupProps) {
               minWidth="100%"
               iconAfter={
                 <AnimatePresence>
-                  {status === 'loading' && (
+                  {status === 'loading' ? (
                     <Spinner
                       color="$color"
-                      key="loading-spinner"
+                      key="signin-loading-spinner"
                       opacity={1}
                       scale={1}
                       animation="quick"
@@ -167,12 +169,8 @@ export default function Signup({ handleSignup }: SignupProps) {
                         opacity: 0,
                         scale: 0.5,
                       }}
-                      exitStyle={{
-                        opacity: 0,
-                        scale: 0.5,
-                      }}
                     />
-                  )}
+                  ) : null}
                 </AnimatePresence>
               }
             >
@@ -230,5 +228,16 @@ const SignUpLink = () => {
         Sign in
       </SizableText>
     </Paragraph>
+  )
+}
+
+const ConfirmEmail = () => {
+  return (
+    <YStack justifyContent="center" alignItems="center" gap="$3">
+      <H1>Check Your Email!</H1>
+      <Paragraph textAlign="center">
+        We&apos;ve sent you a confirmation link. Please check your email and confirm it.
+      </Paragraph>
+    </YStack>
   )
 }

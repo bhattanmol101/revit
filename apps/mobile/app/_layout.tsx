@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
 import { Provider } from '@revit/shared/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
+import ContextProvider from '../components/Provider/ContextProvider'
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
@@ -41,11 +42,13 @@ function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={DarkTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="signup" />
-        </Stack>
-        <NativeToast />
+        <ContextProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="signup" />
+          </Stack>
+          <NativeToast />
+        </ContextProvider>
       </ThemeProvider>
     </Provider>
   )

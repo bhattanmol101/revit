@@ -23,15 +23,7 @@ import { FieldError } from '@revit/ui'
 const CreatePost = ({
   handlePost,
 }: {
-  handlePost?: ({
-    images,
-    description,
-    rating,
-  }: {
-    images?: string[]
-    description: string
-    rating: number
-  }) => void
+  handlePost: (caption: string, image?: File, rating?: number) => Promise<void>
 }) => {
   const toast = useToastController()
 
@@ -39,13 +31,13 @@ const CreatePost = ({
   const [error, setError] = useState('')
   const [description, setDescription] = useState('')
   const [checked, setChecked] = useState(false)
-  const [imageUri, setImageUri] = useState<string[]>()
+  const [imageUri, setImageUri] = useState<File>()
 
   const onCheckedChange = () => {
     setChecked(!checked)
   }
 
-  const handleImageChange = (images: string[]) => {
+  const handleImageChange = (images: File) => {
     setImageUri(images)
   }
 
@@ -56,7 +48,7 @@ const CreatePost = ({
     setDescription(value)
   }
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     if (!description.trim()) {
       setError('description')
       return
@@ -71,7 +63,7 @@ const CreatePost = ({
 
     console.log({ imageUri, description, rating })
 
-    // handlePost({ images: imageUri, description, rating })
+    await handlePost(description, imageUri, rating)
   }
 
   const handleRatingChange = (value: number) => {

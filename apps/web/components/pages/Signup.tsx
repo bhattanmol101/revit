@@ -1,8 +1,8 @@
 'use client'
 
 import Signup from '@revit/shared/components/signup'
-import { UserSigninT } from '@revit/shared/types/user'
-import { signInAction } from '@/app/action'
+import { UserSigninT, UserSignupT } from '@revit/shared/types/user'
+import { signInAction, signUpAction } from '@/app/action'
 import { useToastController, XStack, YStack } from '@revit/ui'
 import MainImage from '@revit/shared/assets/images/Main'
 import { useRouter } from 'next/navigation'
@@ -11,8 +11,8 @@ export default function SignupPage() {
   const router = useRouter()
   const toast = useToastController()
 
-  const siginInHandler = async (userSignin: UserSigninT) => {
-    const error = await signInAction(userSignin)
+  const siginUpHandler = async (userSignup: UserSignupT) => {
+    const error = await signUpAction(userSignup)
     console.log(error)
     if (error) {
       toast.show('Successfully saved!', {
@@ -30,7 +30,7 @@ export default function SignupPage() {
       </YStack>
       <YStack flex={1} flexBasis={2} justifyContent="center" alignItems="center">
         <YStack maxWidth="60%" width="50%">
-          <Signup handleSignup={siginInHandler} />
+          <Signup handleSignup={signUpAction} />
         </YStack>
       </YStack>
     </XStack>

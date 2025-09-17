@@ -3,6 +3,7 @@
   "include": [
     "app/**/*.ts",
     "app/**/*.tsx",
+    "components/**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],

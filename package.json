@@ -24,7 +24,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "setup": "yarn create tamagui --template takeout-starter --info",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:push": "supabase db push",
+    "db:clear": "supabase db reset --linked"
   },
   "resolutions": {
     "react": "19.0.0",
@@ -51,6 +53,7 @@
     "npm": "10.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.3"
+    "@biomejs/biome": "^2.2.3",
+    "supabase": "2.40.7"
   }
 }

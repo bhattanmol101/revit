@@ -1,15 +1,25 @@
 'use client'
 
-import { useRouter, usePathname } from 'next/navigation'
-import { Avatar, Button, View, XStack, YStack } from '@revit/ui'
-import { ClipboardEdit } from '@tamagui/lucide-icons'
+import { H4, Paragraph, Text, XStack, YStack } from '@revit/ui'
 import CreatePostDialog from '../CreatePost'
+import { useSession } from '../Provider/ContextProvider'
+import Avatar from '@revit/shared/components/common/Avatar'
+import { savePostAction } from '@/app/(home)/home/action'
 
 export default function RightNav() {
-  const pathname = usePathname()
-  const router = useRouter()
+  const { user } = useSession()
 
-  const handleRouteClick = (pathname: string) => router.push(pathname)
+  if (!user) {
+    return
+  }
+
+  const handleCreatePost = async (
+    caption: string,
+    image?: File,
+    rating?: number
+  ): Promise<void> => {
+    await savePostAction(user.id, caption, image)
+  }
 
   return (
     <YStack
@@ -21,31 +31,20 @@ export default function RightNav() {
       px="$6"
       justifyContent="space-between"
     >
-      <XStack
-        minWidth="100%"
-        gap="$2"
-        backgroundColor="$black3"
-        p="$6"
-        borderRadius="$5"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Avatar circular size="$6">
-          <Avatar.Fallback />
-          <Avatar.Image
-            source={{
-              uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-            }}
-          />
-        </Avatar>
-        {/* <Button flex={1} borderRadius="$5" variant="outlined" py="$5">
-          <Button.Icon>
-            <ClipboardEdit size={24} />
-          </Button.Icon>
-          <Button.Text>Create a Revit Post!</Button.Text>
-        </Button> */}
-        <CreatePostDialog />
-      </XStack>
+      <YStack alignItems="flex-start" p="$6" gap="$4" backgroundColor="$black3" borderRadius="$5">
+        <XStack gap="$3" alignItems="center" justifyContent="center">
+          <Avatar size="$6" image={user.profileImage} />
+          <YStack gap="$1">
+            <Text fontSize="$3" fontWeight={600}>
+              {user.name}
+            </Text>
+            <Paragraph fontSize="$2" fontWeight={400}>
+              {user.email}
+            </Paragraph>
+          </YStack>
+        </XStack>
+        <CreatePostDialog handleCreatePost={handleCreatePost} />
+      </YStack>
     </YStack>
   )
 }

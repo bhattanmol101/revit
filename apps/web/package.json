@@ -13,6 +13,7 @@
   "dependencies": {
     "@revit/api": "*",
     "@revit/shared": "*",
+    "@revit/supabase": "*",
     "@revit/ui": "*",
     "@tamagui/config": "^1.132.23",
     "@tamagui/next-theme": "^1.132.23",

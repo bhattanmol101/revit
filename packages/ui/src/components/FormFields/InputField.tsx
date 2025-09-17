@@ -34,7 +34,7 @@ export function InputField({
     <Theme name={error ? 'red' : null} forceClassName>
       <View flexDirection="column" justifyContent="center" alignItems="center">
         <Input size={size} minWidth="100%">
-          <Input.Label htmlFor="input" mb="$1.5" size="$2">
+          <Input.Label htmlFor="input" mb="$1.5" size="$3">
             {label}
           </Input.Label>
           <Shake shakeKey={error}>

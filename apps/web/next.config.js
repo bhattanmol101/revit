@@ -46,6 +46,9 @@ module.exports = () => {
     experimental: {
       scrollRestoration: true,
     },
+    images: {
+      domains: [''],
+    },
   }
 
   for (const plugin of plugins) {

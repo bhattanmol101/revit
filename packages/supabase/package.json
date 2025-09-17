@@ -1,17 +1,10 @@
 {
   "name": "@revit/supabase",
-  "packageManager": "yarn@4.5.0",
   "version": "0.0.1",
+  "private": true,
   "dependencies": {
-    "@revit/shared": "*",
     "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.57.2",
-    "drizzle-orm": "^0.44.5",
-    "expo-secure-store": "^15.0.7",
-    "postgres": "^3.4.7"
-  },
-  "devDependencies": {
-    "drizzle-kit": "^0.31.4",
-    "typescript": "^5.9.2"
+    "@supabase/supabase-js": "^2.57.4",
+    "expo-secure-store": "^15.0.7"
   }
 }

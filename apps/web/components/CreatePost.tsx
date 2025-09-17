@@ -1,15 +1,18 @@
 'use client'
 
-import { ChevronRight, X, ClipboardEdit, ChevronLeft } from '@tamagui/lucide-icons'
-import { useState } from 'react'
-import { Button, Dialog, Unspaced, YStack, View, Text, XStack } from '@revit/ui'
+import { X, ClipboardEdit } from '@tamagui/lucide-icons'
+import { Button, Dialog, Unspaced } from '@revit/ui'
 import CreatePost from '@revit/shared/components/post/Create'
 
-const CreatePostDialog = () => {
+const CreatePostDialog = ({
+  handleCreatePost,
+}: {
+  handleCreatePost: (caption: string, image?: File, rating?: number) => Promise<void>
+}) => {
   return (
     <Dialog modal>
       <Dialog.Trigger asChild>
-        <Button flex={1} borderRadius="$5" variant="outlined" py="$5">
+        <Button width="100%" borderRadius="$5" variant="outlined">
           <Button.Icon>
             <ClipboardEdit size={24} />
           </Button.Icon>
@@ -59,7 +62,7 @@ const CreatePostDialog = () => {
           >
             <Dialog.Title fontSize="$2">Create your Revit Post</Dialog.Title>
 
-            <CreatePost />
+            <CreatePost handlePost={handleCreatePost} />
 
             <Unspaced>
               <Dialog.Close asChild>

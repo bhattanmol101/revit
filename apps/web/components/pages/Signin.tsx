@@ -2,25 +2,28 @@
 
 import Signin from '@revit/shared/components/signin'
 import { UserSigninT } from '@revit/shared/types/user'
-import { signInAction } from '@/app/action'
-import { useToastController, XStack, YStack } from '@revit/ui'
+import { fetchLoggedInUserAction, signInAction } from '@/app/action'
+import { XStack, YStack } from '@revit/ui'
 import MainImage from '@revit/shared/assets/images/Main'
-import { useRouter } from 'next/navigation'
+import { useSession } from '../Provider/ContextProvider'
 
 export default function SigninPage() {
-  const router = useRouter()
-  const toast = useToastController()
+  const { setUser } = useSession()
 
-  const siginInHandler = async (userSignin: UserSigninT) => {
-    const error = await signInAction(userSignin)
-    console.log(error)
+  const siginInHandler = async (userSignin: UserSigninT): Promise<Error | undefined> => {
+    const signInError = await signInAction(userSignin)
+    if (signInError) {
+      return signInError
+    }
+
+    const { user, error } = await fetchLoggedInUserAction()
     if (error) {
-      toast.show('Successfully saved!', {
-        message: "Don't worry, we've got your data.",
-        customData: { type: 'error' },
-      })
+      return error
+    }
+    if (user) {
+      setUser(user)
     } else {
-      router.push('/home')
+      return new Error('user not found!')
     }
   }
   return (
