@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export type UserSignupT = {
   name: string
   email: string
@@ -13,8 +15,16 @@ export type UserT = {
   id: string
   email: string
   name: string
-  profileImage?: string
+  avatar?: string
   bio?: string
   dob?: Date
   createdAt: Date
 }
+
+export const userSummary = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatar: z.string().nullable(),
+})
+
+export type UserSummaryT = z.infer<typeof userSummary>

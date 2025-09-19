@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { NextTamaguiProvider } from '@revit/shared/provider/NextTamaguiProvider'
+import { NextTamaguiProvider } from '@revit/app/provider/NextTamaguiProvider'
 import ContextProvider from '@/components/Provider/ContextProvider'
 
 export const metadata: Metadata = {

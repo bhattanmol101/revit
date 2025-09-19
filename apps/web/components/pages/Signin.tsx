@@ -1,6 +1,6 @@
 'use client'
 
-import Signin from '@revit/shared/components/signin'
+import Signin from '@revit/app/features/signin'
 import { UserSigninT } from '@revit/shared/types/user'
 import { fetchLoggedInUserAction, signInAction } from '@/app/action'
 import { XStack, YStack } from '@revit/ui'

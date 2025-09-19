@@ -3270,15 +3270,17 @@ __metadata:
   dependencies:
     "@revit/shared": "npm:*"
     "@revit/supabase": "npm:*"
-    react-native-url-polyfill: "npm:^2.0.0"
+    react-native: "npm:0.79.6"
   languageName: unknown
   linkType: soft
 
-"@revit/shared@npm:*, @revit/shared@workspace:packages/shared":
+"@revit/app@npm:*, @revit/app@workspace:packages/app":
   version: 0.0.0-use.local
-  resolution: "@revit/shared@workspace:packages/shared"
+  resolution: "@revit/app@workspace:packages/app"
   dependencies:
     "@react-navigation/native": "npm:^7.1.17"
+    "@revit/api": "npm:*"
+    "@revit/shared": "npm:*"
     "@revit/ui": "npm:*"
     "@tamagui/animations-react-native": "npm:^1.132.23"
     "@tamagui/colors": "npm:^1.132.23"
@@ -3296,10 +3298,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@revit/shared@npm:*, @revit/shared@workspace:packages/shared":
+  version: 0.0.0-use.local
+  resolution: "@revit/shared@workspace:packages/shared"
+  dependencies:
+    zod: "npm:^4.1.7"
+  languageName: unknown
+  linkType: soft
+
 "@revit/supabase@npm:*, @revit/supabase@workspace:packages/supabase":
   version: 0.0.0-use.local
   resolution: "@revit/supabase@workspace:packages/supabase"
   dependencies:
+    "@revit/shared": "npm:*"
     "@supabase/ssr": "npm:^0.7.0"
     "@supabase/supabase-js": "npm:^2.57.4"
     expo-secure-store: "npm:^15.0.7"
@@ -6431,6 +6442,15 @@ __metadata:
   peerDependencies:
     acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 10/d4371eaef7995530b5b5ca4183ff6f062ca17901a6d3f673c9ac011b01ede37e7a1f7f61f8f5cfe709e88054757bb8f3277dc4061087cdf4f2a1f90ccbcdb977
+  languageName: node
+  linkType: hard
+
+"acorn-loose@npm:^8.3.0":
+  version: 8.5.2
+  resolution: "acorn-loose@npm:8.5.2"
+  dependencies:
+    acorn: "npm:^8.15.0"
+  checksum: 10/3a86f4263ad8eac8d5638e15608bb31b916ab95183e3c9f0cc10ab5b11645dc09fe5b3f22464e8f484b3df13f1a7254ec155a98ae50b6458721f3fee65ebfb4f
   languageName: node
   linkType: hard
 
@@ -13156,6 +13176,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"neo-async@npm:^2.6.1":
+  version: 2.6.2
+  resolution: "neo-async@npm:2.6.2"
+  checksum: 10/1a7948fea86f2b33ec766bc899c88796a51ba76a4afc9026764aedc6e7cde692a09067031e4a1bf6db4f978ccd99e7f5b6c03fe47ad9865c3d4f99050d67e002
+  languageName: node
+  linkType: hard
+
 "nested-error-stacks@npm:~2.0.1":
   version: 2.0.1
   resolution: "nested-error-stacks@npm:2.0.1"
@@ -14767,17 +14794,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-url-polyfill@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "react-native-url-polyfill@npm:2.0.0"
-  dependencies:
-    whatwg-url-without-unicode: "npm:8.0.0-3"
-  peerDependencies:
-    react-native: "*"
-  checksum: 10/6a8d605eeb1b0ee9b0f47f1866acc2edfa2131a4a8fb1ea3839ceb507e225b894ed66f49a3bd826fc964f2c8005b3678c9d3b65d07eb0a3b979be830cb618686
-  languageName: node
-  linkType: hard
-
 "react-native-web@npm:~0.21.1":
   version: 0.21.1
   resolution: "react-native-web@npm:0.21.1"
@@ -14903,6 +14919,21 @@ __metadata:
   version: 0.14.2
   resolution: "react-refresh@npm:0.14.2"
   checksum: 10/512abf97271ab8623486061be04b608c39d932e3709f9af1720b41573415fa4993d0009fa5138b6705b60a98f4102f744d4e26c952b14f41a0e455521c6be4cc
+  languageName: node
+  linkType: hard
+
+"react-server-dom-webpack@npm:~19.0.0":
+  version: 19.0.0
+  resolution: "react-server-dom-webpack@npm:19.0.0"
+  dependencies:
+    acorn-loose: "npm:^8.3.0"
+    neo-async: "npm:^2.6.1"
+    webpack-sources: "npm:^3.2.0"
+  peerDependencies:
+    react: ^19.0.0
+    react-dom: ^19.0.0
+    webpack: ^5.59.0
+  checksum: 10/ab6478303befbe1e6331dd1ca3fc5d9aa76081dee6fad6a3debe0712ffd85eb063d39f1f7ba785a6591fc641ca4b1fc1f24e3215cbd6d26851a8f76ea085d326
   languageName: node
   linkType: hard
 
@@ -15236,6 +15267,7 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.4.7"
     "@react-navigation/native": "npm:^7.1.17"
     "@revit/api": "npm:*"
+    "@revit/app": "npm:*"
     "@revit/shared": "npm:*"
     "@revit/ui": "npm:*"
     "@tamagui/babel-plugin": "npm:^1.132.23"
@@ -15259,6 +15291,7 @@ __metadata:
     react-native-screens: "npm:~4.16.0"
     react-native-svg: "npm:15.12.1"
     react-native-web: "npm:^0.21.1"
+    react-server-dom-webpack: "npm:~19.0.0"
     typescript: "npm:~5.9.2"
   languageName: unknown
   linkType: soft
@@ -15268,6 +15301,7 @@ __metadata:
   resolution: "revit-web@workspace:apps/web"
   dependencies:
     "@revit/api": "npm:*"
+    "@revit/app": "npm:*"
     "@revit/shared": "npm:*"
     "@revit/supabase": "npm:*"
     "@revit/ui": "npm:*"
@@ -17718,6 +17752,13 @@ __metadata:
     source-list-map: "npm:^2.0.0"
     source-map: "npm:~0.6.1"
   checksum: 10/6237c5d1ba639a5d67bd1135c9bba487eadbd04c5e75a2849508013f13cb4b57387e689e0991c19a14a87085be7cc0b8dd1515422ae351f6e3f813ed100ccbb8
+  languageName: node
+  linkType: hard
+
+"webpack-sources@npm:^3.2.0":
+  version: 3.3.3
+  resolution: "webpack-sources@npm:3.3.3"
+  checksum: 10/ec5d72607e8068467370abccbfff855c596c098baedbe9d198a557ccf198e8546a322836a6f74241492576adba06100286592993a62b63196832cdb53c8bae91
   languageName: node
   linkType: hard
 

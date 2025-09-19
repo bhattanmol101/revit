@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { Home, Search, Bell, User, LogOut } from '@tamagui/lucide-icons'
 import { Button, Separator, View, YStack } from '@revit/ui'
-import CreateForumDialog from '@revit/shared/components/forum/Create'
+import CreateForumDialog from '@revit/app/features/forum/Create'
 
 const navItems = [
   { href: '/home', label: 'Home', icon: Home },

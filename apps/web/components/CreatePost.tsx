@@ -2,13 +2,9 @@
 
 import { X, ClipboardEdit } from '@tamagui/lucide-icons'
 import { Button, Dialog, Unspaced } from '@revit/ui'
-import CreatePost from '@revit/shared/components/post/Create'
+import CreatePost from '@revit/app/features/post/Create'
 
-const CreatePostDialog = ({
-  handleCreatePost,
-}: {
-  handleCreatePost: (caption: string, image?: File, rating?: number) => Promise<void>
-}) => {
+const CreatePostDialog = () => {
   return (
     <Dialog modal>
       <Dialog.Trigger asChild>
@@ -62,7 +58,7 @@ const CreatePostDialog = ({
           >
             <Dialog.Title fontSize="$2">Create your Revit Post</Dialog.Title>
 
-            <CreatePost handlePost={handleCreatePost} />
+            <CreatePost />
 
             <Unspaced>
               <Dialog.Close asChild>

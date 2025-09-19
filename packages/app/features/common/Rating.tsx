@@ -1,4 +1,4 @@
-import { Star } from '@tamagui/lucide-icons'
+import { Star, StarHalf } from '@tamagui/lucide-icons'
 import { GetThemeValueForKey, Text, XStack } from '@revit/ui'
 
 const Rating = ({
@@ -16,10 +16,10 @@ const Rating = ({
     <XStack gap="$1">
       {[...Array(totalStars)].map((_, index) => {
         const currentRating = index + 1
-        return currentRating < totalStars ? (
+        return currentRating < rating ? (
           <Star key={currentRating} size={size} color="#fbbf24" fill="#fbbf24" />
         ) : currentRating === totalStars && hasHalfStar ? (
-          <Star key={currentRating} size={size} color="#fbbf24" fill="#fbbf24" />
+          <StarHalf key={currentRating} size={size} color="#fbbf24" fill="#fbbf24" />
         ) : (
           <Star key={currentRating} size={size} color="#fbbf24" />
         )

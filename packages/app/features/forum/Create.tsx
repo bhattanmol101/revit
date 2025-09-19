@@ -18,7 +18,7 @@ import {
 } from '@revit/ui'
 import { FieldError } from '@revit/ui'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { ForumCreateFormType, forumCreateSchema } from '../../validators/ForumSchema'
+import { ForumCreateFormType, forumCreateSchema } from '@revit/shared/validators/ForumSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 const CreateForumDialog = () => {
@@ -104,7 +104,7 @@ const CreateForum = ({
 }) => {
   const toast = useToastController()
 
-  const [imageUri, setImageUri] = useState<string[]>()
+  const [image, setImage] = useState<File | null>(null)
 
   const { control, handleSubmit } = useForm<ForumCreateFormType>({
     resolver: zodResolver(forumCreateSchema),
@@ -112,15 +112,15 @@ const CreateForum = ({
 
   const onSubmit: SubmitHandler<ForumCreateFormType> = (data: ForumCreateFormType) => {
     console.log(data)
-    if (!imageUri)
+    if (!image)
       toast.show('Forum image empty!', {
         message: 'Please provide image for you forum.',
         customData: { type: 'error' },
       })
   }
 
-  const handleImageChange = (images: string[]) => {
-    setImageUri(images)
+  const handleImageChange = (images: File) => {
+    setImage(images)
   }
 
   return (

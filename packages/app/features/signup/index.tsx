@@ -21,12 +21,11 @@ import {
 import { useState } from 'react'
 import Revit from '../icons/Revit'
 import Google from '../icons/Google'
-import { UserSignupT } from '../../types/user'
+import { UserSignupT } from '@revit/shared/types/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SignupFormType, signupSchema } from '../../validators/UserSchema'
+import { SignupFormType, signupSchema } from '@revit/shared/validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
-import { CheckCircle } from '@tamagui/lucide-icons'
 
 interface SignupProps {
   // handleGoogleSignin: () => void

@@ -1,5 +1,5 @@
 import { signUp } from '@revit/api/auth/signup'
-import Signup from '@revit/shared/components/signup'
+import Signup from '@revit/app/features/signup'
 import { YStack } from '@revit/ui'
 
 export default function Screen() {

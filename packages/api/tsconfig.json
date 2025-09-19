@@ -2,10 +2,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
     "composite": true,
-    "jsx": "preserve",
-    "paths": {
-      "@/*": ["./*"]
-    }
+    "jsx": "preserve"
   },
   "references": []
 }

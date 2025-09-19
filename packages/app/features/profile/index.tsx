@@ -78,7 +78,7 @@ export default function Profile({ user }: { user: UserT }) {
       {/* Header Section */}
       <YStack alignItems="center" pt="$3" pb="$5" gap="$4">
         <Image
-          source={{ uri: user.profileImage ? user.profileImage : '' }}
+          source={{ uri: user.avatar ? user.avatar : '' }}
           height={100}
           width={100}
           borderRadius={50}
@@ -144,7 +144,7 @@ export default function Profile({ user }: { user: UserT }) {
       {/* Content Grid */}
       <YStack py="$2">
         {userContent.map((item) => (
-          <PostCard key={item.id} />
+          <PostCard key={item.id} user={user} post={} />
         ))}
       </YStack>
     </View>

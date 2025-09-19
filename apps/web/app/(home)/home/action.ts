@@ -1,11 +1,8 @@
 'use server'
 
 import { createPost } from '@revit/api/post'
+import { fetchUserFeed } from '@revit/api/post/post'
 
-export const savePostAction = async (userId: string, text: string, images?: File) => {
-  try {
-    const resp = await createPost(userId, text, images)
-  } catch (e: unknown) {
-    console.log(e)
-  }
-}
+// export const fetchUserFeedAction = async () => {
+//   return await fetchUserFeed()
+// }

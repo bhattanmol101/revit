@@ -1,33 +1,39 @@
-import { uploadImage } from '../utils'
+'use server'
+
+import { CreatePostT } from '../types/post'
+import { errorHandler, uploadImage } from '../utils'
 import { useSupabase } from '@revit/supabase/client/useSupabase'
 
-export const createPost = async (
-  userId: string,
-  caption: string,
-  images?: File
-): Promise<Error | undefined> => {
-  const supabase = await useSupabase()
+export const createPost = async (post: CreatePostT): Promise<Error | undefined> => {
+  try {
+    const supabase = await useSupabase()
 
-  //   const resp = await uploadImage(supabase, images)
+    const resp = await uploadImage(supabase, post.image)
+    if (resp.error) {
+      return new Error('error uploading image')
+    }
 
-  //   console.log(resp)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  const { data, error } = await supabase
-    .from('posts')
-    .insert([
-      {
-        user_id: userId,
-        caption: caption,
-        media_url: `${'https://polsjqhrbgmnoivxcjrj.supabase.co/storage/v1/object/public/post-bucket/image_GZbSl4YEMK.jpg'}?width=500&height=600`,
-      },
-    ])
-    .select()
-    .single()
+    if (!user) {
+      return new Error('invalid user')
+    }
 
-  if (error) {
-    console.error('Error inserting post:', error)
-  } else {
-    console.log('New post:', data)
+    const { error } = await supabase.from('post').insert({
+      user_id: user.id,
+      caption: post.caption,
+      media_url: `${resp.fileUrl}?width=500&height=600`,
+      rating: post.rating === 0 ? null : post.rating,
+    })
+
+    if (error) {
+      console.error('Error inserting post:', error)
+      return error
+    }
+    return
+  } catch (e: unknown) {
+    return errorHandler(e)
   }
-  return
 }

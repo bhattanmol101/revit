@@ -1,5 +1,6 @@
-import { UserSignupT } from '@revit/shared/types/user'
+import { UserSignupT } from '../types/user'
 import { useSupabase } from '@revit/supabase/client/useSupabase'
+import { errorHandler } from '../utils'
 
 export const signUp = async ({
   name,
@@ -23,16 +24,7 @@ export const signUp = async ({
     if (error) {
       return error
     }
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('Caught an Error object:', error.message)
-      return error
-    } else if (typeof error === 'string') {
-      console.error('Caught a string error:', error)
-      return new Error(error)
-    } else {
-      console.error('Caught an unknown error:', error)
-      return new Error('Internal Server Error')
-    }
+  } catch (e: unknown) {
+    return errorHandler(e)
   }
 }

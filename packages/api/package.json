@@ -5,6 +5,6 @@
   "dependencies": {
     "@revit/shared": "*",
     "@revit/supabase": "*",
-    "react-native-url-polyfill": "^2.0.0"
+    "react-native": "0.79.6"
   }
 }

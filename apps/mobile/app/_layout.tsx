@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { DarkTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
-import { Provider } from '@revit/shared/provider'
+import { Provider } from '@revit/app/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
 import ContextProvider from '../components/Provider/ContextProvider'
 
@@ -46,6 +46,7 @@ function RootLayoutNav() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="signup" />
+            <Stack.Screen name="(home)" />
           </Stack>
           <NativeToast />
         </ContextProvider>

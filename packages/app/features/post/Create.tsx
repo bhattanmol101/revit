@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Alert, Dimensions } from 'react-native'
+import { Alert, Dimensions, KeyboardAvoidingView } from 'react-native'
 import { Send } from '@tamagui/lucide-icons'
 import {
   Button,
@@ -19,38 +19,35 @@ import {
 } from '@revit/ui'
 import GetRating from '../common/GetRating'
 import { FieldError } from '@revit/ui'
+import { createPost } from '@revit/api/post'
 
-const CreatePost = ({
-  handlePost,
-}: {
-  handlePost: (caption: string, image?: File, rating?: number) => Promise<void>
-}) => {
+const CreatePost = () => {
   const toast = useToastController()
 
   const [rating, setRating] = useState(0)
   const [error, setError] = useState('')
-  const [description, setDescription] = useState('')
+  const [caption, setCaption] = useState('')
   const [checked, setChecked] = useState(false)
-  const [imageUri, setImageUri] = useState<File>()
+  const [image, setImage] = useState<File | undefined>()
 
   const onCheckedChange = () => {
     setChecked(!checked)
   }
 
   const handleImageChange = (images: File) => {
-    setImageUri(images)
+    setImage(images)
   }
 
-  const handleDescriptionChange = (value: string) => {
+  const handleCaptionChange = (value: string) => {
     if (error) {
       setError('')
     }
-    setDescription(value)
+    setCaption(value)
   }
 
   const handleCreatePost = async () => {
-    if (!description.trim()) {
-      setError('description')
+    if (!caption.trim()) {
+      setError('caption')
       return
     }
     if (checked && rating === 0) {
@@ -61,9 +58,9 @@ const CreatePost = ({
       return
     }
 
-    console.log({ imageUri, description, rating })
+    const post = { caption, image, rating }
 
-    await handlePost(description, imageUri, rating)
+    await createPost(post)
   }
 
   const handleRatingChange = (value: number) => {
@@ -71,26 +68,26 @@ const CreatePost = ({
   }
 
   return (
-    <YStack flex={1} gap="$3">
+    <YStack flex={1} gap="$3" minWidth='100%'>
+      {/* Review Details Section */}
+      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4">
+        <KeyboardAvoidingView>
+          <Theme name={error ? 'red' : null}>
+            <Shake shakeKey={error}>
+              <TextArea
+                numberOfLines={10}
+                placeholder="Share your experince or get something reviewd...."
+                value={caption}
+                onChangeText={handleCaptionChange}
+              />
+              <FieldError message={error} />
+            </Shake>
+          </Theme>
+        </KeyboardAvoidingView>
+      </YStack>
       {/* Review Image Section */}
       <YStack borderRadius="$5" backgroundColor="$black3" padding="$4">
         <ImagePicker handleImageChange={handleImageChange} />
-      </YStack>
-
-      {/* Review Details Section */}
-      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4">
-        <Theme name={error ? 'red' : null} forceClassName>
-          <Shake shakeKey={error}>
-            <TextArea
-              width="100%"
-              borderWidth={1}
-              placeholder="Share your experince or get something reviewd...."
-              value={description}
-              onChangeText={handleDescriptionChange}
-            />
-            <FieldError message={error} />
-          </Shake>
-        </Theme>
       </YStack>
 
       {/* Review Rating Section */}
@@ -104,17 +101,19 @@ const CreatePost = ({
         {checked && (
           <XStack alignItems="center" gap="$2">
             <Text fontSize="$3">Provide your rating:</Text>
-            <GetRating size={20} onChange={handleRatingChange} />
+            <GetRating size={20} rating={rating} setRating={setRating} />
           </XStack>
         )}
       </YStack>
 
       {/* Post Button */}
       <View paddingBottom="$5" paddingTop="$2">
-        <Button onPress={handleCreatePost} size="$4">
-          <Send size={20} />
-          <Text className="text-md">Post</Text>
-        </Button>
+        <Theme inverse>
+          <Button onPress={handleCreatePost} size="$4">
+            <Send size={20} />
+            <Text className="text-md">Post</Text>
+          </Button>
+        </Theme>
       </View>
     </YStack>
   )

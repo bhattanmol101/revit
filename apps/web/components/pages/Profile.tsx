@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Profile from '@revit/shared/components/profile'
+import Profile from '@revit/app/features/profile'
 import { useSession } from '../Provider/ContextProvider'
 
 const ProfilePage = () => {

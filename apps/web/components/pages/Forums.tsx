@@ -1,5 +1,5 @@
 import React from 'react'
-import Forums from '@revit/shared/components/forum/Forums'
+import Forums from '@revit/app/features/forum/Forums'
 
 const ForumsPage = () => {
   return <Forums />

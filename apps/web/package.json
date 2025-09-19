@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@revit/api": "*",
+    "@revit/app": "*",
     "@revit/shared": "*",
     "@revit/supabase": "*",
     "@revit/ui": "*",

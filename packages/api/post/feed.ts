@@ -1,21 +1,14 @@
-import { useSupabase } from '@revit/supabase/client/useSupabase'
+'use server'
 
-export const fetchUserFeed = async (): Promise<{ feed?: any; error?: Error }> => {
-  const supabase = await useSupabase()
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select(
-      `
-    id,
-    caption,
-    media_url,
-    created_at,
-    comment:post_comments_summary(avg_rating, total_ratings, comments_count),
-  `
-    )
-    .order('created_at', { ascending: false })
+import { fetchPosts } from '@revit/supabase/lib/post'
+import { errorHandler } from '../utils'
+import { PostT } from '@revit/shared/types/post'
 
-  if (error) console.error(error)
-
-  return { feed: posts }
+export const fetchUserFeed = async (): Promise<{ feed?: PostT[]; error?: Error }> => {
+  try {
+    const posts = await fetchPosts()
+    return { feed: posts }
+  } catch (e: unknown) {
+    return { error: errorHandler(e) }
+  }
 }

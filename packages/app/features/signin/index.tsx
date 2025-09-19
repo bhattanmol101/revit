@@ -19,10 +19,10 @@ import {
 import { useState } from 'react'
 import Revit from '../icons/Revit'
 import Google from '../icons/Google'
-import { UserSigninT } from '../../types/user'
+import { UserSigninT } from '@revit/shared/types/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SigninFormType, signinSchema } from '../../validators/UserSchema'
+import { SigninFormType, signinSchema } from '@revit/shared/validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
 import { CheckCircle } from '@tamagui/lucide-icons'
 

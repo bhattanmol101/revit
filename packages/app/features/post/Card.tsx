@@ -2,39 +2,21 @@
 
 import { useState } from 'react'
 import { MessageCircle } from '@tamagui/lucide-icons'
-import { Avatar, Button, Card, Image, Paragraph, Text, XStack, YStack } from '@revit/ui'
+import { Button, Card, Image, Paragraph, Text, XStack, YStack } from '@revit/ui'
 import Rating from '../common/Rating'
 import { PostMenu } from './Menu'
 import Comment from '../comment'
+import Avatar from '../common/Avatar'
+import { PostT } from '@revit/shared/types/post'
+import { UserT } from '@revit/shared/types/user'
+import { timeAgo } from '@revit/api/utils'
+import { Platform } from 'react-native'
 
-const PostCard = () => {
+const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
   const [showComments, setShowComments] = useState(false)
-  const post = {
-    id: '1',
-    username: 'Alex Johnson',
-    userAvatar:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&auto=format&fit=crop',
-    timestamp: '2 hours ago',
-    content: 'Just launched our new product! Excited to see what you all think. Feedback welcome!',
-    image: 'https://picsum.photos/200/300',
-    likes: 243,
-    shares: 12,
-    isLiked: false,
-    tags: ['Product Launch', 'Tech'],
-    rating: 4,
-    comments: [
-      {
-        id: '1',
-        username: 'traveler_girl',
-        text: 'Looks amazing! Where is this?',
-      },
-      {
-        id: '2',
-        username: 'nature_lover',
-        text: 'I want to visit this place too!',
-      },
-    ],
-  }
+
+  const avgRating = post.comment.length > 0 ? post.comment[0].avgRating : 0
+  const commentCount = post.comment.length > 0 ? post.comment[0].commentCount : 0
 
   return (
     <Card my="$1">
@@ -47,14 +29,11 @@ const PostCard = () => {
         paddingBottom="$2"
       >
         <XStack alignItems="center" gap="$2">
-          <Avatar circular size="$3">
-            <Avatar.Fallback borderColor="red" />
-            <Avatar.Image src={post.userAvatar} />
-          </Avatar>
+          <Avatar size="$3" image={post.user.avatar} />
           <YStack>
-            <Text fontSize="$2">{post.username}</Text>
+            <Text fontSize="$2">{post.user.name}</Text>
             <Text fontSize="$1" color="$black11">
-              {post.timestamp}
+              {timeAgo(post.createdAt)}
             </Text>
           </YStack>
         </XStack>
@@ -63,22 +42,22 @@ const PostCard = () => {
 
       {/* Post Content */}
       <YStack paddingHorizontal="$3" paddingBottom="$2" gap="$2">
-        <Paragraph fontWeight={400}>{post.content}</Paragraph>
+        <Paragraph fontWeight={400}>{post.caption}</Paragraph>
 
         {/* Tags */}
         <XStack gap="$2" flexWrap="wrap">
-          {post.tags.map((tag, index) => (
+          {/* {post.tags.map((tag, index) => (
             <Text key={index} color="$blue9" fontSize="$2" fontWeight="bold">
               #{tag}
             </Text>
-          ))}
+          ))} */}
         </XStack>
       </YStack>
 
       {/* Post Image */}
       <Image
-        source={{ width: 500, height: 500, uri: post.image }}
-        height="35rem"
+        source={{ uri: post.image}}
+        height={Platform.OS === "web" ? "35rem": "500"}
         width="100%"
         alt="feed"
       />
@@ -91,7 +70,7 @@ const PostCard = () => {
         py="$1.5"
         paddingHorizontal="$3"
       >
-        <Rating rating={post.rating} size={18} />
+        <Rating rating={avgRating} size={18} />
 
         <Button
           chromeless
@@ -102,10 +81,10 @@ const PostCard = () => {
           <Button.Icon>
             <MessageCircle color="#d1d5db" size={18} />
           </Button.Icon>
-          <Button.Text>{post.comments.length}</Button.Text>
+          <Button.Text>{commentCount}</Button.Text>
         </Button>
       </Card.Footer>
-      {showComments && <Comment post={post} />}
+      {showComments && <Comment user={user} post={post} />}
     </Card>
   )
 }
