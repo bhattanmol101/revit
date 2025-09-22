@@ -1,5 +1,3 @@
-'use server'
-
 import { fetchPosts } from '@revit/supabase/lib/post'
 import { errorHandler } from '../utils'
 import { PostT } from '@revit/shared/types/post'

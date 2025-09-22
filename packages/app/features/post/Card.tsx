@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle } from '@tamagui/lucide-icons'
-import { Button, Card, Image, Paragraph, Text, XStack, YStack } from '@revit/ui'
-import Rating from '../common/Rating'
+import { MessageCircle, Star } from '@tamagui/lucide-icons'
+import { Button, Card, Paragraph, Text, XStack, YStack, ImageCarousel } from '@revit/ui'
 import { PostMenu } from './Menu'
 import Comment from '../comment'
 import Avatar from '../common/Avatar'
 import { PostT } from '@revit/shared/types/post'
 import { UserT } from '@revit/shared/types/user'
 import { timeAgo } from '@revit/api/utils'
-import { Platform } from 'react-native'
 
 const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
   const [showComments, setShowComments] = useState(false)
@@ -19,7 +17,7 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
   const commentCount = post.comment.length > 0 ? post.comment[0].commentCount : 0
 
   return (
-    <Card my="$1">
+    <Card my="$1" bg="$black3">
       {/* Post Header */}
       <Card.Header
         display="flex"
@@ -39,38 +37,35 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
         </XStack>
         <PostMenu placement="bottom" />
       </Card.Header>
-
       {/* Post Content */}
-      <YStack paddingHorizontal="$3" paddingBottom="$2" gap="$2">
+      <YStack paddingHorizontal="$3" paddingBottom="$2">
         <Paragraph fontWeight={400}>{post.caption}</Paragraph>
 
         {/* Tags */}
-        <XStack gap="$2" flexWrap="wrap">
-          {/* {post.tags.map((tag, index) => (
+        {/*<XStack gap="$2" flexWrap="wrap">
+        {post.tags.map((tag, index) => (
             <Text key={index} color="$blue9" fontSize="$2" fontWeight="bold">
               #{tag}
             </Text>
-          ))} */}
-        </XStack>
+          ))} 
+        </XStack>*/}
       </YStack>
-
       {/* Post Image */}
-      <Image
-        source={{ uri: post.image}}
-        height={Platform.OS === "web" ? "35rem": "500"}
-        width="100%"
-        alt="feed"
-      />
-
+      <ImageCarousel images={post.images} />
       {/* Post Actions */}
-      <Card.Footer
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        py="$1.5"
-        paddingHorizontal="$3"
-      >
-        <Rating rating={avgRating} size={18} />
+      <Card.Footer display="flex" alignItems="center" gap="$1" py="$2" paddingHorizontal="$3">
+        <Button
+          py="$1"
+          chromeless
+          onPress={() => {
+            setShowComments(!showComments)
+          }}
+        >
+          <Button.Icon>
+            <Star size="$1" color="#fbbf24" fill="#fbbf24" />
+          </Button.Icon>
+          <Button.Text>{avgRating}</Button.Text>
+        </Button>
 
         <Button
           chromeless

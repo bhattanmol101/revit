@@ -2,7 +2,7 @@ import { SizeTokens, Avatar as TamagAvatar } from '@revit/ui'
 
 interface AvatarProps {
   size?: number | SizeTokens
-  image?: string
+  image?: string | null
 }
 
 const Avatar = ({ size = '$3', image }: AvatarProps) => {

@@ -1,3 +1,5 @@
+'use server'
+
 import { errorHandler } from '../utils'
 import { createComment, fetchCommentsByPostId } from '@revit/supabase/lib'
 import { CommentT, CreateCommentT } from '@revit/shared/types/comment'

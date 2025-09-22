@@ -21,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </YStack>
         </View>
       </View>
-      <YStack width="35%" py="$2">
+      <YStack width="32%" py="$2">
         {children}
       </YStack>
       <View width="30%" height="100%">

@@ -1,38 +1,61 @@
 'use client'
 
-import { TouchableOpacity } from 'react-native'
+import { useState } from 'react'
+import { YStack, XStack } from 'tamagui'
 import { Star } from '@tamagui/lucide-icons'
-import { XStack, YStack } from '@revit/ui'
+import { motion } from 'framer-motion'
+import { Platform, Pressable } from 'react-native'
 
-const GetRating = ({
-  size = 24,
-  rating,
-  setRating,
-  error,
-}: {
-  size: number
+type RatingProps = {
+  size?: number
+  max?: number
   rating: number
-  setRating: (value: number) => void
-  error?: string
-}) => {
-  const handleSelect = (value: number) => {
-    setRating(value)
+  onChange: (rating: number) => void
+}
+
+const GetRating = ({ size = 24, max = 5, rating = 0, onChange }: RatingProps) => {
+  const [hovered, setHovered] = useState<number | null>(null)
+  const [selected, setSelected] = useState<number>(rating)
+
+  const MotionWrapper = motion(YStack)
+
+  const getFillType = (index: number): 'full' | 'empty' => {
+    const rating = hovered ?? selected
+    return rating >= index + 1 ? 'full' : 'empty'
+  }
+
+  const handlePress = (index: number) => {
+    const ratingValue = index + 1 // whole star only
+    setSelected(ratingValue)
+    onChange?.(ratingValue)
   }
 
   return (
-    <YStack gap="$1">
-      <XStack alignItems="center" gap="$2">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <TouchableOpacity key={value} onPress={() => handleSelect(value)}>
-            <Star
-              size={size}
-              color={rating === 0 && error ? 'red' : '#fbbf24'}
-              fill={value <= rating ? '#fbbf24' : ''}
-            />
-          </TouchableOpacity>
-        ))}
-      </XStack>
-    </YStack>
+    <XStack gap="$2">
+      {Array.from({ length: max }).map((_, i) => {
+        const fillType = getFillType(i)
+
+        return (
+          <Pressable
+            key={i}
+            onPress={() => handlePress(i)}
+            onHoverIn={() => Platform.OS === 'web' && setHovered(i + 1)}
+            onHoverOut={() => Platform.OS === 'web' && setHovered(null)}
+          >
+            <MotionWrapper
+              animate={{ scale: fillType === 'full' ? 1.2 : 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <Star
+                size={size}
+                color={fillType === 'full' ? '#fbbf24' : '#fcd166ff'}
+                fill={fillType === 'full' ? '#fbbf24' : 'transparent'}
+              />
+            </MotionWrapper>
+          </Pressable>
+        )
+      })}
+    </XStack>
   )
 }
 

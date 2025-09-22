@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Alert, Dimensions, KeyboardAvoidingView } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native'
 import { Send } from '@tamagui/lucide-icons'
 import {
   Button,
   SwitchWithLabel,
   ImagePicker,
-  Input,
   Text,
   TextArea,
   View,
@@ -19,23 +18,25 @@ import {
 } from '@revit/ui'
 import GetRating from '../common/GetRating'
 import { FieldError } from '@revit/ui'
-import { createPost } from '@revit/api/post'
+import { createPostApi } from '@revit/api/post'
+import Loader from '../common/Loader'
 
-const CreatePost = () => {
+const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
   const toast = useToastController()
 
   const [rating, setRating] = useState(0)
   const [error, setError] = useState('')
   const [caption, setCaption] = useState('')
   const [checked, setChecked] = useState(false)
-  const [image, setImage] = useState<File | undefined>()
+  const [images, setImages] = useState<(File | string)[] | undefined>()
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'failure'>('idle')
 
   const onCheckedChange = () => {
     setChecked(!checked)
   }
 
-  const handleImageChange = (images: File) => {
-    setImage(images)
+  const handleImageChange = (images: (File | string)[]) => {
+    setImages(images)
   }
 
   const handleCaptionChange = (value: string) => {
@@ -58,9 +59,19 @@ const CreatePost = () => {
       return
     }
 
-    const post = { caption, image, rating }
+    const post = { caption, images, rating }
 
-    await createPost(post)
+    setStatus('loading')
+    const error = await createPostApi(post)
+    setStatus('idle')
+
+    if (error) {
+      setStatus('failure')
+      return
+    }
+
+    setStatus('success')
+    handleClose()
   }
 
   const handleRatingChange = (value: number) => {
@@ -68,48 +79,51 @@ const CreatePost = () => {
   }
 
   return (
-    <YStack flex={1} gap="$3" minWidth='100%'>
+    <YStack flex={1} gap="$6" p="$3" minWidth="100%" justifyContent="space-between">
       {/* Review Details Section */}
-      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4">
+      <YStack gap="$3">
         <KeyboardAvoidingView>
           <Theme name={error ? 'red' : null}>
             <Shake shakeKey={error}>
               <TextArea
-                numberOfLines={10}
+                width="100%"
+                color="$white3"
+                height="$10"
                 placeholder="Share your experince or get something reviewd...."
                 value={caption}
                 onChangeText={handleCaptionChange}
+                unstyled
+                scrollbarWidth="none"
+                verticalAlign="top"
               />
               <FieldError message={error} />
             </Shake>
           </Theme>
         </KeyboardAvoidingView>
-      </YStack>
-      {/* Review Image Section */}
-      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4">
+        {/* Review Image Section */}
         <ImagePicker handleImageChange={handleImageChange} />
-      </YStack>
 
-      {/* Review Rating Section */}
-      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4" gap="$2">
-        <SwitchWithLabel
-          label="Provide rating to your post?"
-          size="$1"
-          checked={checked}
-          onCheckedChange={onCheckedChange}
-        />
-        {checked && (
-          <XStack alignItems="center" gap="$2">
-            <Text fontSize="$3">Provide your rating:</Text>
-            <GetRating size={20} rating={rating} setRating={setRating} />
-          </XStack>
-        )}
+        {/* Review Rating Section */}
+        <YStack gap="$2">
+          <SwitchWithLabel
+            label="Rate to your post?"
+            size="$1"
+            checked={checked}
+            onCheckedChange={onCheckedChange}
+          />
+          {checked && (
+            <XStack alignItems="center" gap="$2">
+              <Text fontSize="$3">Provide your rating:</Text>
+              <GetRating size={20} rating={rating} setRating={setRating} />
+            </XStack>
+          )}
+        </YStack>
       </YStack>
 
       {/* Post Button */}
       <View paddingBottom="$5" paddingTop="$2">
         <Theme inverse>
-          <Button onPress={handleCreatePost} size="$4">
+          <Button onPress={handleCreatePost} size="$4" iconAfter={<Loader status={status} />}>
             <Send size={20} />
             <Text className="text-md">Post</Text>
           </Button>

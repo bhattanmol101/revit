@@ -2,10 +2,11 @@
 
 import Signin from '@revit/app/features/signin'
 import { UserSigninT } from '@revit/shared/types/user'
-import { fetchLoggedInUserAction, signInAction } from '@/app/action'
+import { signInAction } from '@/app/action'
 import { XStack, YStack } from '@revit/ui'
 import MainImage from '@revit/shared/assets/images/Main'
 import { useSession } from '../Provider/ContextProvider'
+import { fetchLoggedInUser } from '@revit/api/auth/user'
 
 export default function SigninPage() {
   const { setUser } = useSession()
@@ -16,7 +17,7 @@ export default function SigninPage() {
       return signInError
     }
 
-    const { user, error } = await fetchLoggedInUserAction()
+    const { user, error } = await fetchLoggedInUser()
     if (error) {
       return error
     }

@@ -3313,6 +3313,7 @@ __metadata:
     "@revit/shared": "npm:*"
     "@supabase/ssr": "npm:^0.7.0"
     "@supabase/supabase-js": "npm:^2.57.4"
+    base64-arraybuffer: "npm:^1.0.2"
     expo-secure-store: "npm:^15.0.7"
   languageName: unknown
   linkType: soft
@@ -7161,6 +7162,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base64-arraybuffer@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "base64-arraybuffer@npm:1.0.2"
+  checksum: 10/15e6400d2d028bf18be4ed97702b11418f8f8779fb8c743251c863b726638d52f69571d4cc1843224da7838abef0949c670bde46936663c45ad078e89fee5c62
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.2.3, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -8615,6 +8623,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"embla-carousel-react@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "embla-carousel-react@npm:8.6.0"
+  dependencies:
+    embla-carousel: "npm:8.6.0"
+    embla-carousel-reactive-utils: "npm:8.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.1 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10/8a6338f28844f07e29df03fb09bf7e157e0aecb423b0ca7d9b9a65e4537acce4a140c94f177957518e44d5483993c1c40273b913cde7e543d0b68955efda8ffc
+  languageName: node
+  linkType: hard
+
+"embla-carousel-reactive-utils@npm:8.6.0":
+  version: 8.6.0
+  resolution: "embla-carousel-reactive-utils@npm:8.6.0"
+  peerDependencies:
+    embla-carousel: 8.6.0
+  checksum: 10/48b31931572b32b49705e6125d4f10c240fca0ee8a078867fc91f7c889f6adee95f7fd0b0fdf5dfef6d83d497115759f3f3ca2e8320e331efa0de1c9e6fb4638
+  languageName: node
+  linkType: hard
+
+"embla-carousel@npm:8.6.0":
+  version: 8.6.0
+  resolution: "embla-carousel@npm:8.6.0"
+  checksum: 10/6c1c4268160ce2a150c80f0c84edd4c42b47567f8ef25f56fb21819a4094cfa885614cb0837d180e8da8159ff79a077e0a2e1e679ed2c500ff52697d3ec94b78
+  languageName: node
+  linkType: hard
+
 "emoji-regex@npm:^8.0.0":
   version: 8.0.0
   resolution: "emoji-regex@npm:8.0.0"
@@ -9696,6 +9732,21 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10/c0a924da83c10283c2d1ac1c44010ede22128262a8c50d3f0dd85ce13d39fdfbf990d0d95ce6e1da8500877e5669a32128d4db9848b350d2ac80afde4b5ffd4b
+  languageName: node
+  linkType: hard
+
+"expo-image@npm:^3.0.8":
+  version: 3.0.8
+  resolution: "expo-image@npm:3.0.8"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10/27b843657702ed29d92f21bb3548ed4c9a9072938bd7abd24b52f9789008f9934770a070980b5996e0d1f2881f2ce056cc63001449c78fca411c8e7990054b1f
   languageName: node
   linkType: hard
 
@@ -14732,6 +14783,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-reanimated-carousel@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "react-native-reanimated-carousel@npm:4.0.3"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-native: ">=0.70.3"
+    react-native-gesture-handler: ">=2.9.0"
+    react-native-reanimated: ">=3.0.0"
+  checksum: 10/b9febfc8beffb63079f65a76aa644c8a260d613760e4edb0107008e70fff2af720588ffe3761316321f1f473615f589240ddbde129d7d2e77d02cb1a4bf896ca
+  languageName: node
+  linkType: hard
+
 "react-native-reanimated@npm:~3.17.4":
   version: 3.17.5
   resolution: "react-native-reanimated@npm:3.17.5"
@@ -15276,6 +15339,7 @@ __metadata:
     expo: "npm:~53.0.22"
     expo-constants: "npm:~17.1.7"
     expo-font: "npm:~13.3.2"
+    expo-image: "npm:^3.0.8"
     expo-linear-gradient: "npm:~14.1.5"
     expo-linking: "npm:~7.1.7"
     expo-router: "npm:~5.1.4"
@@ -15287,6 +15351,7 @@ __metadata:
     react-native: "npm:0.79.6"
     react-native-gesture-handler: "npm:~2.28.0"
     react-native-reanimated: "npm:~3.17.4"
+    react-native-reanimated-carousel: "npm:^4.0.3"
     react-native-safe-area-context: "npm:5.6.1"
     react-native-screens: "npm:~4.16.0"
     react-native-svg: "npm:15.12.1"
@@ -15308,6 +15373,7 @@ __metadata:
     "@tamagui/config": "npm:^1.132.23"
     "@tamagui/next-plugin": "npm:^1.132.23"
     "@tamagui/next-theme": "npm:^1.132.23"
+    embla-carousel-react: "npm:^8.6.0"
     eslint-config-next: "npm:^15.5.2"
     framer-motion: "npm:^12.23.12"
     next: "npm:15.5.3"

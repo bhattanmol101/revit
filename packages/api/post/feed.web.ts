@@ -1,4 +1,6 @@
-import { PostT } from '@revit/supabase/types/post'
+'use server'
+
+import { PostT } from '@revit/shared/types/post'
 import { errorHandler } from '../utils'
 import { fetchPosts } from '@revit/supabase/lib/post'
 

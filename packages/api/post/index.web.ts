@@ -1,3 +1,5 @@
+'use server'
+
 import { createPost } from '@revit/supabase/lib'
 import { errorHandler } from '../utils'
 import { CreatePostT } from '@revit/shared/types/post'

@@ -1,3 +1,5 @@
+'use server'
+
 import { fetchCurrentUser } from '@revit/supabase/lib'
 import { errorHandler } from '../utils'
 import { UserT } from '@revit/shared/types/user'

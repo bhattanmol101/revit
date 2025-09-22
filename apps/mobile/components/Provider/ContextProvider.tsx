@@ -1,6 +1,7 @@
 import { fetchLoggedInUser } from '@revit/api/auth/user'
 import { UserT } from '@revit/shared/types/user'
 import { Spinner, View } from '@revit/ui'
+import { useRouter } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type MaybeUser = UserT | null
@@ -14,6 +15,8 @@ type UserContext = {
 const Context = createContext<UserContext>()
 
 export default function ContextProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+
   const [user, setUser] = useState<MaybeUser>(null)
   const [loading, setLoading] = useState(true)
 
@@ -26,6 +29,7 @@ export default function ContextProvider({ children }: { children: React.ReactNod
 
       if (user) {
         setUser(user as UserT)
+        // router.replace('/home')
       }
       setLoading(false)
     }

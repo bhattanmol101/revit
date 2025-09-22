@@ -1,16 +1,20 @@
 import { z } from 'zod'
 import { userSummary } from './user'
 
-export type CreatePostT = {
-  caption: string
-  image?: File
-  rating?: number
-}
+const stringSchema = z.string()
 
-const post = z.object({
+const fileSchema = z.instanceof(File)
+
+const postCreateSchema = z.object({
+  caption: z.string(),
+  images: z.union([stringSchema, fileSchema]).array().optional(),
+  rating: z.number().optional(),
+})
+
+const postSchema = z.object({
   id: z.string(),
   caption: z.string(),
-  image: z.string(),
+  images: z.string().array().optional(),
   rating: z.number().nullable(),
   createdAt: z.coerce.date(),
   user: userSummary,
@@ -22,8 +26,10 @@ const post = z.object({
   ),
 })
 
-export type PostT = z.infer<typeof post>
+export type CreatePostT = z.infer<typeof postCreateSchema>
 
-export const feed = z.array(post)
+export type PostT = z.infer<typeof postSchema>
+
+export const feed = z.array(postSchema)
 
 export type FeedT = z.infer<typeof feed>
