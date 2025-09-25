@@ -105,9 +105,9 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       )}
 
       {/* Dots */}
-      <XStack mt="$2" space="$2">
+      <XStack mt="$2" gap="$2" pos="absolute" b="$3" l="50%">
         {images.map((_, i) => (
-          <YStack key={i} w={8} h={8} br={50} bg={i === activeIndex ? '$blue10' : '$gray7'} />
+          <YStack key={i} w={6} h={6} br={50} bg={i === activeIndex ? '$white2' : '$white11'} />
         ))}
       </XStack>
     </YStack>

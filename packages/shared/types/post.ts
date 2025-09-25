@@ -1,11 +1,8 @@
 import { z } from 'zod'
 import { userSummary } from './user'
+import { fileSchema, stringSchema } from './common'
 
-const stringSchema = z.string()
-
-const fileSchema = z.instanceof(File)
-
-const postCreateSchema = z.object({
+const createPostSchema = z.object({
   caption: z.string(),
   images: z.union([stringSchema, fileSchema]).array().optional(),
   rating: z.number().optional(),
@@ -26,7 +23,7 @@ const postSchema = z.object({
   ),
 })
 
-export type CreatePostT = z.infer<typeof postCreateSchema>
+export type CreatePostT = z.infer<typeof createPostSchema>
 
 export type PostT = z.infer<typeof postSchema>
 

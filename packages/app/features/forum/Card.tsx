@@ -2,15 +2,18 @@
 
 import { Users } from '@tamagui/lucide-icons'
 import { Card, Image, Text, View, XStack, YStack } from '@revit/ui'
-import Rating from '../common/Rating'
 import { useRouter } from 'solito/navigation'
+import { ForumT } from '@revit/shared/types/forum'
 
-const ForumCard = ({ forum }: { forum: any }) => {
+const ForumCard = ({ forum }: { forum: ForumT }) => {
   const router = useRouter()
 
   const handleForumClick = () => {
     router.push(`/forums/${forum.id}`)
   }
+
+  const membershipCount = forum.members.length > 0 ? forum.members[0].membershipCount : 0
+  const postCount = forum.posts.length > 0 ? forum.posts[0].postCount : 0
 
   return (
     <Card
@@ -33,7 +36,7 @@ const ForumCard = ({ forum }: { forum: any }) => {
         <XStack justifyContent="space-between" alignItems="flex-start">
           <YStack flex={1} gap="$1">
             <Text fontSize="$3" fontWeight="bold">
-              {forum.title}
+              {forum.name}
             </Text>
             <Text fontSize="$2" color="$white8">
               {forum.description}
@@ -41,7 +44,7 @@ const ForumCard = ({ forum }: { forum: any }) => {
           </YStack>
           <View backgroundColor="$blue10" borderRadius={10} py="$1" px="$2">
             <Text fontSize="$1" fontWeight={600}>
-              {forum.category}
+              {/* {forum.category} */}
             </Text>
           </View>
         </XStack>
@@ -49,16 +52,16 @@ const ForumCard = ({ forum }: { forum: any }) => {
         <XStack alignItems="center">
           <Users size={16} color="#9ca3af" />
           <Text color="$black11" fontSize="$2">
-            {forum.participants} participants • {forum.posts} posts
+            {membershipCount} participants • {postCount} posts
           </Text>
         </XStack>
 
         <XStack justifyContent="space-between" alignItems="center">
-          <XStack>
+          {/* <XStack>
             <Rating rating={forum.rating} size={16} fontSize="$2" />
-          </XStack>
+          </XStack> */}
           <Text color="$black11" fontSize="$2" fontWeight="bold">
-            by {forum.creator}
+            by {forum.creator.name}
           </Text>
         </XStack>
       </YStack>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { YStack, XStack } from 'tamagui'
 import { Star } from '@tamagui/lucide-icons'
-import { motion } from 'framer-motion'
+import { MotiView } from 'moti'
 import { Platform, Pressable } from 'react-native'
 
 type RatingProps = {
@@ -17,7 +17,7 @@ const GetRating = ({ size = 24, max = 5, rating = 0, onChange }: RatingProps) =>
   const [hovered, setHovered] = useState<number | null>(null)
   const [selected, setSelected] = useState<number>(rating)
 
-  const MotionWrapper = motion(YStack)
+  // const MotionWrapper = MotiTransition.create(YStack)
 
   const getFillType = (index: number): 'full' | 'empty' => {
     const rating = hovered ?? selected
@@ -42,7 +42,7 @@ const GetRating = ({ size = 24, max = 5, rating = 0, onChange }: RatingProps) =>
             onHoverIn={() => Platform.OS === 'web' && setHovered(i + 1)}
             onHoverOut={() => Platform.OS === 'web' && setHovered(null)}
           >
-            <MotionWrapper
+            <MotiView
               animate={{ scale: fillType === 'full' ? 1.2 : 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
@@ -51,7 +51,7 @@ const GetRating = ({ size = 24, max = 5, rating = 0, onChange }: RatingProps) =>
                 color={fillType === 'full' ? '#fbbf24' : '#fcd166ff'}
                 fill={fillType === 'full' ? '#fbbf24' : 'transparent'}
               />
-            </MotionWrapper>
+            </MotiView>
           </Pressable>
         )
       })}

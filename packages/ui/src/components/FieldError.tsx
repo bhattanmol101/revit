@@ -16,7 +16,7 @@ export const FieldError = ({ message }: FieldErrorProps) => {
         <Paragraph
           key="error"
           animation="200ms"
-          mt="$1"
+          mt="$2"
           ml="$2"
           fontSize={12}
           theme="alt2"

@@ -3293,6 +3293,7 @@ __metadata:
     burnt: "npm:^0.12.2"
     expo-constants: "npm:~17.1.7"
     expo-linking: "npm:~7.1.7"
+    moti: "npm:^0.30.0"
     react-native-safe-area-context: "npm:5.6.1"
     solito: "npm:^4.4.1"
   languageName: unknown

@@ -1,12 +1,13 @@
-import { Text } from '@revit/ui'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Explore from '@revit/app/features/explore'
+import { useSession } from '../../../components/Provider/ContextProvider'
 
-function Profile() {
-  return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
-      <Text>Explore</Text>
-    </SafeAreaView>
-  )
+function ExploreScreen() {
+  const { user } = useSession()
+  if (!user) {
+    return
+  }
+
+  return <Explore user={user} />
 }
 
-export default Profile
+export default ExploreScreen

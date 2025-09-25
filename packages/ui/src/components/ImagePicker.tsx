@@ -40,9 +40,10 @@ export function ImagePicker({
         const newFiles = [...images, ...selected]
         if (newFiles.length > maxImages) {
           toast.show('Too many images!', {
-            message: 'Please select maximum 5 images.',
+            message: `Please select maximum ${maxImages} images.`,
             customData: { type: 'error' },
           })
+          return
         }
 
         setImages(newFiles)
@@ -54,7 +55,7 @@ export function ImagePicker({
       const result = await ImagePickerExpo.launchImageLibraryAsync({
         mediaTypes: ImagePickerExpo.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
-        selectionLimit: 5,
+        selectionLimit: maxImages,
         quality: 1,
         base64: true,
       })
@@ -166,9 +167,9 @@ export function ImagePicker({
         )}
 
         {/* Dots indicator */}
-        <XStack mt="$2" gap="$2" alignSelf="center">
+        <XStack mt="$2" gap="$2" pos="absolute" b="$3" l="50%">
           {images.map((_, i) => (
-            <YStack key={i} w={8} h={8} br={50} bg={i === activeIndex ? '$blue10' : '$gray7'} />
+            <YStack key={i} w={6} h={6} br={50} bg={i === activeIndex ? '$white2' : '$white11'} />
           ))}
         </XStack>
       </YStack>

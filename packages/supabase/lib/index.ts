@@ -1,3 +1,5 @@
 export * from './user'
 export * from './post'
 export * from './comment'
+export * from './search'
+export * from './forum'

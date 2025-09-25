@@ -49,7 +49,7 @@ export default function Signin({ handleSignin }: SigninProps) {
     setStatus('idle')
     if (!error) {
       setStatus('success')
-      router.push('/home')
+      router.replace('/home')
     } else {
       toast.show('Invalid Credentials!', {
         message: 'Please provide correct details.',

@@ -11,34 +11,33 @@ import {
   useToastController,
   Shake,
   Theme,
-  Image,
   InputField,
   Dialog,
   Unspaced,
 } from '@revit/ui'
+import Avatar from '../common/Avatar'
 import { FieldError } from '@revit/ui'
+import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { UpdateUserT, UserT, updateUserSchema } from '@revit/shared/types/user'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as ImagePickerExpo from 'expo-image-picker'
+import { updateUserApi } from '@revit/api/user'
+import { IDLE, LOADING, SUCCESS } from '@revit/shared/utils/constants'
+import { StatusT } from '@revit/shared/types/common'
+import Loader from '../common/Loader'
 
-const EditProfileDialog = ({
-  user,
-  handlePost,
-}: {
-  user: any
-  handlePost?: ({
-    images,
-    description,
-    rating,
-  }: {
-    images?: string[]
-    description: string
-    rating: number
-  }) => void
-}) => {
-  const [rating, setRating] = useState(0)
-  const [checked, setChecked] = useState(false)
-  const [imageUri, setImageUri] = useState<string[]>()
+const EditProfileDialog = ({ user }: { user: UserT }) => {
+  const [open, onOpen] = useState(false)
 
+  const onOpenChange = () => {
+    onOpen(!open)
+  }
+
+  const handleClose = () => {
+    onOpen(false)
+  }
   return (
-    <Dialog modal>
+    <Dialog modal open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger asChild>
         <Button variant="outlined" size="$2">
           <Button.Icon>
@@ -68,11 +67,13 @@ const EditProfileDialog = ({
         <Dialog.FocusScope focusOnIdle>
           <Dialog.Content
             bordered
-            paddingVertical="$4"
-            paddingHorizontal="$6"
+            pt="$4"
+            pb="$2"
             elevate
-            minWidth={600}
+            width={500}
             minHeight={250}
+            maxHeight={800}
+            style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}
             borderRadius="$6"
             key="content"
             animateOnly={['transform', 'opacity']}
@@ -90,7 +91,7 @@ const EditProfileDialog = ({
           >
             <Dialog.Title fontSize="$2">Edit your profile</Dialog.Title>
 
-            <EditProfile user={user} />
+            <EditProfile user={user} handleClose={handleClose} />
 
             <Unspaced>
               <Dialog.Close asChild>
@@ -104,54 +105,89 @@ const EditProfileDialog = ({
   )
 }
 
-const EditProfile = ({ user }: { user: any }) => {
+const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: () => void }) => {
   const toast = useToastController()
-  const [error, setError] = useState('')
-  const [description, setDescription] = useState('')
 
-  const handleDescriptionChange = (value: string) => {
+  const [status, setStatus] = useState<StatusT>(IDLE)
+  const [image, setImage] = useState<{ uri: string; file: File | string }>()
+
+  const { control, handleSubmit } = useForm<UpdateUserT>({
+    resolver: zodResolver(updateUserSchema),
+    values: {
+      name: user.name,
+      bio: user.bio || '',
+    },
+  })
+
+  const onSubmit: SubmitHandler<UpdateUserT> = async (data: UpdateUserT) => {
+    setStatus(LOADING)
+    data.avatar = image?.file
+    const error = await updateUserApi(user, data)
+    setStatus(IDLE)
     if (error) {
-      setError('')
-    }
-    setDescription(value)
-  }
-
-  const handleCreatePost = () => {
-    if (!description.trim()) {
-      setError('description')
+      toast.show('Failed to update user!', {
+        message: 'Something went wrong! Please try again.',
+        customData: { type: 'error' },
+      })
       return
     }
+    setStatus(SUCCESS)
+    handleClose()
+  }
 
-    toast.show('Post rating empty!', {
-      message: 'Please provide rating on a scale of 1 to 5.',
-      customData: { type: 'error' },
-    })
-    return
+  const pickImage = async () => {
+    if (typeof window !== 'undefined' && !('expo' in window)) {
+      // Web: multi-file selection
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.multiple = true
+      input.onchange = (e: any) => {
+        const files = Array.from(e.target.files) as File[]
+        const selected = {
+          uri: URL.createObjectURL(files[0]),
+          file: files[0],
+        }
 
-    // handlePost({ images: imageUri, description, rating })
+        setImage(selected)
+      }
+      input.click()
+    } else {
+      // Native (Expo)
+      const result = await ImagePickerExpo.launchImageLibraryAsync({
+        mediaTypes: ImagePickerExpo.MediaTypeOptions.Images,
+        allowsMultipleSelection: false,
+        selectionLimit: 1,
+        quality: 1,
+        base64: true,
+      })
+
+      if (!result.canceled) {
+        const asset = result.assets[0]
+        if (asset.base64) {
+          setImage({ uri: asset.uri, file: asset.base64 })
+        }
+      }
+    }
   }
 
   return (
-    <YStack flex={1} gap="$3">
+    <YStack flex={1} gap="$4">
       {/* Review Image Section */}
-      <YStack alignItems="center" borderRadius="$5" backgroundColor="$black3" padding="$4">
+      <YStack alignItems="center" padding="$3">
         <View className="relative">
-          <Image
-            source={{ uri: user.avatar }}
-            height={100}
-            width={100}
-            borderRadius={50}
-            borderColor="$white0"
-            alt="user image"
-          />
+          <Avatar size="$10" image={image?.uri || user.avatar} />
+
           <Button
             size="$2"
             position="absolute"
             bottom={0}
             right={0}
             borderRadius="$10"
-            borderColor="$white0"
+            bg="$black8"
             borderWidth={1}
+            zIndex={10}
+            onPress={pickImage}
           >
             <Button.Icon>
               <Camera size={14} color="white" />
@@ -161,30 +197,54 @@ const EditProfile = ({ user }: { user: any }) => {
       </YStack>
 
       {/* Review Details Section */}
-      <YStack borderRadius="$5" backgroundColor="$black3" padding="$4" gap="$2">
-        <InputField id="name" placeholder="John Doe" value={user.name} />
-        <Theme name={error ? 'red' : null} forceClassName>
-          <Shake shakeKey={error}>
-            <TextArea
-              width="100%"
-              borderWidth={1}
-              placeholder="Add your bio..."
-              value={description}
-              onChangeText={handleDescriptionChange}
+      <YStack gap="$4">
+        <Controller
+          control={control}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <InputField
+              id="name"
+              label=""
+              placeholder="Please enter your name"
+              onChangeText={onChange}
+              value={value}
+              error={error ? error.message : ''}
             />
-            <FieldError message={error} />
-          </Shake>
-        </Theme>
-      </YStack>
+          )}
+          name="name"
+        />
 
+        <Controller
+          control={control}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <Theme name={error ? 'red' : null} forceClassName>
+              <Shake shakeKey={String(error)}>
+                <TextArea
+                  width="100%"
+                  color="$white3"
+                  height="$7"
+                  placeholder="Write your bio...."
+                  value={value}
+                  onChangeText={onChange}
+                  scrollbarWidth="none"
+                  verticalAlign="top"
+                />
+                <FieldError message={error ? String(error.message) : ''} />
+              </Shake>
+            </Theme>
+          )}
+          name="bio"
+        />
+      </YStack>
       {/* Post Button */}
-      <View paddingBottom="$5" paddingTop="$2">
-        <Button onPress={handleCreatePost}>
-          <Button.Icon>
-            <Send size={18} />
-          </Button.Icon>
-          <Button.Text>Edit Profile</Button.Text>
-        </Button>
+      <View paddingBottom="$5" paddingTop="$2" mt="$2">
+        <Theme inverse>
+          <Button onPress={handleSubmit(onSubmit)} iconAfter={<Loader status={status} />}>
+            <Button.Icon>
+              <Send size={18} />
+            </Button.Icon>
+            <Button.Text>Edit Profile</Button.Text>
+          </Button>
+        </Theme>
       </View>
     </YStack>
   )

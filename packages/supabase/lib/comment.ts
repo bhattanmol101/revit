@@ -20,6 +20,7 @@ export const createComment = async (comment: CreateCommentT): Promise<void> => {
   })
 
   if (error) {
+    console.log(error)
     if (error.code === '23505') {
       throw new Error('You can give review only once!')
     }

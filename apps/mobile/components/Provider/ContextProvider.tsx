@@ -8,17 +8,17 @@ type MaybeUser = UserT | null
 
 type UserContext = {
   user: MaybeUser
+  initialized?: boolean
   setUser: (user: MaybeUser) => void
+  signOut?: () => void
 }
 
 // @ts-ignore
 const Context = createContext<UserContext>()
 
 export default function ContextProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-
   const [user, setUser] = useState<MaybeUser>(null)
-  const [loading, setLoading] = useState(true)
+  const [initialized, setInitialized] = useState<boolean>(false)
 
   useEffect(() => {
     const getUser = async () => {
@@ -26,27 +26,18 @@ export default function ContextProvider({ children }: { children: React.ReactNod
       if (error) {
         //TODO need to see what to do in this case
       }
+      setInitialized(true)
 
       if (user) {
         setUser(user as UserT)
-        // router.replace('/home')
       }
-      setLoading(false)
     }
 
     getUser()
   }, [])
 
-  if (loading) {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center">
-        <Spinner size="large" />
-      </View>
-    )
-  }
-
   return (
-    <Context.Provider value={{ user, setUser }}>
+    <Context.Provider value={{ user, setUser, initialized }}>
       <>{children}</>
     </Context.Provider>
   )

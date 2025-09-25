@@ -1,9 +1,8 @@
 'use client'
 
-import { Spinner, useToastController, View } from '@revit/ui'
+import { ScrollView, Spinner, useToastController, View } from '@revit/ui'
 import { useSession } from '../../../components/Provider/ContextProvider'
 import { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { fetchUserFeed } from '@revit/api/post/feed'
 import { PostT } from '@revit/shared/types/post'
 import PostCard from '@revit/app/features/post/Card'
@@ -49,9 +48,9 @@ function Home() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
+    <ScrollView>
       {feed && feed.map((item: any) => <PostCard key={item.id} user={user as UserT} post={item} />)}
-    </SafeAreaView>
+    </ScrollView>
   )
 }
 

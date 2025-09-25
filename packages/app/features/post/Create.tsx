@@ -20,6 +20,8 @@ import GetRating from '../common/GetRating'
 import { FieldError } from '@revit/ui'
 import { createPostApi } from '@revit/api/post'
 import Loader from '../common/Loader'
+import { StatusT } from '@revit/shared/types/common'
+import { FAILED, IDLE, LOADING, SUCCESS } from '@revit/shared/utils/constants'
 
 const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
   const toast = useToastController()
@@ -29,7 +31,7 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
   const [caption, setCaption] = useState('')
   const [checked, setChecked] = useState(false)
   const [images, setImages] = useState<(File | string)[] | undefined>()
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'failure'>('idle')
+  const [status, setStatus] = useState<StatusT>(IDLE)
 
   const onCheckedChange = () => {
     setChecked(!checked)
@@ -61,21 +63,17 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
 
     const post = { caption, images, rating }
 
-    setStatus('loading')
+    setStatus(LOADING)
     const error = await createPostApi(post)
-    setStatus('idle')
+    setStatus(IDLE)
 
     if (error) {
-      setStatus('failure')
+      setStatus(FAILED)
       return
     }
 
-    setStatus('success')
+    setStatus(SUCCESS)
     handleClose()
-  }
-
-  const handleRatingChange = (value: number) => {
-    console.log('User selected rating:', value)
   }
 
   return (
@@ -114,7 +112,7 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
           {checked && (
             <XStack alignItems="center" gap="$2">
               <Text fontSize="$3">Provide your rating:</Text>
-              <GetRating size={20} rating={rating} setRating={setRating} />
+              <GetRating size={20} rating={rating} onChange={setRating} />
             </XStack>
           )}
         </YStack>

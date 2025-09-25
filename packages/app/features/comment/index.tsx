@@ -5,6 +5,7 @@ import {
   Paragraph,
   Spinner,
   Text,
+  TextArea,
   Theme,
   useToastController,
   XStack,
@@ -21,6 +22,7 @@ import { StatusT } from '@revit/shared/types/common'
 import { IDLE, LOADING, SUCCESS, FAILED } from '@revit/shared/utils/constants'
 import Loader from '../common/Loader'
 import { CommentT } from '@revit/shared/types/comment'
+import { Platform } from 'react-native'
 
 const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
   const toast = useToastController()
@@ -42,11 +44,11 @@ const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
     const error = await createCommentApi({ postId: post.id, rating, content: text })
     setStatus(IDLE)
     if (error) {
-      toast.show('Failed to save comment!', {
+      toast.show(Platform.OS === 'web' ? 'Failed to save comment!' : error.message, {
         message: error.message,
         customData: { type: 'error' },
       })
-      setStatus(FAILED)
+      return
     }
     setStatus(SUCCESS)
   }
@@ -139,27 +141,28 @@ const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
           <Avatar image={user.avatar} />
           <YStack flex={1} gap="$2.5" bg="$black4" px="$2.5" py="$3" br="$2">
             <XStack alignItems="center">
-              <Text mx="$1" fontSize="$2">
+              <Text mx="$2" fontSize="$2">
                 Rate this post:{' '}
               </Text>
               <GetRating size={18} rating={rating} onChange={setRating} />
             </XStack>
 
             <XStack alignItems="center" gap="$2">
-              <Input
+              <TextArea
                 flex={1}
-                size="$3"
+                color="$white3"
                 placeholder="Add a comment..."
                 value={text}
                 onChangeText={setText}
+                scrollbarWidth="none"
+                verticalAlign="top"
               />
               <Theme inverse>
                 <Button
                   circular
                   size="$3"
                   fontSize="$2"
-                  icon={<Send size={16} />}
-                  iconAfter={<Loader status={status} />}
+                  icon={status === IDLE ? <Send size={16} /> : <Loader status={status} />}
                   disabled={status === LOADING}
                   onPress={handleComment}
                 />

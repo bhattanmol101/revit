@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { DarkTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { SplashScreen, Stack } from 'expo-router'
+import { Slot, SplashScreen, Stack, useRouter } from 'expo-router'
 import { Provider } from '@revit/app/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
-import ContextProvider from '../components/Provider/ContextProvider'
+import ContextProvider, { useSession } from '../components/Provider/ContextProvider'
+import { Spinner, View } from '@revit/ui'
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
@@ -38,16 +39,42 @@ export default function App() {
   return <RootLayoutNav />
 }
 
+const InitialLayout = () => {
+  const router = useRouter()
+  const { user, initialized } = useSession()
+
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (initialized) {
+      setLoading(false)
+      if (user) {
+        console.log('log')
+        router.replace('/home')
+      } else {
+        router.replace('/')
+      }
+    }
+  }, [initialized])
+
+  if (loading) {
+    return (
+      <View flex={1} alignItems="center" justifyContent="center">
+        <Spinner size="large" />
+      </View>
+    )
+  }
+
+  return
+}
+
 function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={DarkTheme}>
         <ContextProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="signup" />
-            <Stack.Screen name="(home)" />
-          </Stack>
+          <InitialLayout />
+          <Slot />
           <NativeToast />
         </ContextProvider>
       </ThemeProvider>
