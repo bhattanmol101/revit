@@ -1,20 +1,18 @@
 'use client'
 
-import { Card, Separator, Text, View, XStack } from '@revit/ui'
+import { Button, Card, Image, Text, UniversalList, View, XStack, YStack } from '@revit/ui'
 import ForumPostCard from './post/Card'
 import { useEffect, useState } from 'react'
 import { ForumPostT, ForumT } from '@revit/shared/types/forum'
-import { fetchForumPostsApi } from '@revit/api/forum/post'
-import { useParams, useRouter } from 'solito/navigation'
+import { useParams } from 'solito/navigation'
 import { StatusT } from '@revit/shared/types/common'
 import { IDLE, LOADING } from '@revit/shared/utils/constants'
-import { fetchForumsByIdApi } from '@revit/api/forum'
+import { joinForumsApi } from '@revit/api/forum'
 import Loader from '../common/Loader'
-import { Image } from '@revit/ui'
-import { YStack } from '@revit/ui'
 import { Plus, Users } from '@tamagui/lucide-icons'
-import { Button } from '@revit/ui'
 import { UserT } from '@revit/shared/types/user'
+import CreateForumPostDialog from './post/CreateDialog'
+import { useForumPostStore, useForumStore } from '../../store/forum.store'
 
 const Forum = ({ user }: { user: UserT }) => {
   const { id } = useParams()
@@ -22,69 +20,59 @@ const Forum = ({ user }: { user: UserT }) => {
     return
   }
 
-  const [forum, setForum] = useState<ForumT>()
-  const [posts, setPosts] = useState<ForumPostT[]>([])
-  const [forumStatus, setForumStatus] = useState<StatusT>(LOADING)
-  const [postsStatus, setPostsStatus] = useState<StatusT>(LOADING)
+  const forumId = String(id)
 
-  const fetchForum = async () => {
-    const { forum, error } = await fetchForumsByIdApi(String(id))
-    setForumStatus(IDLE)
-    if (error) {
-      return
-    }
-    if (forum) {
-      setForum(forum)
-    }
-  }
-
-  const fetchForumPosts = async () => {
-    const { posts, error } = await fetchForumPostsApi(String(id))
-    setPostsStatus(IDLE)
-    if (error) {
-      return
-    }
-    if (posts) {
-      setPosts(posts)
-    }
-  }
+  const { forum, fetchForum, loading, error } = useForumStore()
+  const {
+    posts,
+    fetchForumPosts,
+    loading: postLoading,
+    error: postError,
+    clearForumPosts,
+  } = useForumPostStore()
 
   useEffect(() => {
-    fetchForum()
-    fetchForumPosts()
-  }, [])
+    fetchForum(forumId)
+    fetchForumPosts(forumId, { refresh: true })
 
-  if (forumStatus === LOADING) {
-    return <Loader status={forumStatus} />
+    return () => {
+      clearForumPosts()
+    }
+  }, [forumId])
+
+  if (loading) {
+    return <Loader mt="$2" status={LOADING} />
   }
 
   if (!forum) {
     return
   }
 
+  const renderForumPost = (post: ForumPostT) => (
+    <ForumPostCard key={post.id} user={user} post={post} />
+  )
+
   return (
-    <View flex={1}>
-      <ForumCard user={user} forum={forum} />
-      <XStack my="$2" gap="$3" alignItems="center">
-        <Separator />
-        <Text fontSize="$3" color="$black11">
-          Posts
-        </Text>
-        <Separator />
-      </XStack>
-      <ForumPostCard />
-    </View>
+    <UniversalList
+      listHeaderComponent={<ForumCard user={user} forum={forum} />}
+      data={posts}
+      renderItem={renderForumPost}
+      loading={postLoading}
+      emptyText="No posts found. Start adding reviews!"
+    />
   )
 }
 
 const ForumCard = ({ user, forum }: { user: UserT; forum: ForumT }) => {
-  const router = useRouter()
+  const [joinStatus, setJoinStatus] = useState<StatusT>(IDLE)
 
-  const handleForumClick = () => {
-    router.push(`/forums/${forum.id}`)
+  const handleJoinForum = async () => {
+    setJoinStatus(LOADING)
+    await joinForumsApi(forum.id)
+    setJoinStatus(IDLE)
   }
 
-  const membershipCount = forum.members.length > 0 ? forum.members[0].membershipCount : 0
+  const membershipCount = forum.members.length > 0 ? forum.members[0].memberCount : 0
   const postCount = forum.posts.length > 0 ? forum.posts[0].postCount : 0
 
   return (
@@ -95,8 +83,10 @@ const ForumCard = ({ user, forum }: { user: UserT; forum: ForumT }) => {
         justifyContent="space-between"
         alignItems="center"
         paddingBottom="$1"
+        pt="$0"
+        px="$0"
       >
-        <Image source={{ uri: forum.image }} width="100%" height={200} alt="forum image" />
+        <Image source={{ uri: forum.image }} width="100%" height={250} alt="forum image" />
       </Card.Header>
       <YStack p="$3" gap="$3">
         <XStack justifyContent="space-between" alignItems="flex-start">
@@ -110,15 +100,15 @@ const ForumCard = ({ user, forum }: { user: UserT; forum: ForumT }) => {
           </YStack>
           <View backgroundColor="$blue10" borderRadius={10} py="$1" px="$2">
             <Text fontSize="$1" fontWeight={600}>
-              {/* {forum.category} */}
+              {forum.category}
             </Text>
           </View>
         </XStack>
 
         <XStack alignItems="center">
-          <Users size={16} color="#9ca3af" />
-          <Text color="$black11" fontSize="$2">
-            {membershipCount} participants • {postCount} posts
+          <Users size={14} color="#9ca3af" />
+          <Text color="$black11" fontSize="$2" ml="$1">
+            {membershipCount} member(s) • {postCount} posts
           </Text>
         </XStack>
 
@@ -127,27 +117,24 @@ const ForumCard = ({ user, forum }: { user: UserT; forum: ForumT }) => {
             by {forum.creator.name}
           </Text>
           <XStack alignItems="center" gap="$3">
-            {forum.isMember && (
-              <Button size="$3">
-                <Button.Icon>
-                  <Plus />
-                </Button.Icon>
-                <Button.Text>Add Review</Button.Text>
-              </Button>
-            )}
+            {forum.isMember && <CreateForumPostDialog forumId={forum.id} />}
             {!(forum.creator.id === user.id) && !forum.isMember && (
-              <Button size="$3">
+              <Button
+                size="$2"
+                onPress={handleJoinForum}
+                iconAfter={<Loader status={joinStatus} />}
+              >
                 <Button.Icon>
                   <Plus />
                 </Button.Icon>
                 <Button.Text>Join</Button.Text>
               </Button>
             )}
-            {forum.creator.id === user.id && (
-              <Button size="$3">
-                <Button.Text>Edit</Button.Text>
-              </Button>
-            )}
+            {/*{forum.creator.id === user.id && (*/}
+            {/*  <Button size="$2">*/}
+            {/*    <Button.Text>Edit</Button.Text>*/}
+            {/*  </Button>*/}
+            {/*)}*/}
           </XStack>
         </XStack>
       </YStack>

@@ -1,8 +1,8 @@
-import { UserSigninT } from '../types/user'
 import { useSupabase } from '@revit/supabase/client/useSupabase'
 import { errorHandler } from '../utils'
+import { UserSigninT } from '@revit/shared/types/user'
 
-export const signIn = async ({ email, password }: UserSigninT): Promise<Error | undefined> => {
+export const signInApi = async ({ email, password }: UserSigninT): Promise<Error | undefined> => {
   try {
     const supabase = await useSupabase()
 

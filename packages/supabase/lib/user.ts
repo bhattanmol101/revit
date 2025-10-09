@@ -1,4 +1,10 @@
-import { userSchema, UserT, UpdateUserT } from '@revit/shared/types/user'
+import {
+  UpdateUserT,
+  userProfileSchema,
+  UserProfileT,
+  userSchema,
+  UserT,
+} from '@revit/shared/types/user'
 import { useSupabase } from '../client/useSupabase'
 import { uploadImages } from '../utils'
 
@@ -49,4 +55,39 @@ export const updateUser = async (user: UserT, updUser: UpdateUserT) => {
     .eq('id', user.id)
 
   if (error) throw error
+}
+
+export const fetchUserProfileById = async (userId: string): Promise<UserProfileT> => {
+  const supabase = await useSupabase()
+
+  const { data: user, error } = await supabase
+    .from('profile')
+    .select(
+      `
+      id,
+      full_name,
+      avatar_url,
+      bio,
+      created_at,
+      posts:post(count)
+    `
+    )
+    .eq('id', userId)
+    .single()
+
+  if (error) {
+    throw new Error(`Error fetching profile: ${error.message}`)
+  }
+
+  if (!user) throw new Error('user not found.')
+
+  const profile = {
+    id: user.id,
+    name: user.full_name,
+    avatar: user.avatar_url,
+    bio: user.bio,
+    createdAt: user.created_at,
+    postcount: user.posts[0]?.count ?? 0,
+  }
+  return userProfileSchema.parse(profile)
 }

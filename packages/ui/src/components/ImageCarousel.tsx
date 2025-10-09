@@ -58,6 +58,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       ai="center"
       pos="relative"
       onLayout={(e) => setParentWidth(e.nativeEvent.layout.width)}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       {parentWidth > 0 && (
         <Carousel
@@ -66,7 +67,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
           height={height}
           data={images}
           loop={false}
-          //   scrollAnimationDuration={500}
+          scrollAnimationDuration={500}
           onSnapToItem={onSnap}
           renderItem={({ item, index }) => (
             <Slide uri={item} index={index} parentWidth={parentWidth} height={height} />
@@ -75,7 +76,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       )}
 
       {/* Left Chevron */}
-      {activeIndex > 0 && (
+      {images.length > 1 && activeIndex > 0 && (
         <Button
           size="$2"
           circular
@@ -90,7 +91,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       )}
 
       {/* Right Chevron */}
-      {activeIndex < images.length - 1 && (
+      {images.length > 1 && activeIndex < images.length - 1 && (
         <Button
           size="$2"
           circular
@@ -105,11 +106,13 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       )}
 
       {/* Dots */}
-      <XStack mt="$2" gap="$2" pos="absolute" b="$3" l="50%">
-        {images.map((_, i) => (
-          <YStack key={i} w={6} h={6} br={50} bg={i === activeIndex ? '$white2' : '$white11'} />
-        ))}
-      </XStack>
+      {images.length > 1 && (
+        <XStack mt="$2" gap="$2" pos="absolute" b="$3" l="50%">
+          {images.map((_, i) => (
+            <YStack key={i} w={6} h={6} br={50} bg={i === activeIndex ? '$white2' : '$white11'} />
+          ))}
+        </XStack>
+      )}
     </YStack>
   )
 }

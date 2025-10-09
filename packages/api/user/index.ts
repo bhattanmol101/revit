@@ -1,6 +1,6 @@
 import { errorHandler } from '../utils'
-import { updateUser } from '@revit/supabase/lib'
-import { UpdateUserT, UserT } from '@revit/shared/types/user'
+import { fetchUserProfileById, updateUser } from '@revit/supabase/lib'
+import { UpdateUserT, UserProfileT, UserT } from '@revit/shared/types/user'
 
 export const updateUserApi = async (
   user: UserT,
@@ -10,5 +10,17 @@ export const updateUserApi = async (
     await updateUser(user, updUser)
   } catch (e: unknown) {
     return errorHandler(e)
+  }
+}
+
+export const fetchUserProfileByIdApi = async (
+  userId: string
+): Promise<{ user?: UserProfileT; error?: Error }> => {
+  try {
+    const user = await fetchUserProfileById(userId)
+
+    return { user }
+  } catch (e: unknown) {
+    return { error: errorHandler(e) }
   }
 }

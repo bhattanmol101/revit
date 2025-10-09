@@ -1,8 +1,7 @@
 import { fetchLoggedInUser } from '@revit/api/auth/user'
 import { UserT } from '@revit/shared/types/user'
-import { Spinner, View } from '@revit/ui'
-import { useRouter } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useAuthStore } from '@revit/app/store'
 
 type MaybeUser = UserT | null
 
@@ -20,6 +19,8 @@ export default function ContextProvider({ children }: { children: React.ReactNod
   const [user, setUser] = useState<MaybeUser>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
 
+  const { loading, fetchUser } = useAuthStore()
+
   useEffect(() => {
     const getUser = async () => {
       const { user, error } = await fetchLoggedInUser()
@@ -32,6 +33,8 @@ export default function ContextProvider({ children }: { children: React.ReactNod
         setUser(user as UserT)
       }
     }
+
+    fetchUser()
 
     getUser()
   }, [])

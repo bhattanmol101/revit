@@ -12,7 +12,12 @@ export const createComment = async (comment: CreateCommentT): Promise<void> => {
     throw new Error('invalid user')
   }
 
-  const { error } = await supabase.from('comment').insert({
+  let table = "comment"
+  if(comment.type === "forum"){
+    table = "forum_post_comment"
+  }
+
+  const { error } = await supabase.from(table).insert({
     user_id: user.id,
     post_id: comment.postId,
     content: comment.content,
@@ -29,10 +34,16 @@ export const createComment = async (comment: CreateCommentT): Promise<void> => {
   return
 }
 
-export const fetchCommentsByPostId = async (postId: string): Promise<CommentT[]> => {
+export const fetchCommentsByPostId = async (postId: string, type: string): Promise<CommentT[]> => {
   const supabase = await useSupabase()
+
+  let table = "comment"
+  if(type === "forum"){
+    table = "forum_post_comment"
+  }
+
   const { data: comments, error } = await supabase
-    .from('comment')
+    .from(table)
     .select(
       `
         id,

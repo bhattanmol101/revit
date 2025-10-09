@@ -127,8 +127,29 @@ select
 from forum_post_comment
 group by post_id;
 
-forum_summary
-
+create or replace view forum_trending as
+select 
+  f.id,
+  f.name,
+  f.description,
+  f.category,
+  f.category,
+  f.created_at,
+  p.username as created_by,
+  coalesce(count(distinct po.id), 0) as recent_post_count,
+  coalesce(count(distinct all_post.id), 0) as total_post_count,
+  coalesce(count(distinct m.user_id), 0) as member_count
+from forum f
+join profile p on p.id = f.created_by
+left join forum_post po 
+  on po.forum_id = f.id 
+  and po.created_at > now() - interval '7 days'
+left join forum_post all_post
+  on all_post.forum_id = f.id
+left join forum_membership m 
+  on m.forum_id = f.id
+group by f.id, f.name, f.description, f.created_at, p.username
+order by recent_post_count desc;
 
 -- Function to create a profile row after signup
 create or replace function handle_new_user()

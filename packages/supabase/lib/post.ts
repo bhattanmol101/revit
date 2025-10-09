@@ -1,5 +1,5 @@
 import { useSupabase } from '../client/useSupabase'
-import { CreatePostT, PostT, feed } from '@revit/shared/types/post'
+import { CreatePostT, feed, PostT } from '@revit/shared/types/post'
 import { uploadImages } from '../utils'
 
 export const createPost = async ({ caption, images, rating }: CreatePostT) => {
@@ -33,7 +33,7 @@ export const createPost = async ({ caption, images, rating }: CreatePostT) => {
   }
 }
 
-export const fetchPosts = async (): Promise<PostT[]> => {
+export const fetchPosts = async (from: number, to: number): Promise<PostT[]> => {
   const supabase = await useSupabase()
   const { data: posts, error } = await supabase
     .from('post')
@@ -49,6 +49,7 @@ export const fetchPosts = async (): Promise<PostT[]> => {
       `
     )
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   if (error) throw error
 

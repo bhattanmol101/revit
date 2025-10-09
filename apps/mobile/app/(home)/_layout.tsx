@@ -1,8 +1,6 @@
-import { useTheme, Button, View, Text, Dropdown, DropdownItem } from '@revit/ui'
-import { DrawerActions } from '@react-navigation/native'
-import { Home, Menu, Plus, Search, User } from '@tamagui/lucide-icons'
-// import { IconGearFill, IconGear, IconHouse, IconHouseFill } from '@tamagui-icons/icon-ph'
-import { router, Stack, Tabs, useNavigation, usePathname } from 'expo-router'
+import { Dropdown, DropdownItem, Text, View } from '@revit/ui'
+import { Blend, Home, Plus, Search, User } from '@tamagui/lucide-icons'
+import { Tabs } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Revit from '@revit/app/features/icons/Revit'
 import { useSession } from 'apps/mobile/components/Provider/ContextProvider'
@@ -91,14 +89,13 @@ export default function Layout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="forums/index"
         key="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ size, color, focused }) => (
-            <Search color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
+            <Blend color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
         }}
       />
@@ -111,6 +108,31 @@ export default function Layout() {
           tabBarIcon: ({ size, color, focused }) => (
             <User color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
+        }}
+      />
+      // Hidden tabs
+      <Tabs.Screen
+        name="forums/create"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="forums/[id]/index"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/[id]/index"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/edit"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

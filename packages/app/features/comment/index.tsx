@@ -1,36 +1,53 @@
-import { Send, Star } from '@tamagui/lucide-icons'
+import { Send } from '@tamagui/lucide-icons'
 import {
   Button,
-  Input,
-  Paragraph,
-  Spinner,
   Text,
   TextArea,
   Theme,
+  UniversalList,
   useToastController,
+  View,
   XStack,
   YStack,
 } from '@revit/ui'
-import { View } from '@revit/ui'
 import GetRating from '../common/GetRating'
 import { useEffect, useState } from 'react'
-import { createCommentApi, fetchPostCommentsApi } from '@revit/api/comment'
 import { PostT } from '@revit/shared/types/post'
 import Avatar from '../common/Avatar'
-import { UserT } from '@revit/shared/types/user'
 import { StatusT } from '@revit/shared/types/common'
-import { IDLE, LOADING, SUCCESS, FAILED } from '@revit/shared/utils/constants'
+import { IDLE, LOADING, SUCCESS } from '@revit/shared/utils/constants'
 import Loader from '../common/Loader'
 import { CommentT } from '@revit/shared/types/comment'
-import { Platform } from 'react-native'
+import { ForumPostT } from '@revit/shared/types/forum'
+import { useCommentStore } from '../../store/comment.store'
+import CommentCard from './Card'
+import { useAuthStore } from '../../store'
 
-const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
+const Comment = ({
+  post,
+  type = 'post',
+}: {
+  post: PostT | ForumPostT
+  type?: 'post' | 'forum'
+}) => {
   const toast = useToastController()
   const [rating, setRating] = useState(0)
   const [text, setText] = useState('')
   const [status, setStatus] = useState<StatusT>(IDLE)
-  const [fetchStatus, setFetchStatus] = useState<StatusT>(LOADING)
-  const [comments, setComments] = useState<CommentT[]>([])
+
+  const { user } = useAuthStore()
+
+  if (!user) {
+    return
+  }
+
+  const { loadingByPost, commentsByPost, fetchComments, addComment } = useCommentStore()
+
+  const clearComment = () => {
+    setText('')
+    setRating(0)
+    setStatus(IDLE)
+  }
 
   const handleComment = async () => {
     if (rating === 0) {
@@ -41,11 +58,13 @@ const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
       return
     }
     setStatus(LOADING)
-    const error = await createCommentApi({ postId: post.id, rating, content: text })
-    setStatus(IDLE)
+
+    const error = await addComment(post.id, { postId: post.id, rating, content: text, type })
+
+    clearComment()
     if (error) {
-      toast.show(Platform.OS === 'web' ? 'Failed to save comment!' : error.message, {
-        message: error.message,
+      toast.show(error.message, {
+        message: 'Something went wrong! Please try again later.',
         customData: { type: 'error' },
       })
       return
@@ -53,80 +72,28 @@ const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
     setStatus(SUCCESS)
   }
 
-  const fetchComments = async () => {
-    const { comments, error } = await fetchPostCommentsApi(post.id)
-    setFetchStatus(IDLE)
-
-    if (error) {
-      toast.show('Failed to fetch comments!', {
-        message: error.message,
-        customData: { type: 'error' },
-      })
-    }
-    if (comments) {
-      setComments(comments)
-    }
-  }
-
   useEffect(() => {
-    fetchComments()
-  }, [])
+    fetchComments(post.id, { type, refresh: true })
+  }, [post.id])
+
+  const renderComment = (comment: CommentT) => <CommentCard comment={comment} />
+
+  const comments = commentsByPost[post.id] || []
+
+  const height =
+    comments.length === 0 ? 60 : comments.length < 2 ? 100 : comments.length < 4 ? 200 : 400
 
   return (
-    <View borderTopWidth={1} borderTopColor="$black6">
+    <View flex={1} borderTopWidth={1} borderTopColor="$black6">
       {/* Existing Comments */}
-      {fetchStatus === LOADING ? (
-        <YStack justifyContent="center" alignItems="center" py="$3">
-          <Spinner />
-        </YStack>
-      ) : (
-        <View pt="$3" pb="$2" px="$3">
-          {comments.length > 0 ? (
-            comments.map((comment: CommentT) => (
-              <YStack key={comment.id} paddingBottom="$2" gap="$0.5">
-                <XStack alignItems="center" gap="$2">
-                  <Avatar image={comment.user.avatar} />
-
-                  <YStack
-                    borderRadius="$5"
-                    backgroundColor="$black5"
-                    px="$3"
-                    py="$2"
-                    gap="$1"
-                    position="relative"
-                  >
-                    <Text fontSize={13} fontWeight="$3">
-                      {comment.user.name}
-                    </Text>
-                    <Paragraph fontSize="$2" color="$white8">
-                      {comment.content}
-                    </Paragraph>
-                    <View position="absolute" top={0} right={0}>
-                      <XStack
-                        gap="$1"
-                        px="$2"
-                        py="$1"
-                        backgroundColor="$black7"
-                        borderRadius="$2"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Star size={12} color="#fbbf24" fill="#fbbf24" />
-                        <Text fontSize="$1">{comment.rating}</Text>
-                      </XStack>
-                    </View>
-                  </YStack>
-                </XStack>
-              </YStack>
-            ))
-          ) : (
-            <Text fontSize="$2" pt="$2" pb="$3" alignSelf="center">
-              No reviews yet, be the first one!
-            </Text>
-          )}
-        </View>
-      )}
-
+      <View pt="$2" height={height}>
+        <UniversalList
+          loading={loadingByPost[post.id]}
+          data={comments}
+          renderItem={renderComment}
+          emptyText="No reviews yet, be the first one!"
+        />
+      </View>
       {/* Add Comment */}
       <YStack
         px="$2"
@@ -152,7 +119,9 @@ const Comment = ({ user, post }: { user: UserT; post: PostT }) => {
                 flex={1}
                 color="$white3"
                 placeholder="Add a comment..."
+                height="$4.5"
                 value={text}
+                numberOfLines={10}
                 onChangeText={setText}
                 scrollbarWidth="none"
                 verticalAlign="top"

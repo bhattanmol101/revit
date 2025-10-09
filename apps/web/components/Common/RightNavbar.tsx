@@ -4,8 +4,13 @@ import { Paragraph, Text, XStack, YStack } from '@revit/ui'
 import CreatePostDialog from '../CreatePost'
 import { useSession } from '../Provider/ContextProvider'
 import Avatar from '@revit/app/features/common/Avatar'
+import { usePathname } from 'next/navigation'
+import CreatePostButton from '../CreatePostButton'
+import TrendingForums from '../TrendingForums'
 
 export default function RightNav() {
+  const pathname = usePathname()
+
   const { user } = useSession()
 
   if (!user) {
@@ -22,20 +27,11 @@ export default function RightNav() {
       px="$6"
       justifyContent="space-between"
     >
-      <YStack alignItems="flex-start" p="$6" gap="$4" backgroundColor="$black3" borderRadius="$5">
-        <XStack gap="$3" alignItems="center" justifyContent="center">
-          <Avatar size="$6" image={user.avatar} />
-          <YStack gap="$1">
-            <Text fontSize="$3" fontWeight={600}>
-              {user.name}
-            </Text>
-            <Paragraph fontSize="$2" fontWeight={400}>
-              {user.email}
-            </Paragraph>
-          </YStack>
-        </XStack>
-        <CreatePostDialog />
-      </YStack>
+      {pathname === '/home' ? (
+        <CreatePostButton user={user} />
+      ) : pathname.includes('/forums') ? (
+        <TrendingForums />
+      ) : null}
     </YStack>
   )
 }

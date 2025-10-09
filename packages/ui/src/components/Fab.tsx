@@ -1,21 +1,22 @@
 // components/Fab.tsx
-import { Button } from 'tamagui'
+import { Button, GetThemeValueForKey } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons' // Lucide icons work with Tamagui
 import { FC, JSX } from 'react'
 
 type FabProps = {
   onPress?: () => void
   icon?: JSX.Element
+  bg?: string | GetThemeValueForKey<'backgroundColor'>
 }
 
-export const Fab: FC<FabProps> = ({ onPress, icon }) => {
+export const Fab: FC<FabProps> = ({ onPress, icon, bg = '$blue8' }) => {
   return (
     <Button
       circular
-      size="$6"
-      bg="$blue8"
+      size="$5"
+      bg={bg}
       color="white"
-      icon={icon ?? <Plus size="$1.5"/>}
+      icon={icon ?? <Plus size="$1.5" />}
       onPress={onPress}
       position="absolute"
       bottom={20}

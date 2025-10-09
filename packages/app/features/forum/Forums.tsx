@@ -1,132 +1,94 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, H5, Tabs, TabsContentProps, Text, View, XStack } from '@revit/ui'
-import { useRouter } from 'solito/navigation'
-import { Separator } from '@revit/ui'
-import { SizableText } from '@revit/ui'
-import { StatusT } from '@revit/shared/types/common'
-import { IDLE, LOADING } from '@revit/shared/utils/constants'
+import { Fab, Separator, SizableText, Tabs, TabsContentProps, UniversalList, View } from '@revit/ui'
 import { ForumT } from '@revit/shared/types/forum'
-import { fetchForumsByUserApi } from '@revit/api/forum'
-import Loader from '../common/Loader'
-import { Image } from '@revit/ui'
-import { YStack } from '@revit/ui'
-import { Users } from '@tamagui/lucide-icons'
 import ForumCard from './Card'
+import { Plus } from '@tamagui/lucide-icons'
+import { Platform } from 'react-native'
+import { useRouter } from 'solito/navigation'
+import { useForumStore } from '../../store/forum.store'
+
+const TABS = ['created', 'joined']
 
 const Forums = () => {
-  const [activeTab, setActiveTab] = useState<string>('tab1')
-  const [status, setStatus] = useState<StatusT>(LOADING)
-  const [userForums, setUserForums] = useState<ForumT[]>([])
-  const [joinedForums, setJoinedForums] = useState<ForumT[]>([])
+  const router = useRouter()
 
-  const fetchUserForums = async () => {
-    if (userForums.length > 0) {
-      return
-    }
+  const [activeTab, setActiveTab] = useState<string>(TABS[0])
 
-    const { forums, error } = await fetchForumsByUserApi()
-    setStatus(IDLE)
-    if (error) {
-      // toas
-      return
-    }
-    if (forums) {
-      setUserForums(forums)
-    }
-  }
+  const { loading, userForums, joinedForums, fetchUserForums, fetchJoinedForums } = useForumStore()
 
-  const fetchJoinedForums = async () => {
-    if (joinedForums.length > 0) {
-      return
-    }
-    const { forums, error } = await fetchForumsByUserApi()
-    setStatus(IDLE)
-    if (error) {
-      // toas
-      return
-    }
-    if (forums) {
-      setJoinedForums(forums)
-    }
+  const handleCreateForum = () => {
+    router.push('/forums/create')
   }
 
   useEffect(() => {
-    if (activeTab == 'tab1') {
-      fetchUserForums()
+    if (activeTab == TABS[0]) {
+      fetchUserForums({ refresh: true })
     } else {
-      fetchJoinedForums()
+      fetchJoinedForums({ refresh: true })
     }
   }, [activeTab])
 
+  const data: ForumT[] = activeTab == TABS[0] ? userForums : joinedForums
+  const renderItem = (forum: ForumT) => <ForumCard key={forum.id} forum={forum} />
+
   return (
     <View flex={1}>
-      {/* Forum Top Tabs */}
-      <Tabs
-        defaultValue="tab1"
-        orientation="horizontal"
-        flexDirection="column"
-        width="100%"
-        onValueChange={setActiveTab}
-      >
-        <Tabs.List
-          separator={<Separator vertical />}
-          disablePassBorderRadius="bottom"
-          aria-label="Manage your account"
-        >
-          <Tabs.Tab
-            focusStyle={{
-              backgroundColor: '$color4',
-            }}
-            flex={1}
-            value="tab1"
+      <UniversalList
+        listHeaderComponent={
+          <Tabs
+            defaultValue={TABS[0]}
+            orientation="horizontal"
+            flexDirection="column"
+            width="100%"
+            mt="$1"
+            onValueChange={setActiveTab}
           >
-            <SizableText fontFamily="$body" textAlign="center">
-              Your Forums
-            </SizableText>
-          </Tabs.Tab>
-          <Tabs.Tab
-            focusStyle={{
-              backgroundColor: '$color4',
-            }}
-            flex={1}
-            value="tab2"
-          >
-            <SizableText fontFamily="$body" textAlign="center">
-              Joined Forums
-            </SizableText>
-          </Tabs.Tab>
-        </Tabs.List>
-        <Separator />
-        <TabsContent value="tab1" flex={1}>
-          <Loader status={status} />
-          {userForums.map((forum) => (
-            <ForumCard key={forum.id} forum={forum} />
-          ))}
-        </TabsContent>
-
-        <TabsContent value="tab2">
-          <H5>Connections</H5>
-        </TabsContent>
-      </Tabs>
+            <Separator mt="$1" />
+            <Tabs.List
+              separator={<Separator vertical />}
+              disablePassBorderRadius="bottom"
+              aria-label="Manage your account"
+            >
+              <Tabs.Tab
+                focusStyle={{
+                  backgroundColor: '$color4',
+                }}
+                flex={1}
+                value={TABS[0]}
+              >
+                <SizableText fontFamily="$body" textAlign="center">
+                  Your Forums
+                </SizableText>
+              </Tabs.Tab>
+              <Tabs.Tab
+                focusStyle={{
+                  backgroundColor: '$color4',
+                }}
+                flex={1}
+                value={TABS[1]}
+              >
+                <SizableText fontFamily="$body" textAlign="center">
+                  Joined Forums
+                </SizableText>
+              </Tabs.Tab>
+            </Tabs.List>
+            <Separator />
+          </Tabs>
+        }
+        emptyText="Nothing here, create or join forums."
+        data={data}
+        loading={loading}
+        renderItem={renderItem}
+      />
+      {Platform.OS != 'web' && <Fab bg="$blue4" icon={<Plus />} onPress={handleCreateForum} />}
     </View>
   )
 }
 
 const TabsContent = (props: TabsContentProps) => {
-  return (
-    <Tabs.Content
-      key="tab1"
-      alignItems="center"
-      justifyContent="center"
-      flex={1}
-      width="100%"
-      {...props}
-    >
-      {props.children}
-    </Tabs.Content>
-  )
+  return <Tabs.Content {...props}>{props.children}</Tabs.Content>
 }
 
 export default Forums

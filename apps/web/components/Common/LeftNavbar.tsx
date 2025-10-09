@@ -1,14 +1,14 @@
 'use client'
 
-import { useRouter, usePathname } from 'next/navigation'
-import { Home, Search, Bell, User, LogOut } from '@tamagui/lucide-icons'
+import { usePathname, useRouter } from 'next/navigation'
+import { Blend, Home, LogOut, Search, User } from '@tamagui/lucide-icons'
 import { Button, Separator, View, YStack } from '@revit/ui'
-import CreateForumDialog from '@revit/app/features/forum/Create'
+import CreateForumDialog from '@/components/CreateForum'
 
 const navItems = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/explore', label: 'Explore', icon: Search },
-  { href: '/forums', label: 'Forums', icon: Bell },
+  { href: '/forums', label: 'Forums', icon: Blend },
   { href: '/profile', label: 'Profile', icon: User },
 ]
 

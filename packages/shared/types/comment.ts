@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { userSummary } from './user'
 
-const commmentCreateSchema = z.object({
+const commentCreateSchema = z.object({
+  type: z.string().default('post').optional(),
   postId: z.string(),
   content: z.string().optional(),
   rating: z.number(),
@@ -15,7 +16,7 @@ const commentSchema = z.object({
   user: userSummary,
 })
 
-export type CreateCommentT = z.infer<typeof commmentCreateSchema>
+export type CreateCommentT = z.infer<typeof commentCreateSchema>
 
 export type CommentT = z.infer<typeof commentSchema>
 

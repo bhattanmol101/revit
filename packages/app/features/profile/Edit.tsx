@@ -1,24 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Camera, Edit3, Send, X } from '@tamagui/lucide-icons'
 import {
   Button,
-  Text,
+  Dialog,
+  FieldError,
+  InputField,
+  Shake,
   TextArea,
+  Theme,
+  Unspaced,
+  useToastController,
   View,
   YStack,
-  useToastController,
-  Shake,
-  Theme,
-  InputField,
-  Dialog,
-  Unspaced,
 } from '@revit/ui'
 import Avatar from '../common/Avatar'
-import { FieldError } from '@revit/ui'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { UpdateUserT, UserT, updateUserSchema } from '@revit/shared/types/user'
+import { updateUserSchema, UpdateUserT, UserT } from '@revit/shared/types/user'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as ImagePickerExpo from 'expo-image-picker'
 import { updateUserApi } from '@revit/api/user'
@@ -105,7 +104,7 @@ const EditProfileDialog = ({ user }: { user: UserT }) => {
   )
 }
 
-const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: () => void }) => {
+export const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: () => void }) => {
   const toast = useToastController()
 
   const [status, setStatus] = useState<StatusT>(IDLE)
@@ -170,6 +169,12 @@ const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: () => vo
       }
     }
   }
+
+  useEffect(() => {
+    return () => {
+      setStatus(IDLE)
+    }
+  }, [])
 
   return (
     <YStack flex={1} gap="$4">
@@ -238,11 +243,15 @@ const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: () => vo
       {/* Post Button */}
       <View paddingBottom="$5" paddingTop="$2" mt="$2">
         <Theme inverse>
-          <Button onPress={handleSubmit(onSubmit)} iconAfter={<Loader status={status} />}>
+          <Button
+            onPress={handleSubmit(onSubmit)}
+            iconAfter={<Loader status={status} />}
+            disabled={status === LOADING}
+          >
             <Button.Icon>
               <Send size={18} />
             </Button.Icon>
-            <Button.Text>Edit Profile</Button.Text>
+            <Button.Text marginTop="$1.5">Edit Profile</Button.Text>
           </Button>
         </Theme>
       </View>

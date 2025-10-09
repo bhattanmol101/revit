@@ -4,10 +4,6 @@
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
-    "paths": {
-      "@revit/ui/*": ["./packages/ui/*"],
-      "@/*": ["./*"]
-    }
   },
   "references": []
 }

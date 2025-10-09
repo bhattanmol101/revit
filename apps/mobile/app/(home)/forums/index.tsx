@@ -1,12 +1,7 @@
-import { Text } from '@revit/ui'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Forums from '@revit/app/features/forum/Forums'
 
-function Profile() {
-  return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
-      <Text>Forum</Text>
-    </SafeAreaView>
-  )
+const ForumsPage = () => {
+  return <Forums />
 }
 
-export default Profile
+export default ForumsPage

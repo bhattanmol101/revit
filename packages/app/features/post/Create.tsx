@@ -5,19 +5,19 @@ import { KeyboardAvoidingView } from 'react-native'
 import { Send } from '@tamagui/lucide-icons'
 import {
   Button,
-  SwitchWithLabel,
+  FieldError,
   ImagePicker,
+  Shake,
+  SwitchWithLabel,
   Text,
   TextArea,
+  Theme,
+  useToastController,
   View,
   XStack,
   YStack,
-  useToastController,
-  Shake,
-  Theme,
 } from '@revit/ui'
 import GetRating from '../common/GetRating'
-import { FieldError } from '@revit/ui'
 import { createPostApi } from '@revit/api/post'
 import Loader from '../common/Loader'
 import { StatusT } from '@revit/shared/types/common'
@@ -77,7 +77,7 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
   }
 
   return (
-    <YStack flex={1} gap="$6" p="$3" minWidth="100%" justifyContent="space-between">
+    <YStack flex={1} gap="$6" minWidth="100%" justifyContent="space-between">
       {/* Review Details Section */}
       <YStack gap="$3">
         <KeyboardAvoidingView>
@@ -86,7 +86,7 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
               <TextArea
                 width="100%"
                 color="$white3"
-                height="$10"
+                minHeight="$10"
                 placeholder="Share your experince or get something reviewd...."
                 value={caption}
                 onChangeText={handleCaptionChange}

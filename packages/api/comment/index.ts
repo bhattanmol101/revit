@@ -11,12 +11,13 @@ export const createCommentApi = async (comment: CreateCommentT): Promise<Error |
 }
 
 export const fetchPostCommentsApi = async (
-  postId: string
-): Promise<{ comments?: CommentT[]; error?: Error }> => {
+  postId: string,
+  type: string
+): Promise<{ comments: CommentT[]; error?: Error }> => {
   try {
-    const comments = await fetchCommentsByPostId(postId)
+    const comments = await fetchCommentsByPostId(postId, type)
     return { comments }
   } catch (e: unknown) {
-    return { error: errorHandler(e) }
+    return { comments: [], error: errorHandler(e) }
   }
 }

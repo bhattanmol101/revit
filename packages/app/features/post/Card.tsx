@@ -2,16 +2,23 @@
 
 import { useState } from 'react'
 import { MessageCircle, Star } from '@tamagui/lucide-icons'
-import { Button, Card, Paragraph, Text, XStack, YStack, ImageCarousel } from '@revit/ui'
+import { Button, Card, ImageCarousel, Paragraph, Text, View, XStack, YStack } from '@revit/ui'
 import { PostMenu } from './Menu'
 import Comment from '../comment'
 import Avatar from '../common/Avatar'
 import { PostT } from '@revit/shared/types/post'
 import { UserT } from '@revit/shared/types/user'
 import { timeAgo } from '@revit/api/utils'
+import { useRouter } from 'solito/navigation'
+import Rating from '../common/Rating'
 
 const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
+  const router = useRouter()
   const [showComments, setShowComments] = useState(false)
+
+  const handleUserClick = () => {
+    router.push(`/profile/${post.user.id}`)
+  }
 
   const avgRating = post.comment.length > 0 ? post.comment[0].avgRating : 0
   const commentCount = post.comment.length > 0 ? post.comment[0].commentCount : 0
@@ -29,7 +36,14 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
         <XStack alignItems="center" gap="$2">
           <Avatar size="$3" image={post.user.avatar} />
           <YStack>
-            <Text fontSize="$2">{post.user.name}</Text>
+            <Text
+              fontSize="$2"
+              hoverStyle={{ textDecorationLine: 'underline' }}
+              cursor="pointer"
+              onPress={handleUserClick}
+            >
+              {post.user.name}
+            </Text>
             <Text fontSize="$1" color="$black11">
               {timeAgo(post.createdAt)}
             </Text>
@@ -39,6 +53,11 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
       </Card.Header>
       {/* Post Content */}
       <YStack paddingHorizontal="$3" paddingBottom="$2">
+        {post.rating && (
+          <View mb="$2">
+            <Rating size={14} showRating={false} rating={post.rating} />
+          </View>
+        )}
         <Paragraph fontWeight={400}>{post.caption}</Paragraph>
 
         {/* Tags */}

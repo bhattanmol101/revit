@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DarkTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Slot, SplashScreen, Stack, useRouter } from 'expo-router'
+import { Slot, SplashScreen, useRouter } from 'expo-router'
 import { Provider } from '@revit/app/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
 import ContextProvider, { useSession } from '../components/Provider/ContextProvider'
@@ -49,7 +49,6 @@ const InitialLayout = () => {
     if (initialized) {
       setLoading(false)
       if (user) {
-        console.log('log')
         router.replace('/home')
       } else {
         router.replace('/')

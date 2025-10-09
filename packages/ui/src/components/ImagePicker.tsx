@@ -10,10 +10,12 @@ import { useToastController } from '@tamagui/toast'
 export function ImagePicker({
   name = 'Pick Images',
   maxImages = 5,
+  height = 500,
   handleImageChange,
 }: {
   name?: string
   maxImages?: number
+  height?: number
   handleImageChange: (images: (File | string)[]) => void
 }) {
   const toast = useToastController()
@@ -117,8 +119,8 @@ export function ImagePicker({
           >
             <XStack>
               {images.map((img, index) => (
-                <YStack key={index} pos="relative" w={parentWidth} h={500}>
-                  <Image src={img.uri} w={parentWidth} h={500} objectFit="cover" />
+                <YStack key={index} pos="relative" w={parentWidth} h={height}>
+                  <Image src={img.uri} w={parentWidth} h={height} objectFit="cover" />
                   <Button
                     size="$2"
                     circular

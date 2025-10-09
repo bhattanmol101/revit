@@ -33,8 +33,19 @@ export const userSummary = z.object({
   avatar: z.string().nullable(),
 })
 
+export const userProfileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatar: z.string().nullable(),
+  bio: z.string().nullable(),
+  createdAt: z.coerce.date(),
+  postCount: z.number().default(0),
+})
+
 export type UserT = z.infer<typeof userSchema>
 
 export type UpdateUserT = z.infer<typeof updateUserSchema>
 
 export type UserSummaryT = z.infer<typeof userSummary>
+
+export type UserProfileT = z.infer<typeof userProfileSchema>

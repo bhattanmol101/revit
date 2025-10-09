@@ -1,4 +1,3 @@
-import { SafeAreaView } from 'react-native-safe-area-context'
 import Profile from '@revit/app/features/profile'
 import { useSession } from '../../../components/Provider/ContextProvider'
 
@@ -8,11 +7,7 @@ function ProfileScreen() {
     return
   }
 
-  return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
-      <Profile user={user} />
-    </SafeAreaView>
-  )
+  return <Profile userId={user.id} user={user} />
 }
 
 export default ProfileScreen
