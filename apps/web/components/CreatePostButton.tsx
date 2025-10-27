@@ -1,10 +1,15 @@
 import CreatePostDialog from '@/components/CreatePost'
 import Avatar from '@revit/app/features/common/Avatar'
-import { UserT } from '@revit/shared/types/user'
 import { Paragraph, Text, XStack, YStack } from '@revit/ui'
-import React from 'react'
+import { useAuthStore } from '@revit/app/store'
 
-const CreatePostButton = ({ user }: { user: UserT }) => {
+const CreatePostButton = () => {
+  const { user } = useAuthStore()
+
+  if (!user) {
+    return null
+  }
+
   return (
     <YStack alignItems="flex-start" p="$6" gap="$4" backgroundColor="$black3" borderRadius="$5">
       <XStack gap="$3" alignItems="center" justifyContent="center">

@@ -1,16 +1,18 @@
 import { create } from 'zustand'
 import { useAuthStore } from './auth.store'
-import { ForumPostT, ForumT } from '@revit/shared/types/forum'
+import { ForumPostT, ForumT, TrendingForumT } from '@revit/shared/types/forum'
 import {
   fetchForumByIdApi,
   fetchForumsByUserApi,
   fetchForumsJoinedByUserApi,
+  fetchTrendingForumsApi,
 } from '@revit/api/forum'
 import { fetchForumPostsApi } from '@revit/api/forum/post'
 
 type ForumState = {
   userForums: ForumT[]
   joinedForums: ForumT[]
+  trendingForums: TrendingForumT[]
   forum: ForumT | null
   loading: boolean
   hasMore: boolean
@@ -19,6 +21,7 @@ type ForumState = {
   fetchForum: (forumId: string) => Promise<void>
   fetchUserForums: (opts?: { refresh?: boolean }) => Promise<void>
   fetchJoinedForums: (opts?: { refresh?: boolean }) => Promise<void>
+  fetchTrendingForums: () => Promise<void>
 }
 
 const PAGE_SIZE = 10
@@ -26,6 +29,7 @@ const PAGE_SIZE = 10
 export const useForumStore = create<ForumState>((set, get) => ({
   userForums: [],
   joinedForums: [],
+  trendingForums: [],
   forum: null,
   loading: false,
   hasMore: true,
@@ -62,7 +66,6 @@ export const useForumStore = create<ForumState>((set, get) => ({
     set({
       userForums: refresh ? forums : [...currentForums, ...forums],
       hasMore: forums.length === PAGE_SIZE,
-      loading: false,
     })
   },
 
@@ -87,7 +90,22 @@ export const useForumStore = create<ForumState>((set, get) => ({
     set({
       joinedForums: refresh ? forums : [...currentForums, ...forums],
       hasMore: forums.length === PAGE_SIZE,
-      loading: false,
+    })
+  },
+
+  fetchTrendingForums: async () => {
+    set({ loading: true, error: null })
+
+    const { forums, error } = await fetchTrendingForumsApi()
+
+    set({ loading: false })
+    if (error) {
+      set({ error: error.message })
+      return
+    }
+
+    set({
+      trendingForums: forums,
     })
   },
 }))

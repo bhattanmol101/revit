@@ -90,6 +90,25 @@ export const fetchForumsJoinedByUser = async (): Promise<ForumT[]> => {
     throw new Error('invalid user session')
   }
 
+  const { data: memberships, error: memError } = await supabase
+    .from('forum_membership')
+    .select('forum_id')
+    .eq('user_id', user.id)
+
+  if (memError) throw memError
+
+  if (!memberships) {
+    console.log('User has not joined any forums.')
+    return []
+  }
+
+  const joinedIds = memberships.map((m) => m.forum_id)
+
+  if (joinedIds.length === 0) {
+    console.log('User has not joined any forums.')
+    return []
+  }
+
   const { data: forums, error } = await supabase
     .from('forum')
     .select(
@@ -103,14 +122,14 @@ export const fetchForumsJoinedByUser = async (): Promise<ForumT[]> => {
         creator:profile!forum_created_by_fkey(id, name:full_name, avatar:avatar_url),
         members:forum_membership_summary(memberCount:member_count),
         posts:forum_post_summary(postCount:post_count),
-        memberships:forum_membership!left (user_id)
     `
     )
-    .eq('forum_membership.user_id', user.id)
-    .neq('created_by', user.id)
+    .in('id', joinedIds)
     .order('created_at', { ascending: false })
 
   if (error) throw error
+
+  console.log(forums)
 
   if (!forums) {
     return []

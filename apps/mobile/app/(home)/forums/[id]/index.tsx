@@ -1,9 +1,9 @@
-import { useSession } from '../../../../components/Provider/ContextProvider'
 import React from 'react'
 import Forum from '@revit/app/features/forum'
+import { useAuthStore } from '@revit/app/store'
 
 const ForumScreen = () => {
-  const { user } = useSession()
+  const { user } = useAuthStore()
 
   if (!user) {
     return

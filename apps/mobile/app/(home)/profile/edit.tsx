@@ -1,10 +1,10 @@
 import { EditProfile } from '@revit/app/features/profile/Edit'
-import { useSession } from '../../../components/Provider/ContextProvider'
 import { ScrollView, View } from '@revit/ui'
 import { useRouter } from 'expo-router'
+import { useAuthStore } from '@revit/app/store'
 
 function ProfileEditScreen() {
-  const { user } = useSession()
+  const { user } = useAuthStore()
   if (!user) {
     return
   }

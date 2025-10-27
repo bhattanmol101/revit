@@ -2,6 +2,12 @@ import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 import { createJSONStorage } from 'zustand/middleware'
 
+const noopStorage = {
+  getItem: async (name: string) => null,
+  setItem: async (name: string, value: string) => {},
+  removeItem: async (name: string) => {},
+}
+
 const expoSecureStorage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
@@ -31,5 +37,5 @@ const expoSecureStorage = {
 // Only import localStorage when on web
 export const storage =
   Platform.OS === 'web'
-    ? createJSONStorage(() => localStorage)
+    ? createJSONStorage(() => noopStorage)
     : createJSONStorage(() => expoSecureStorage)

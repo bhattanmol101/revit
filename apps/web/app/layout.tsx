@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { NextTamaguiProvider } from '@revit/app/provider/NextTamaguiProvider'
-import ContextProvider from '@/components/Provider/ContextProvider'
+import { AuthProvider } from '@revit/app/Provider/auth/AuthProvider'
 
 export const metadata: Metadata = {
   title: 'Tamagui • App Router',
@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body>
         <NextTamaguiProvider>
-          <ContextProvider>{children}</ContextProvider>
+          <AuthProvider>{children}</AuthProvider>
         </NextTamaguiProvider>
       </body>
     </html>

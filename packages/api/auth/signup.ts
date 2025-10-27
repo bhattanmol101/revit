@@ -1,12 +1,8 @@
-import { UserSignupT } from '../types/user'
 import { useSupabase } from '@revit/supabase/client/useSupabase'
 import { errorHandler } from '../utils'
+import { SignupT } from '@revit/shared/types/user'
 
-export const signUp = async ({
-  name,
-  email,
-  password,
-}: UserSignupT): Promise<Error | undefined> => {
+export const signUpApi = async ({ name, email, password }: SignupT): Promise<Error | undefined> => {
   try {
     const supabase = await useSupabase()
 
@@ -14,7 +10,6 @@ export const signUp = async ({
       email,
       password,
       options: {
-        // emailRedirectTo: process.env.EXPO_PUBLIC_AUTH_EMAIL_REDIRECT,
         data: {
           full_name: name,
         },

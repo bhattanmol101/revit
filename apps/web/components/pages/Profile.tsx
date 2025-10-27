@@ -2,10 +2,10 @@
 
 import React from 'react'
 import Profile from '@revit/app/features/profile'
-import { useSession } from '../Provider/ContextProvider'
+import { useAuthStore } from '@revit/app/store'
 
 const ProfilePage = () => {
-  const { user } = useSession()
+  const { user } = useAuthStore()
 
   if (!user) return null
 

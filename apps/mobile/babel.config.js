@@ -12,10 +12,11 @@ module.exports = (api) => {
           root: ['../..'],
           alias: {
             // define aliases to shorten the import paths
+            '@revit/api': '../../packages/api',
             '@revit/app': '../../packages/app',
             '@revit/ui': '../../packages/ui',
           },
-          extensions: ['.js', '.jsx', '.tsx', '.ios.js', '.android.js'],
+          extensions: ['.ts', '.jsx', '.tsx', '.ios.js', '.android.js'],
         },
       ],
       'react-native-reanimated/plugin',

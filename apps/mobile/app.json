@@ -1,8 +1,9 @@
 {
   "expo": {
     "name": "revit-mobile",
-    "slug": "yourprojectsname",
-    "scheme": "yourprojectsname",
+    "slug": "revit",
+    "jsEngine": "hermes",
+    "scheme": "revit-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,25 +16,51 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourprojectsname.app"
+      "bundleIdentifier": "com.aeradron.revit",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.yourprojectsname.app",
-      "softwareKeyboardLayoutMode": "pan"
+      "package": "com.aeradron.revit",
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "version": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      "expo-router",
+      "expo-font"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "anmolbhat",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9688f0c1-4465-43bb-ae5f-79d304e88b95"
+      }
     }
   }
 }

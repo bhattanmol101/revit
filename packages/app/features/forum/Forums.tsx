@@ -1,37 +1,69 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Fab, Separator, SizableText, Tabs, TabsContentProps, UniversalList, View } from '@revit/ui'
-import { ForumT } from '@revit/shared/types/forum'
+import {
+  Fab,
+  isWeb,
+  Separator,
+  SizableText,
+  Tabs,
+  TabsContentProps,
+  UniversalList,
+  View,
+} from '@revit/ui'
+import { ForumT, TrendingForumT } from '@revit/shared/types/forum'
 import ForumCard from './Card'
 import { Plus } from '@tamagui/lucide-icons'
-import { Platform } from 'react-native'
 import { useRouter } from 'solito/navigation'
 import { useForumStore } from '../../store/forum.store'
+import TrendingForumCard from '@revit/app/features/forum/TrendingCard'
 
-const TABS = ['created', 'joined']
+const TABS = ['created', 'joined', 'trending']
 
 const Forums = () => {
   const router = useRouter()
 
   const [activeTab, setActiveTab] = useState<string>(TABS[0])
 
-  const { loading, userForums, joinedForums, fetchUserForums, fetchJoinedForums } = useForumStore()
+  const {
+    loading,
+    userForums,
+    joinedForums,
+    trendingForums,
+    fetchUserForums,
+    fetchJoinedForums,
+    fetchTrendingForums,
+  } = useForumStore()
 
   const handleCreateForum = () => {
     router.push('/forums/create')
   }
 
   useEffect(() => {
-    if (activeTab == TABS[0]) {
-      fetchUserForums({ refresh: true })
-    } else {
-      fetchJoinedForums({ refresh: true })
+    switch (activeTab) {
+      case TABS[0]:
+        fetchUserForums({ refresh: true })
+        break
+      case TABS[1]:
+        fetchJoinedForums({ refresh: true })
+        break
+      case TABS[2]:
+        fetchTrendingForums()
+        break
+      default:
+        break
     }
   }, [activeTab])
 
-  const data: ForumT[] = activeTab == TABS[0] ? userForums : joinedForums
-  const renderItem = (forum: ForumT) => <ForumCard key={forum.id} forum={forum} />
+  const data: ForumT[] | TrendingForumT[] =
+    activeTab == TABS[0] ? userForums : activeTab === TABS[1] ? joinedForums : trendingForums
+
+  const renderItem = (forum: ForumT | TrendingForumT) =>
+    activeTab == TABS[2] ? (
+      <TrendingForumCard key={forum.id} forum={forum as TrendingForumT} />
+    ) : (
+      <ForumCard key={forum.id} forum={forum as ForumT} />
+    )
 
   return (
     <View flex={1}>
@@ -59,7 +91,7 @@ const Forums = () => {
                 value={TABS[0]}
               >
                 <SizableText fontFamily="$body" textAlign="center">
-                  Your Forums
+                  Created
                 </SizableText>
               </Tabs.Tab>
               <Tabs.Tab
@@ -70,9 +102,22 @@ const Forums = () => {
                 value={TABS[1]}
               >
                 <SizableText fontFamily="$body" textAlign="center">
-                  Joined Forums
+                  Joined
                 </SizableText>
               </Tabs.Tab>
+              {!isWeb && (
+                <Tabs.Tab
+                  focusStyle={{
+                    backgroundColor: '$color4',
+                  }}
+                  flex={1}
+                  value={TABS[2]}
+                >
+                  <SizableText fontFamily="$body" textAlign="center">
+                    Trending
+                  </SizableText>
+                </Tabs.Tab>
+              )}
             </Tabs.List>
             <Separator />
           </Tabs>
@@ -82,7 +127,7 @@ const Forums = () => {
         loading={loading}
         renderItem={renderItem}
       />
-      {Platform.OS != 'web' && <Fab bg="$blue4" icon={<Plus />} onPress={handleCreateForum} />}
+      {!isWeb && <Fab bg="$blue4" icon={<Plus />} onPress={handleCreateForum} />}
     </View>
   )
 }

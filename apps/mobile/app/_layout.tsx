@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { DarkTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Slot, SplashScreen, useRouter } from 'expo-router'
+import { SplashScreen, Stack } from 'expo-router'
 import { Provider } from '@revit/app/provider'
 import { NativeToast } from '@revit/ui/src/NativeToast'
-import ContextProvider, { useSession } from '../components/Provider/ContextProvider'
-import { Spinner, View } from '@revit/ui'
+import { AuthProvider } from '@revit/app/provider/auth/AuthProvider'
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
@@ -39,43 +39,27 @@ export default function App() {
   return <RootLayoutNav />
 }
 
-const InitialLayout = () => {
-  const router = useRouter()
-  const { user, initialized } = useSession()
-
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (initialized) {
-      setLoading(false)
-      if (user) {
-        router.replace('/home')
-      } else {
-        router.replace('/')
-      }
-    }
-  }, [initialized])
-
-  if (loading) {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center">
-        <Spinner size="large" />
-      </View>
-    )
-  }
-
-  return
-}
-
 function RootLayoutNav() {
+  const insets = useSafeAreaInsets()
   return (
     <Provider>
       <ThemeProvider value={DarkTheme}>
-        <ContextProvider>
-          <InitialLayout />
-          <Slot />
-          <NativeToast />
-        </ContextProvider>
+        <SafeAreaProvider
+          style={{
+            flex: 1,
+            paddingBottom: insets.bottom,
+            backgroundColor: 'black',
+          }}
+        >
+          <AuthProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="signin" />
+              <Stack.Screen name="signup" />
+            </Stack>
+          </AuthProvider>
+        </SafeAreaProvider>
+        <NativeToast />
       </ThemeProvider>
     </Provider>
   )

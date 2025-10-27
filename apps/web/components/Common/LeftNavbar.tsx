@@ -2,8 +2,10 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { Blend, Home, LogOut, Search, User } from '@tamagui/lucide-icons'
-import { Button, Separator, View, YStack } from '@revit/ui'
+import { Button, Separator, Spinner, View, YStack } from '@revit/ui'
 import CreateForumDialog from '@/components/CreateForum'
+import { useAuthStore } from '@revit/app/store'
+import { useState } from 'react'
 
 const navItems = [
   { href: '/home', label: 'Home', icon: Home },
@@ -15,8 +17,17 @@ const navItems = [
 export default function LeftNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { signOut } = useAuthStore()
+  const [logoutLoading, setLogoutLoading] = useState(false)
 
   const handleRouteClick = (pathname: string) => router.push(pathname)
+
+  const handleLogout = async () => {
+    setLogoutLoading(true)
+    await signOut()
+    setLogoutLoading(false)
+    router.replace('/signin')
+  }
 
   return (
     <YStack
@@ -47,7 +58,12 @@ export default function LeftNav() {
         <CreateForumDialog />
       </YStack>
       <View>
-        <Button chromeless>
+        <Button
+          chromeless
+          onPress={handleLogout}
+          disabled={logoutLoading}
+          iconAfter={logoutLoading ? <Spinner /> : null}
+        >
           <Button.Icon>
             <LogOut color="$red10" size={24} />
           </Button.Icon>

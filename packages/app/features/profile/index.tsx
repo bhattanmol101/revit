@@ -20,12 +20,10 @@ import { useRouter } from 'solito/navigation'
 export default function Profile({ userId, user }: { userId: string; user?: UserT }) {
   const router = useRouter()
 
-  const [userStatus, setUserStatus] = useState<StatusT>(user ? IDLE : LOADING)
+  const [userStatus, setUserStatus] = useState<StatusT>(LOADING)
   const [status, setStatus] = useState<StatusT>(LOADING)
   const [posts, setPosts] = useState<PostT[]>([])
-  const [userProfile, setUserProfile] = useState<UserProfileT | undefined>(
-    user ? { ...user, postCount: -1 } : undefined
-  )
+  const [userProfile, setUserProfile] = useState<UserProfileT>()
 
   const handleMobileEditProfile = () => {
     router.push('/profile/edit')
@@ -33,11 +31,13 @@ export default function Profile({ userId, user }: { userId: string; user?: UserT
 
   const fetchUserProfile = async () => {
     const { user: userProfile, error } = await fetchUserProfileByIdApi(userId)
+
     if (error) {
       return
     }
     setUserStatus(IDLE)
     if (userProfile) {
+      console.log('Fetching user profile', typeof userProfile.createdAt)
       setUserProfile(userProfile)
     }
   }
@@ -61,7 +61,7 @@ export default function Profile({ userId, user }: { userId: string; user?: UserT
 
   if (userStatus === LOADING) {
     return (
-      <View flex={1} justifyContent={'center'} alignContent={'center'}>
+      <View flex={1} justifyContent="center" alignContent="center">
         <Loader status={userStatus} />
       </View>
     )
@@ -134,7 +134,7 @@ export default function Profile({ userId, user }: { userId: string; user?: UserT
         </View>
       }
       data={posts}
-      status={status}
+      loading={status === LOADING}
       renderItem={(item: PostT) => <PostCard key={item.id} user={user as UserT} post={item} />}
     />
   )

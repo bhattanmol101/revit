@@ -1,106 +1,65 @@
-import { Dropdown, DropdownItem, Text, View } from '@revit/ui'
 import { Blend, Home, Plus, Search, User } from '@tamagui/lucide-icons'
 import { Tabs } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Revit from '@revit/app/features/icons/Revit'
-import { useSession } from 'apps/mobile/components/Provider/ContextProvider'
-import Avatar from '@revit/app/features/common/Avatar'
-import { useState } from 'react'
 
 export default function Layout() {
-  const { user } = useSession()
   const insets = useSafeAreaInsets()
-  const [open, setOpen] = useState(false)
-
-  const onOpenChange = () => {
-    setOpen(!open)
-  }
-  let items: DropdownItem[] = [
-    {
-      key: 'profile',
-      label: 'Profile',
-    },
-  ]
 
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
           paddingTop: 10,
-          marginBottom: insets.bottom,
           height: 60,
           alignContent: 'center',
           justifyContent: 'center',
         },
-        headerStyle: {
-          height: 82,
-        },
-        headerTitle: () => (
-          <Text marginLeft="$1" fontSize="$4" letterSpacing={0.5}>
-            Revit
-          </Text>
-        ),
-        headerLeft: () => (
-          <View marginLeft="$3">
-            <Revit width={36} height={36} />
-          </View>
-        ),
-        headerRight: () => (
-          <View marginRight="$3" onPress={onOpenChange}>
-            <Dropdown
-              items={items}
-              open={open}
-              onOpenChange={onOpenChange}
-              align="right"
-              label={<Avatar size="$3" image={user?.avatar} />}
-            />
-          </View>
-        ),
       }}
     >
       <Tabs.Screen
-        name="home/index"
-        key="index"
+        name="home"
+        key="home"
         options={{
-          title: 'Home',
+          title: 'Revit',
           tabBarIcon: ({ size, color, focused }) => (
             <Home color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore/index"
-        key="index"
+        name="explore"
+        key="explore"
         options={{
-          title: 'Home',
+          title: 'Explore',
           tabBarIcon: ({ size, color, focused }) => (
             <Search color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
         }}
       />
       <Tabs.Screen
-        name="post/create"
-        key="index"
+        name="post"
+        key="post"
         options={{
-          title: 'Create Revit Post',
+          title: 'Create Post',
           tabBarIcon: ({ size, color, focused }) => (
             <Plus color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
         }}
       />
       <Tabs.Screen
-        name="forums/index"
-        key="index"
+        name="forums"
+        key="forum"
         options={{
-          title: 'Home',
+          title: 'Forums',
           tabBarIcon: ({ size, color, focused }) => (
             <Blend color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile/index"
+        name="profile"
         key="profile"
         options={{
           title: 'Profile',
@@ -108,31 +67,6 @@ export default function Layout() {
           tabBarIcon: ({ size, color, focused }) => (
             <User color={focused ? '$color12' : '$color10'} size={size} strokeWidth={2} />
           ),
-        }}
-      />
-      // Hidden tabs
-      <Tabs.Screen
-        name="forums/create"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="forums/[id]/index"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="profile/[id]/index"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="profile/edit"
-        options={{
-          href: null,
         }}
       />
     </Tabs>

@@ -22,9 +22,12 @@ import { createPostApi } from '@revit/api/post'
 import Loader from '../common/Loader'
 import { StatusT } from '@revit/shared/types/common'
 import { FAILED, IDLE, LOADING, SUCCESS } from '@revit/shared/utils/constants'
+import { useFeedStore } from '../../store'
 
 const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
   const toast = useToastController()
+
+  const { fetchFeed } = useFeedStore()
 
   const [rating, setRating] = useState(0)
   const [error, setError] = useState('')
@@ -72,6 +75,7 @@ const CreatePost = ({ handleClose }: { handleClose: () => void }) => {
       return
     }
 
+    fetchFeed({ refresh: true })
     setStatus(SUCCESS)
     handleClose()
   }

@@ -2,8 +2,8 @@
   "name": "revit",
   "private": true,
   "workspaces": [
-    "./apps/*",
-    "./packages/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "mobile": "cd apps/mobile && yarn start",

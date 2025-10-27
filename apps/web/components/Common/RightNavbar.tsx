@@ -1,21 +1,12 @@
 'use client'
 
-import { Paragraph, Text, XStack, YStack } from '@revit/ui'
-import CreatePostDialog from '../CreatePost'
-import { useSession } from '../Provider/ContextProvider'
-import Avatar from '@revit/app/features/common/Avatar'
+import { YStack } from '@revit/ui'
 import { usePathname } from 'next/navigation'
 import CreatePostButton from '../CreatePostButton'
 import TrendingForums from '../TrendingForums'
 
 export default function RightNav() {
   const pathname = usePathname()
-
-  const { user } = useSession()
-
-  if (!user) {
-    return
-  }
 
   return (
     <YStack
@@ -28,7 +19,7 @@ export default function RightNav() {
       justifyContent="space-between"
     >
       {pathname === '/home' ? (
-        <CreatePostButton user={user} />
+        <CreatePostButton />
       ) : pathname.includes('/forums') ? (
         <TrendingForums />
       ) : null}

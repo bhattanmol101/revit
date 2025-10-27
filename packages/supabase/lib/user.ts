@@ -1,10 +1,4 @@
-import {
-  UpdateUserT,
-  userProfileSchema,
-  UserProfileT,
-  userSchema,
-  UserT,
-} from '@revit/shared/types/user'
+import { UpdateUserT, userProfileSchema, UserProfileT, userSchema, UserT, } from '@revit/shared/types/user'
 import { useSupabase } from '../client/useSupabase'
 import { uploadImages } from '../utils'
 
@@ -16,7 +10,9 @@ export const fetchCurrentUser = async (): Promise<UserT> => {
     error,
   } = await supabase.auth.getUser()
 
-  if (error) throw error
+  if (error) {
+    throw error
+  }
 
   if (!user) throw new Error('user not found.')
 

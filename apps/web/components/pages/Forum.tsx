@@ -2,10 +2,10 @@
 
 import React from 'react'
 import Forum from '@revit/app/features/forum'
-import { useSession } from '../Provider/ContextProvider'
+import { useAuthStore } from '@revit/app/store'
 
 const ForumPage = () => {
-  const { user } = useSession()
+  const { user } = useAuthStore()
 
   if (!user) {
     return

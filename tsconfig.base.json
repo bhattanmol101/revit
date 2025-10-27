@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "extends": "expo/tsconfig.base",
     "baseUrl": ".",
     "rootDir": ".",
     "importHelpers": true,
@@ -25,10 +26,38 @@
     "sourceMap": false,
     "strictNullChecks": true,
     "target": "es2020",
-    "types": ["node"],
-    "lib": ["dom", "esnext"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "paths": {
+      "@revit/app/*": [
+        "packages/app/*"
+      ],
+      "@revit/ui/*": [
+        "packages/ui/*"
+      ],
+      "@revit/shared/*": [
+        "packages/shared/*"
+      ],
+      "@revit/supabase/*": [
+        "packages/supabase/*"
+      ]
+    }
   },
-  "exclude": ["_"],
+  "plugins": [
+    {
+      // docs: https://github.com/nderscore/tamagui-typescript-plugin#readme
+      "name": "@nderscore/tamagui-typescript-plugin",
+      "pathToApp": "apps/next"
+    }
+  ],
+  "exclude": [
+    "_"
+  ],
   "typeAcquisition": {
     "enable": true
   }

@@ -11,7 +11,6 @@ type FeedState = {
 
   fetchFeed: (opts?: { refresh?: boolean }) => Promise<void>
   loadMore: () => Promise<void>
-  addPost: (post: PostT) => void
   clearFeed: () => void
 }
 
@@ -49,10 +48,6 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     })
   },
 
-  // Add a new post manually (optimistic update)
-  addPost: (post) => {
-    set({ posts: [post, ...get().posts] })
-  },
   // Load next page
   loadMore: async () => {
     if (!get().hasMore || get().loading) return

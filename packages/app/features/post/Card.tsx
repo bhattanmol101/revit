@@ -98,7 +98,7 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
           <Button.Text>{commentCount}</Button.Text>
         </Button>
       </Card.Footer>
-      {showComments && <Comment user={user} post={post} />}
+      {showComments && <Comment post={post} />}
     </Card>
   )
 }

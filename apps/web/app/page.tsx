@@ -1,13 +1,12 @@
 import { Metadata } from 'next'
-import SigninPage from '@/components/pages/Signin'
+import HomePage from '@/components/Main'
 
 export const metadata: Metadata = {
-  title: 'Revit - All in one place for reviews',
-
-  // other metadata
-  description: 'This is Home for Solid Pro',
+  title: 'Revit — Where Opinions Matter',
+  description:
+    'Rate anything — movies, food, apps, and more. Join a community where real opinions count.',
 }
 
 export default function Main() {
-  return <SigninPage />
+  return <HomePage />
 }

@@ -1,22 +1,34 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { useSupabase } from '@revit/supabase/client/useSupabase'
 
 export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  // if (request.cookies.get('mw_ran')?.value === 'true') {
+  //   return response
+  // }
+
   try {
     // Create an unmodified response
-    let response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
+
     const supabase = await useSupabase()
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
+    response.cookies.set('mw_ran', 'true', { maxAge: 60 })
+
     if (user) {
-      if (request.nextUrl.pathname === '/') {
+      if (
+        request.nextUrl.pathname === '/' ||
+        request.nextUrl.pathname === '/signin' ||
+        request.nextUrl.pathname === '/signup'
+      ) {
         return NextResponse.redirect(new URL('/home', request.url))
       }
     } else {
@@ -27,11 +39,10 @@ export async function middleware(request: NextRequest) {
           request.nextUrl.pathname == '/terms' ||
           request.nextUrl.pathname == '/signup' ||
           request.nextUrl.pathname == '/signin' ||
-          request.nextUrl.pathname.includes('/revit/') ||
-          request.nextUrl.pathname == '/api/auth/callback' ||
-          request.nextUrl.pathname == '/api/webhook'
+          request.nextUrl.pathname == '/api/auth/callback'
         )
       ) {
+        console.log('redirecting')
         return NextResponse.redirect(new URL('/', request.url))
       }
     }
@@ -50,14 +61,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|css)$).*)',
+    '/',
+    '/signin',
+    '/signup',
+    '/home',
+    '/explore',
+    '/forums/:path*',
+    '/profile/:path*',
+    '/api/auth/callback',
   ],
 }

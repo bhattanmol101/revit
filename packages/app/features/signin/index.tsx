@@ -1,54 +1,54 @@
 'use client'
 
-import { useLink, useRouter } from 'solito/navigation'
+import { useRouter } from 'solito/navigation'
 import {
-  Button,
-  Text,
-  YStack,
-  InputField,
-  Theme,
   AnimatePresence,
-  Spinner,
-  View,
-  Separator,
-  Paragraph,
-  SizableText,
+  Button,
   H1,
+  InputField,
+  Paragraph,
+  Separator,
+  SizableText,
+  Spinner,
+  Text,
+  Theme,
   useToastController,
+  View,
+  YStack,
 } from '@revit/ui'
-import { useState } from 'react'
 import Revit from '../icons/Revit'
 import Google from '../icons/Google'
-import { UserSigninT } from '@revit/shared/types/user'
+import { signinSchema, SigninT } from '@revit/shared/types/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SigninFormType, signinSchema } from '@revit/shared/validators/UserSchema'
 import { KeyboardAvoidingView, Platform } from 'react-native'
-import { CheckCircle } from '@tamagui/lucide-icons'
+import { useAuthStore } from '../../store'
+import { signInWithGoogleApi } from '@revit/api/auth'
 
-interface SigninProps {
-  // handleGoogleSignin: () => void
-  handleSignin: ({ email, password }: UserSigninT) => Promise<Error | undefined>
-}
-
-export default function Signin({ handleSignin }: SigninProps) {
+export default function Signin() {
   const router = useRouter()
   const toast = useToastController()
 
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+  const { loading, error, signIn } = useAuthStore()
 
-  const { control, handleSubmit } = useForm<SigninFormType>({
+  const { control, handleSubmit } = useForm<SigninT>({
     resolver: zodResolver(signinSchema),
   })
 
   //Test User: locoj23912@insfou.com
 
-  const onSubmit: SubmitHandler<SigninFormType> = async (data: SigninFormType) => {
-    setStatus('loading')
-    const error = await handleSignin(data as UserSigninT)
-    setStatus('idle')
+  const signInWithGoogle = async () => {
+    if (Platform.OS === 'web') {
+      const { error } = await signInWithGoogleApi()
+      if (error) {
+        console.log(error)
+      }
+    }
+  }
+
+  const onSubmit: SubmitHandler<SigninT> = async (data: SigninT) => {
+    await signIn(data as SigninT)
     if (!error) {
-      setStatus('success')
       router.replace('/home')
     } else {
       toast.show('Invalid Credentials!', {
@@ -56,18 +56,6 @@ export default function Signin({ handleSignin }: SigninProps) {
         customData: { type: 'error' },
       })
     }
-  }
-
-  const handleGoogleSignin = async () => {
-    console.log('here 1')
-    // const { data, error } = await supabase.auth.signInWithOAuth({
-    //   provider: 'google',
-    //   options: {
-    //     redirectTo: `https://localhost:8081/api/auth/callback`,
-    //   },
-    // })
-
-    // console.log(data, error)
   }
 
   return (
@@ -124,12 +112,12 @@ export default function Signin({ handleSignin }: SigninProps) {
           <Button
             mt="$4"
             mb="$2"
-            disabled={status === 'loading'}
+            disabled={loading}
             onPress={handleSubmit(onSubmit)}
             minWidth="100%"
             iconAfter={
-              <AnimatePresence>
-                {status === 'loading' ? (
+              loading ? (
+                <AnimatePresence>
                   <Spinner
                     color="$color"
                     key="signin-loading-spinner"
@@ -141,21 +129,8 @@ export default function Signin({ handleSignin }: SigninProps) {
                       scale: 0.5,
                     }}
                   />
-                ) : status == 'success' ? (
-                  <CheckCircle
-                    color="$green10"
-                    size="$1"
-                    key="signin-success"
-                    opacity={1}
-                    scale={1}
-                    animation="quick"
-                    enterStyle={{
-                      opacity: 0,
-                      scale: 0.5,
-                    }}
-                  />
-                ) : null}
-              </AnimatePresence>
+                </AnimatePresence>
+              ) : null
             }
           >
             <Button.Text>Sign In</Button.Text>
@@ -175,7 +150,7 @@ export default function Signin({ handleSignin }: SigninProps) {
                 <Paragraph>OR</Paragraph>
                 <Separator />
               </View>
-              <Button minWidth="100%">
+              <Button minWidth="100%" onPress={signInWithGoogle}>
                 <Button.Icon>
                   <Google height={20} width={20} />
                 </Button.Icon>

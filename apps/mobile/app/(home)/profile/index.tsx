@@ -1,8 +1,8 @@
 import Profile from '@revit/app/features/profile'
-import { useSession } from '../../../components/Provider/ContextProvider'
+import { useAuthStore } from '@revit/app/store'
 
 function ProfileScreen() {
-  const { user } = useSession()
+  const { user } = useAuthStore()
   if (!user) {
     return
   }

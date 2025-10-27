@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Button, XStack, YStack } from 'tamagui'
+import { memo, useRef, useState } from 'react'
+import { Button, View, XStack, YStack } from 'tamagui'
 import { ChevronLeft, ChevronRight } from '@tamagui/lucide-icons'
-import Carousel from 'react-native-reanimated-carousel'
 import { Image } from 'expo-image'
+import PagerView from 'react-native-pager-view'
 
 type ImageCarouselProps = {
   images?: string[]
@@ -18,39 +18,15 @@ const Slide = memo(({ uri, parentWidth, height }: any) => (
 export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
   if (!images || images.length === 0) return null
 
-  const [activeIndex, setActiveIndex] = useState(0)
+  const pagerRef = useRef<PagerView>(null)
   const [parentWidth, setParentWidth] = useState(0)
-  const carouselRef = useRef<any>(null)
+  const [page, setPage] = useState(0)
 
-  // When images change (parent removed one), jump to a safe index immediately
-  useEffect(() => {
-    if (!carouselRef.current) return
-    const lastIndex = Math.max(0, images.length - 1)
-    const safeIndex = Math.min(activeIndex, lastIndex)
-
-    // Jump without animation to avoid "stuck on removed" situations
-    // api: scrollTo({ index, animated: boolean })
-    carouselRef.current?.scrollTo?.({ index: safeIndex, animated: false })
-    setActiveIndex(safeIndex)
-  }, [images])
-
-  const onSnap = useCallback(
-    (index: number) => {
-      // only update if it changed
-      if (index !== activeIndex) setActiveIndex(index)
-    },
-    [activeIndex]
-  )
-
-  const goToIndex = useCallback(
-    (index: number) => {
-      if (!carouselRef.current) return
-      if (index < 0 || index >= images.length) return
-      carouselRef.current?.scrollTo?.({ index, animated: true })
-      setActiveIndex(index)
-    },
-    [images.length]
-  )
+  const goToPage = (index: number) => {
+    if (index < 0 || index >= images.length) return
+    pagerRef.current?.setPage(index)
+    setPage(index)
+  }
 
   return (
     <YStack
@@ -61,22 +37,35 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       onTouchStart={(e) => e.stopPropagation()}
     >
       {parentWidth > 0 && (
-        <Carousel
-          ref={carouselRef}
-          width={parentWidth}
-          height={height}
-          data={images}
-          loop={false}
-          scrollAnimationDuration={500}
-          onSnapToItem={onSnap}
-          renderItem={({ item, index }) => (
-            <Slide uri={item} index={index} parentWidth={parentWidth} height={height} />
-          )}
-        />
+        <PagerView
+          ref={pagerRef}
+          initialPage={0}
+          style={{
+            width: parentWidth,
+            height,
+            borderRadius: 12,
+            overflow: 'hidden',
+          }}
+          onPageSelected={(e) => setPage(e.nativeEvent.position)}
+        >
+          {images.map((img, i) => (
+            <View key={i.toString()} style={{ width: parentWidth, height }}>
+              <Image
+                source={{ uri: img }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            </View>
+          ))}
+        </PagerView>
       )}
 
       {/* Left Chevron */}
-      {images.length > 1 && activeIndex > 0 && (
+      {images.length > 1 && page > 0 && (
         <Button
           size="$2"
           circular
@@ -86,12 +75,12 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
           icon={ChevronLeft}
           bg="rgba(0,0,0,0.5)"
           color="white"
-          onPress={() => goToIndex(activeIndex - 1)}
+          onPress={() => goToPage(page - 1)}
         />
       )}
 
       {/* Right Chevron */}
-      {images.length > 1 && activeIndex < images.length - 1 && (
+      {images.length > 1 && page < images.length - 1 && (
         <Button
           size="$2"
           circular
@@ -101,7 +90,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
           icon={ChevronRight}
           bg="rgba(0,0,0,0.5)"
           color="white"
-          onPress={() => goToIndex(activeIndex + 1)}
+          onPress={() => goToPage(page + 1)}
         />
       )}
 
@@ -109,7 +98,7 @@ export const ImageCarousel = ({ images, height = 500 }: ImageCarouselProps) => {
       {images.length > 1 && (
         <XStack mt="$2" gap="$2" pos="absolute" b="$3" l="50%">
           {images.map((_, i) => (
-            <YStack key={i} w={6} h={6} br={50} bg={i === activeIndex ? '$white2' : '$white11'} />
+            <YStack key={i} w={6} h={6} br={50} bg={i === page ? '$white2' : '$white11'} />
           ))}
         </XStack>
       )}
