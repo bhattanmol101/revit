@@ -1,17 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Button,
-  Input,
-  Separator,
-  SizableText,
-  Tabs,
-  TabsContentProps,
-  UniversalList,
-  View,
-  XStack,
-} from '@revit/ui'
+import { Button, Input, Separator, SizableText, Tabs, UniversalList, View, XStack } from '@revit/ui'
 import { Search } from '@tamagui/lucide-icons'
 import { searchForumsApi, searchPostsApi } from '@revit/api/search'
 import { IDLE, LOADING } from '@revit/shared/utils/constants'
@@ -156,10 +146,6 @@ const Explore = () => {
       emptyText="Nothing here, Try searching again..."
     />
   )
-}
-
-const TabsContent = (props: TabsContentProps) => {
-  return <Tabs.Content {...props}>{props.children}</Tabs.Content>
 }
 
 export default Explore

@@ -19,7 +19,7 @@ import FallingStars from '@revit/app/animation/FallingStars'
 import RevitText from '@revit/shared/assets/logo/RevitText'
 import { useAuthStore } from '@revit/app/store'
 
-export default function MainPage() {
+export default function MainScreenr() {
   const { user } = useAuthStore()
 
   const router = useRouter()

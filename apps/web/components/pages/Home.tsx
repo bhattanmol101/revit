@@ -25,7 +25,7 @@ function HomePage() {
         customData: { type: 'error' },
       })
     }
-  }, [error])
+  }, [error, toast])
 
   const handleRefresh = async () => {
     await fetchFeed({ refresh: true })

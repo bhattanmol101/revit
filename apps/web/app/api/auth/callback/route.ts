@@ -1,3 +1,5 @@
+'use server'
+
 import { NextResponse } from 'next/server'
 
 import { useSupabase } from '@revit/supabase/client/useSupabase'
@@ -9,6 +11,7 @@ export async function GET(request: Request) {
   const next = searchParams.get('next') ?? '/'
 
   if (code) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const supabase = await useSupabase()
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)

@@ -22,6 +22,8 @@ export const fetchCurrentUser = async (): Promise<UserT> => {
     .eq('id', user.id)
     .single()
 
+  console.log(profile, profileError)
+
   if (error) throw profileError
 
   return userSchema.parse({ email: user.email, ...profile })

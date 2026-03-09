@@ -2,7 +2,7 @@ import Signin from '@revit/app/features/signin'
 import { YStack } from '@revit/ui'
 import { KeyboardAvoidingViewProvider } from '@revit/app/provider/KeyboardAvoidingViewProvider'
 
-export default function Screen() {
+export default function SigninScreen() {
   return (
     <KeyboardAvoidingViewProvider>
       <YStack

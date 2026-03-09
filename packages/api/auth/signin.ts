@@ -19,25 +19,12 @@ export const signInApi = async ({ email, password }: SigninT): Promise<Error | u
   }
 }
 
-export const signInWithGoogleApi = async (
-  redirectUri?: string
-): Promise<{ uri?: string; error?: Error | undefined }> => {
-  try {
-    console.log(redirectUri)
-    const supabase = await useSupabase()
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUri,
-        skipBrowserRedirect: true,
-      },
-    })
-    if (error) {
-      return { error }
-    }
-    if (data) return { uri: data.url }
-    return { error: new Error('Something went wrong! Please try again.') }
-  } catch (e: unknown) {
-    return { error: errorHandler(e) }
-  }
+export const signInWithGoogleApi = async (token?: string | null): Promise<Error | undefined> => {
+  if (!token) return new Error('No token provided')
+  const supabase = await useSupabase()
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: token,
+  })
+  if (error) return errorHandler(error)
 }

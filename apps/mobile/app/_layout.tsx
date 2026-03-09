@@ -48,7 +48,7 @@ function RootLayoutNav() {
           style={{
             flex: 1,
             paddingBottom: insets.bottom,
-            backgroundColor: 'black',
+            backgroundColor: 'green',
           }}
         >
           <AuthProvider>

@@ -16,9 +16,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aeradron.revit",
@@ -31,15 +29,19 @@
       },
       "package": "com.aeradron.revit",
       "softwareKeyboardLayoutMode": "resize",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ],
+      "permissions": ["android.permission.RECORD_AUDIO"],
       "version": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.557334331998-94i4mmk01n615mbdoi07ddnbndbt183a"
+        }
+      ],
       [
         "expo-image-picker",
         {

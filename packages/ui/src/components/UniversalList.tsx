@@ -49,6 +49,7 @@ export function UniversalList({
         refreshControl={refreshControl}
         onEndReachedThreshold={onEndReachedThreshold}
         onEndReached={handleLoadMore}
+        estimatedItemSize={10}
         ListFooterComponent={loadFooter ? <Spinner style={{ marginVertical: 16 }} /> : null}
       />
     </View>

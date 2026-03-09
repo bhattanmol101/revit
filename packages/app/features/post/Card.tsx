@@ -81,7 +81,7 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
           }}
         >
           <Button.Icon>
-            <Star size="$1" color="#fbbf24" fill="#fbbf24" />
+            <Star color="#fbbf24" fill="#fbbf24" />
           </Button.Icon>
           <Button.Text>{avgRating}</Button.Text>
         </Button>
@@ -93,7 +93,7 @@ const PostCard = ({ user, post }: { user: UserT; post: PostT }) => {
           }}
         >
           <Button.Icon>
-            <MessageCircle color="#d1d5db" size={18} />
+            <MessageCircle color="#d1d5db" />
           </Button.Icon>
           <Button.Text>{commentCount}</Button.Text>
         </Button>

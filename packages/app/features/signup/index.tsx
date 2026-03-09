@@ -25,11 +25,14 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '../../store'
 import { useEffect, useState } from 'react'
-import RevitText from '@revit/shared/assets/logo/RevitText'
+import { Platform } from 'react-native'
+import { signInWithGoogleApi } from '@revit/api/auth'
+import Revit from '@revit/app/features/icons/Revit'
 
 export default function Signup() {
   const toast = useToastController()
   const [status, setStatus] = useState<'success' | 'error' | ''>('')
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const { loading, signUp } = useAuthStore()
 
@@ -51,6 +54,17 @@ export default function Signup() {
         message: 'Something went wrong. Please try again later.',
         customData: { type: 'error' },
       })
+    }
+  }
+
+  const signUpWithGoogle = async () => {
+    if (Platform.OS === 'web') {
+      setGoogleLoading(true)
+      const { error } = await signInWithGoogleApi()
+      setGoogleLoading(false)
+      if (error) {
+        console.log(error)
+      }
     }
   }
 
@@ -79,13 +93,13 @@ export default function Signup() {
   return (
     <ScrollView width="100%" px="$1">
       <YStack width="100%" gap="$3" paddingBottom={isWeb ? 0 : 100}>
-        <YStack gap="$6" paddingBottom="$5" alignItems="center" justifyContent="center">
-          <RevitText height={90} width={90} />
+        <YStack gap="$3" paddingBottom="$3" alignItems="center" justifyContent="center">
+          <Revit height={90} width={90} />
           <H1 fontSize="$6">Welcome to Revit!</H1>
         </YStack>
         <YStack gap="$3">
-          <Text fontSize="$4" alignSelf="center">
-            Create your revit account
+          <Text fontSize="$5" alignSelf="center">
+            Create your account
           </Text>
           <Controller
             control={control}
@@ -150,7 +164,7 @@ export default function Signup() {
           <Button
             mt="$4"
             mb="$2"
-            disabled={loading}
+            disabled={loading || googleLoading}
             onPress={handleSubmit(onSubmit)}
             minWidth="100%"
             iconAfter={
@@ -188,7 +202,28 @@ export default function Signup() {
                 <Paragraph>OR</Paragraph>
                 <Separator />
               </View>
-              <Button minWidth="100%">
+              <Button
+                minWidth="100%"
+                onPress={signUpWithGoogle}
+                disabled={loading || googleLoading}
+                iconAfter={
+                  googleLoading ? (
+                    <AnimatePresence>
+                      <Spinner
+                        color="$color"
+                        key="signin-loading-spinner"
+                        opacity={1}
+                        scale={1}
+                        animation="quick"
+                        enterStyle={{
+                          opacity: 0,
+                          scale: 0.5,
+                        }}
+                      />
+                    </AnimatePresence>
+                  ) : null
+                }
+              >
                 <Button.Icon>
                   <Google height={20} width={20} />
                 </Button.Icon>

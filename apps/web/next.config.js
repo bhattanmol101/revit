@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')
 const { withTamagui } = require('@tamagui/next-plugin')
 const { join } = require('node:path')
 
@@ -11,10 +12,17 @@ const disableExtraction =
   boolVals[process.env.DISABLE_EXTRACTION] ?? process.env.NODE_ENV === 'development'
 
 const plugins = [
+  withBundleAnalyzer({
+    enabled: process.env.ANALYZE === 'true',
+    openAnalyzer: process.env.ANALYZE === 'true',
+  }),
   withTamagui({
+    themeBuilder: {
+      input: '../../packages/ui/src/themes/theme.ts',
+      output: '../../packages/ui/src/themes/theme-generated.ts',
+    },
     config: '../../packages/ui/src/tamagui.config.ts',
     components: ['@revit/ui'],
-    appDir: true,
     importsWhitelist: ['constants.js', 'colors.js'],
     outputCSS: process.env.NODE_ENV === 'production' ? './public/tamagui.css' : null,
     logTimings: true,
@@ -43,6 +51,12 @@ module.exports = () => {
       'expo-modules-core',
       'react-native-reanimated',
     ],
+    // modularizeImports: {
+    //   '@tamagui/lucide-icons': {
+    //     transform: `@tamagui/lucide-icons/dist/esm/icons/{{kebabCase member}}`,
+    //     skipDefaultConversion: true,
+    //   },
+    // },
     experimental: {
       scrollRestoration: true,
     },
@@ -58,5 +72,5 @@ module.exports = () => {
     }
   }
 
-  return config
+  return { ...config, typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } }
 }

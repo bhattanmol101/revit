@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
+    "@tamagui/theme-builder": "^1.132.23",
     "@tamagui/toast": "^1.132.23",
     "expo-image-picker": "^17.0.8",
     "react-dropzone": "^14.3.8",

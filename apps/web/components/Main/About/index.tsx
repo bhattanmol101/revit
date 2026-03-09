@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import Image from "next/image";
+import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 const About = () => {
   return (
@@ -32,12 +32,11 @@ const About = () => {
                 Revit Your Business
               </h4>
               <p className="pt-5 text-sm md:text-base">
-                We help you outsource any feedback integration required for your
-                business. We will handle all the work for you to get precise
-                reviews by providing custom feedback forms and integrate it with
-                your website. Businesses can view and manage all their reviews
-                in one place and don't need to go through multiple apps to find
-                their reviews.
+                We help you outsource any feedback integration required for your business. We will
+                handle all the work for you to get precise reviews by providing custom feedback
+                forms and integrate it with your website. Businesses can view and manage all their
+                reviews in one place and don&#39;t need to go through multiple apps to find their
+                reviews.
               </p>
             </motion.div>
             <motion.div
@@ -65,7 +64,7 @@ const About = () => {
       </section>
       {/* <!-- ===== About End ===== --> */}
     </>
-  );
-};
+  )
+}
 
-export default About;
+export default About

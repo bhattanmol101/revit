@@ -15,9 +15,8 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "app/*": [
-        "./*"
-      ]
+      "app/*": ["./*"],
+      "@revit/*": ["../*"]
     }
   },
   "references": []

@@ -1,5 +1,5 @@
 import { shorthands } from '@tamagui/shorthands'
-import { createTokens, createTamagui, setupDev } from 'tamagui'
+import { createTamagui, createTokens, setupDev } from 'tamagui'
 
 import { animations } from './config/animations'
 import { bodyFont, headingFont } from './config/fonts'
@@ -21,7 +21,7 @@ setupDev({
  */
 
 const themes =
-  process.env.TAMAGUI_TARGET !== 'web' || process.env.TAMAGUI_IS_SERVER || process.env.STORYBOOK
+  process.env.TAMAGUI_TARGET !== 'web' || process.env.TAMAGUI_IS_SERVER
     ? themesIn
     : ({} as typeof themesIn)
 

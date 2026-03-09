@@ -6,6 +6,7 @@ import {
   Button,
   H1,
   InputField,
+  isWeb,
   Paragraph,
   Separator,
   SizableText,
@@ -23,13 +24,13 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { KeyboardAvoidingView, Platform } from 'react-native'
 import { useAuthStore } from '../../store'
-import { signInWithGoogleApi } from '@revit/api/auth'
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
 
 export default function Signin() {
   const router = useRouter()
   const toast = useToastController()
 
-  const { loading, error, signIn } = useAuthStore()
+  const { loading, error, signIn, signInWithGoogle } = useAuthStore()
 
   const { control, handleSubmit } = useForm<SigninT>({
     resolver: zodResolver(signinSchema),
@@ -37,13 +38,48 @@ export default function Signin() {
 
   //Test User: locoj23912@insfou.com
 
-  const signInWithGoogle = async () => {
-    if (Platform.OS === 'web') {
-      const { error } = await signInWithGoogleApi()
-      if (error) {
-        console.log(error)
+  const signInWithGoogleWeb = async () => {
+    await signInWithGoogle(null)
+  }
+
+  const signInWithGoogleMobile = async () => {
+    try {
+      GoogleSignin.configure({
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+        scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+        offlineAccess: true,
+        forceCodeForRefreshToken: true,
+      })
+      await GoogleSignin.hasPlayServices()
+      const response = await GoogleSignin.signIn()
+      console.log(response)
+      if (response && response.type === 'success' && response.data) {
+        await signInWithGoogle(response.data.idToken)
+      } else {
+        // sign in was cancelled by user
+        console.log('cancelled')
+      }
+    } catch (error) {
+      console.log(error)
+      if (error.code) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            // operation (eg. sign in) already in progress
+            break
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // Android only, play services not available or outdated
+            break
+          default:
+          // some other error happened
+        }
+      } else {
+        // an error that's not related to google sign in occurred
       }
     }
+  }
+
+  const handleGoogleSignin = async () => {
+    isWeb ? await signInWithGoogleWeb() : await signInWithGoogleMobile()
   }
 
   const onSubmit: SubmitHandler<SigninT> = async (data: SigninT) => {
@@ -150,7 +186,7 @@ export default function Signin() {
                 <Paragraph>OR</Paragraph>
                 <Separator />
               </View>
-              <Button minWidth="100%" onPress={signInWithGoogle}>
+              <Button minWidth="100%" onPress={handleGoogleSignin}>
                 <Button.Icon>
                   <Google height={20} width={20} />
                 </Button.Icon>

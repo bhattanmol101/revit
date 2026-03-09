@@ -249,9 +249,9 @@ export const EditProfile = ({ user, handleClose }: { user: UserT; handleClose: (
             disabled={status === LOADING}
           >
             <Button.Icon>
-              <Send size={18} />
+              <Send />
             </Button.Icon>
-            <Button.Text marginTop="$1.5">Edit Profile</Button.Text>
+            <Button.Text>Edit Profile</Button.Text>
           </Button>
         </Theme>
       </View>

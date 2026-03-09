@@ -4,22 +4,17 @@ import { fetchLoggedInUser, signOutApi } from '@revit/api/auth/user'
 import { signInApi, signInWithGoogleApi, signUpApi } from '@revit/api/auth'
 import { SigninT, SignupT, UserT } from '@revit/shared/types/user'
 import { storage } from '@revit/shared/storage'
-import { Platform } from 'react-native'
-import * as WebBrowser from 'expo-web-browser'
-import * as AuthSession from 'expo-auth-session'
 
 type AuthState = {
   user: UserT | null
   loading: boolean
   error: string | null
   signIn: ({ email, password }: SigninT) => Promise<void>
-  signInWithGoogle: () => Promise<void>
+  signInWithGoogle: (token: string | null) => Promise<void>
   signUp: (signup: SignupT) => Promise<Error | undefined>
   signOut: () => Promise<void>
   fetchUser: () => Promise<void>
 }
-
-WebBrowser.maybeCompleteAuthSession()
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -44,50 +39,18 @@ export const useAuthStore = create<AuthState>()(
         }
         set({ user: user })
       },
-      signInWithGoogle: async () => {
-        try {
-          if (Platform.OS === 'web') {
-            const { uri, error } = await signInWithGoogleApi()
-            console.log('uri', uri)
-            if (error) {
-              set({ error: error.message })
-            }
-          } else {
-            // 📱 Mobile Expo flow
-            const redirectUri = AuthSession.makeRedirectUri({
-              scheme: 'revit-app', // 👈 must match "scheme" in app.json
-              path: 'auth/callback',
-            })
-
-            console.log('Redirect URI:', redirectUri)
-
-            const { uri, error } = await signInWithGoogleApi(redirectUri)
-            if (error) {
-              set({ error: error.message })
-              return
-            }
-
-            if (uri) {
-              const res = await WebBrowser.openAuthSessionAsync(uri, redirectUri)
-              console.log('res', res)
-              if (res.type !== 'success') {
-                set({ error: 'Authentication failed' })
-                return
-              }
-            }
-          }
-
-          const { user, error: userError } = await fetchLoggedInUser()
-          console.log('user', user)
-          if (userError) {
-            set({ error: userError.message })
-            return
-          }
-          set({ user: user })
-        } catch (err: any) {
-          console.error('Google Sign-In Error:', err)
-          set({ error: err.message })
+      signInWithGoogle: async (token: string | null) => {
+        const error = await signInWithGoogleApi(token)
+        if (error) {
+          set({ error: error.message })
         }
+        const { user, error: userError } = await fetchLoggedInUser()
+        console.log('user', user)
+        if (userError) {
+          set({ error: userError.message })
+          return
+        }
+        set({ user: user })
       },
       signUp: async (signup: SignupT) => {
         set({ loading: true })

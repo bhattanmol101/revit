@@ -4,6 +4,7 @@ import { useSupabase } from '@revit/supabase/client/useSupabase'
 import { errorHandler } from '../utils'
 import { SigninT } from '@revit/shared/types/user'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 export const signInApi = async ({ email, password }: SigninT): Promise<Error | undefined> => {
   try {
@@ -23,15 +24,16 @@ export const signInApi = async ({ email, password }: SigninT): Promise<Error | u
 }
 
 export const signInWithGoogleApi = async (
-  redirectUri?: string
-): Promise<{ uri?: string; error?: Error | undefined }> => {
+  token?: string | null
+): Promise<{ data?: any; error?: Error | undefined }> => {
+  const origin = (await headers()).get('origin')
   let url = ''
   try {
     const supabase = await useSupabase()
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:3000/api/auth/callback',
+        redirectTo: `${origin}/api/auth/callback`,
       },
     })
     if (error) {
@@ -40,10 +42,14 @@ export const signInWithGoogleApi = async (
     if (data) {
       url = data.url
     }
+    return { error: new Error('Something went wrong! Please try again.') }
   } catch (e: unknown) {
     console.log(e)
     return { error: errorHandler(e) }
+  } finally {
+    // Need to do this outside try as redirect throws an error which next needs to catch
+    if (url.length > 0) {
+      redirect(url)
+    }
   }
-
-  redirect(url)
 }

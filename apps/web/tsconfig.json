@@ -1,11 +1,14 @@
 {
+  "extends": "../../tsconfig.base",
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
     "paths": {
       "react-native": ["react-native-web"],
-      "@/*": ["./*"]
+      "@revit/app/*": ["../../packages/app/*"],
+      "@/*": ["./*"],
+      "@revit/ui/*": ["../../packages/ui/*"]
     },
     "allowJs": true,
     "skipLibCheck": true,

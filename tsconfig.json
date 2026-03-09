@@ -4,7 +4,7 @@
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true
   },
-  "extends": "./tsconfig.base",
+  "extends": "expo/tsconfig.base",
   "references": [
     {
       "path": "apps/mobile"
