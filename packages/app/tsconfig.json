@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base",
+  "include": ["**/*.ts", "**/*.tsx"],
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@revit/app/*": ["./packages/app/*"],
+      "@revi/ui/*": ["./packages/ui/*"]
+    }
+  },
+  "references": []
+}

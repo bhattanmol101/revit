@@ -1,28 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
     "paths": {
-      "@/*": ["./*"]
+      "@revit/app/*": ["./packages/app/*"],
+      "@revit/ui/*": ["./packages/ui/*"],
+      "@revit/api/*": ["./packages/api/*"],
+      "@revit/db/*": ["./packages/db/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "extends": "./tsconfig.base",
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/types",
+    "apps/web/out",
+    "apps/web/.next",
+    "apps/web/.tamagui"
+  ]
 }
