@@ -1,3 +1,7 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+export type DB = SupabaseClient<Database>
+
 export type Json =
   | string
   | number

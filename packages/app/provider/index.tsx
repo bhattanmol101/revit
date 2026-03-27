@@ -4,11 +4,11 @@ import { config } from '@revit/config'
 
 export function Provider({
   children,
-  defaultTheme = 'light',
+  defaultTheme,
   ...rest
 }: Omit<TamaguiProviderProps, 'config' | 'defaultTheme'> & { defaultTheme?: string }) {
   const colorScheme = useColorScheme()
-  const theme = defaultTheme || (colorScheme === 'dark' ? 'dark' : 'light')
+  const theme = defaultTheme ?? (colorScheme === 'dark' ? 'dark' : 'light')
 
   return (
     <TamaguiProvider

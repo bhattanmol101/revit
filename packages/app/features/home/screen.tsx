@@ -5,6 +5,7 @@ import {
   Button,
   H1,
   Paragraph,
+  Card,
   Separator,
   Sheet,
   SwitchThemeButton,
@@ -16,7 +17,21 @@ import { ChevronDown, ChevronUp } from '@tamagui/lucide-icons'
 import { useState } from 'react'
 import { Platform } from 'react-native'
 
-export function HomeScreen({ onLinkPress }: { onLinkPress?: () => void }) {
+type HomeScreenProps = {
+  email?: string | null
+  username?: string | null
+  error?: string | null
+  onLinkPress?: () => void
+  onSignOut?: () => void
+}
+
+export function HomeScreen({
+  email,
+  username,
+  error,
+  onLinkPress,
+  onSignOut,
+}: HomeScreenProps) {
 
   return (
     <YStack
@@ -59,7 +74,47 @@ export function HomeScreen({ onLinkPress }: { onLinkPress?: () => void }) {
         <Separator />
       </YStack>
 
-      <Button onPress={onLinkPress}>Link to user</Button>
+      <Card
+        border='1px solid'
+        width="100%"
+        maxWidth={460}
+        p="$4"
+        gap="$3"
+      >
+        <Paragraph
+          text="center"
+          fontWeight="700"
+        >
+          Signed in
+        </Paragraph>
+        <Paragraph text="center">{email || 'No email found for this account.'}</Paragraph>
+        <Paragraph
+          text="center"
+          color="$color10"
+        >
+          {username ? `Username: ${username}` : 'No username set on the profile yet.'}
+        </Paragraph>
+        {error ? (
+          <Paragraph
+            text="center"
+            color="$red10"
+          >
+            {error}
+          </Paragraph>
+        ) : null}
+        <XStack
+          gap="$3"
+          justify="center"
+          flexWrap="wrap"
+        >
+          <Button onPress={onLinkPress}>View profile</Button>
+          <Button
+            onPress={onSignOut}
+          >
+            Sign out
+          </Button>
+        </XStack>
+      </Card>
 
       <SheetDemo />
     </YStack>

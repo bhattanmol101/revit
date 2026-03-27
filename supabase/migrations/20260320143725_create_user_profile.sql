@@ -31,12 +31,23 @@ on public.profiles
 for update
 using (auth.uid() = id);
 
-create function public.handle_new_user()
+-- Function to create a profile row after signup
+create or replace function handle_new_user()
 returns trigger as $$
+declare
+fullName text;
 begin
-  insert into public.profiles (id)
-  values (new.id);
-  return new;
+  -- Extract metadata from auth.users
+  fullName := new.raw_user_meta_data ->> 'full_name';
+
+insert into public.profiles (id, username, full_name)
+values (
+           new.id,
+           split_part(new.email, '@', 1),
+           fullName
+       );
+
+return new;
 end;
 $$ language plpgsql security definer;
 

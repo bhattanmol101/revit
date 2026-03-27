@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { NextTamaguiProvider } from '@revit/app/provider/NextTamaguiProvider'
+import { TRPCProvider } from '@revit/app/provider/TRPCProvider'
 
 export const metadata: Metadata = {
   title: 'Tamagui • App Router',
@@ -15,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body>
-        <NextTamaguiProvider>{children}</NextTamaguiProvider>
+      <NextTamaguiProvider><TRPCProvider>{children}</TRPCProvider></NextTamaguiProvider>
       </body>
     </html>
   )

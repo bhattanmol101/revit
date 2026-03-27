@@ -1,17 +1,10 @@
-import { cookies } from 'next/headers'
-import { createSupabaseClient } from '@revit/db/client/supabase'
+import { createServerSupabase } from '@revit/db/client/supabase'
 
-export async function createContext() {
-  // 🍪 Get cookies (Next.js SSR)
-  const cookieStore = await cookies()
-  const cookieString = cookieStore.toString()
+export const createContext = async ({ req }: any) => {
+  const token = req?.headers?.authorization?.replace('Bearer ', '')
 
-  // 🧠 Create Supabase client with cookies
-  const supabase = createSupabaseClient({
-    cookies: cookieString,
-  })
+  const supabase = createServerSupabase(token)
 
-  // 👤 Get user
   const {
     data: { user },
   } = await supabase.auth.getUser()

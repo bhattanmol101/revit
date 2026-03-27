@@ -6,6 +6,7 @@
   "types": "index.ts",
   "dependencies": {
     "@revit/db": "*",
+    "@trpc/react-query": "^11.15.0",
     "@trpc/server": "^11.13.4",
     "zod": "^4.3.6"
   }
