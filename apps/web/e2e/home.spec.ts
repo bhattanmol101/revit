@@ -16,7 +16,7 @@ test.describe('Home Page', () => {
       errors.push(error.message)
     })
 
-    // Navigate to home page
+    // Navigate to landing page
     await page.goto('/')
 
     // Wait for the page to be fully loaded

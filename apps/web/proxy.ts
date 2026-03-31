@@ -42,7 +42,7 @@ export const config = {
         '/',
         '/signin',
         '/signup',
-        '/home',
+        '/landing',
         '/explore',
         '/forums/:path*',
         '/profile/:path*',

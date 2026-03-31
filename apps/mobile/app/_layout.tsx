@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
 import { Provider } from '@revit/app/provider'
 import {TRPCProvider} from "@revit/app/provider/TRPCProvider";
+import {AuthProvider} from "@revit/app/provider/AuthProvider";
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
@@ -41,7 +42,9 @@ function RootLayoutNav() {
     <Provider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <TRPCProvider>
-        <Stack />
+          <AuthProvider>
+            <Stack />
+          </AuthProvider>
         </TRPCProvider>
       </ThemeProvider>
     </Provider>

@@ -1,13 +1,13 @@
-import SignInScreen from "@revit/app/features/auth/sign-in-screen"
+import SignUpScreen from "@revit/app/features/auth/sign-up-screen"
 import {Stack} from "expo-router";
 
-export default function SignIn() {
+export default function SignUp() {
     return<>
         <Stack.Screen
             options={{
                 headerShown: false,
             }}
         />
-        <SignInScreen/>
+        <SignUpScreen/>
     </>
 }

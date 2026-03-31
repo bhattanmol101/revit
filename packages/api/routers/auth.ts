@@ -1,8 +1,18 @@
 import { router, publicProcedure } from '../trpc'
-import {signInSchema, signUpSchema} from "../types/auth.types";
+import {SignInT, SignUpT, UserIdT} from "../types/auth.types";
 
 export const authRouter = router({
-  signIn: publicProcedure.input(signInSchema).mutation(async ({ ctx, input }) => {
+  get: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) {
+      return null
+    }
+
+    return {
+      id: ctx.user.id,
+    }
+  }),
+
+  signIn: publicProcedure.input(SignInT).mutation(async ({ ctx, input }) => {
     const { data, error } = await ctx.supabase.auth.signInWithPassword({
       email: input.email,
       password: input.password,
@@ -15,7 +25,7 @@ export const authRouter = router({
     }
   }),
 
-  signUp: publicProcedure.input(signUpSchema).mutation(async ({ ctx, input }) => {
+  signUp: publicProcedure.input(SignUpT).mutation(async ({ ctx, input }) => {
   }),
 
   signOut: publicProcedure.mutation(async ({ ctx }) => {

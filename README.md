@@ -1,112 +1,241 @@
-# Tamagui + Solito + Next + Expo Monorepo
+# Revit Monorepo
 
-> **We highly recommend using [Takeout](https://tamagui.dev/takeout) instead** - a much more comprehensive and actively maintained starter. Available in free and pro versions:
->
-> - [Takeout Overview](https://tamagui.dev/takeout)
-> - [Live Demo](https://takeout.tamagui.dev)
-> - [Takeout Free on GitHub](https://github.com/tamagui/takeout-free)
->
-> This repository is not well maintained.
+Cross-platform app monorepo built with Next.js, Expo, Tamagui, Solito, tRPC, Zustand, and Supabase.
 
-```sh
-npm create tamagui
+## Stack
+
+- Web: Next.js App Router in `apps/web`
+- Mobile: Expo + Expo Router in `apps/mobile`
+- Shared app logic: `packages/app`
+- Shared UI kit: `packages/ui`
+- Tamagui config: `packages/config`
+- API layer: `packages/api`
+- Database types and Supabase client: `packages/db`
+- Local backend: Supabase CLI in `supabase`
+- Monorepo orchestration: Yarn workspaces + Turbo
+
+## Project Structure
+
+```text
+.
+├── apps
+│   ├── mobile              # Expo app
+│   │   ├── app             # Expo Router routes
+│   │   ├── assets          # Native assets
+│   │   └── scripts         # Native helper scripts
+│   └── web                 # Next.js app
+│       ├── app             # App Router routes
+│       ├── __tests__       # Vitest tests
+│       ├── e2e             # Playwright tests
+│       └── public          # Static assets
+├── packages
+│   ├── api                 # tRPC setup, auth store, schemas
+│   ├── app                 # Shared screens, providers, feature logic
+│   ├── config              # Tamagui theme and config
+│   ├── db                  # Supabase client and generated DB types
+│   └── ui                  # Shared UI components
+├── supabase
+│   ├── config.toml         # Local Supabase CLI config
+│   └── migrations          # SQL migrations
+├── package.json            # Root workspace scripts
+├── turbo.json              # Turbo pipeline
+└── tsconfig.json           # Workspace path aliases
 ```
 
-## 🔦 About
+## How The Apps Fit Together
 
-This monorepo is a starter for an Expo + Next.js + Tamagui + Solito app.
+- `apps/web` and `apps/mobile` are thin shells.
+- Shared feature screens live in `packages/app/features`.
+- Shared providers live in `packages/app/provider`.
+- Shared primitives and design-system components live in `packages/ui`.
+- Web and mobile both use the same auth store from `packages/api/store/auth.store.ts`.
+- tRPC procedures live in `packages/api/routers`.
+- Supabase schema is managed locally through the `supabase/` folder.
 
-Many thanks to [@FernandoTheRojo](https://twitter.com/fernandotherojo) for the Solito starter monorepo which this was forked from. Check out his [talk about using expo + next together at Next.js Conf 2021](https://www.youtube.com/watch?v=0lnbdRweJtA).
+## Requirements
 
-## 📦 Included packages
+- Node.js `22`
+- npm `10.8+`
+- Yarn `4.5.0`
+- Supabase CLI
+- For mobile iOS: Xcode
+- For mobile Android: Android Studio / SDK
 
-- [Tamagui](https://tamagui.dev) 🪄
-- [solito](https://solito.dev) for cross-platform navigation
-- Expo SDK
-- Next.js
-- Expo Router
+## Install
 
-## 🗂 Folder layout
+Enable Corepack and install dependencies from the repo root:
 
-The main apps are:
-
-- `expo` (native)
-- `next` (web)
-
-- `packages` shared packages across apps
-  - `ui` includes your custom UI kit that will be optimized by Tamagui
-  - `app` you'll be importing most files from `app/`
-    - `features` (don't use a `screens` folder. organize by feature.)
-    - `provider` (all the providers that wrap the app, and some no-ops for Web.)
-
-You can add other folders inside of `packages/` if you know what you're doing and have a good reason to.
-
-> [!TIP]
-> Switching from `app` to `pages` router:
->
-> - remove `app` folder from `apps/next`
-> - move `index.tsx` from `pages-example` to `pages` folder
-> - rename `pages-example-user` to `user` and be sure to update `linkTarget` in `screen.tsx` to `user` as well
-> - delete `SwitchRouterButton.tsx` component and remove it from `screen.tsx` and `packages/ui/src/index.tsx`
-> - search for `pagesMode` keyword and remove it
-
-## 🏁 Start the app
-
-- Install dependencies: `yarn`
-
-- Next.js local dev: `yarn web`
-
-To run with optimizer on in dev mode (just for testing, it's faster to leave it off): `yarn web:extract`. To build for production `yarn web:prod`.
-
-To see debug output to verify the compiler, add `// debug` as a comment to the top of any file.
-
-- Expo local dev: `yarn native`
-
-## UI Kit
-
-Note we're following the [design systems guide](https://tamagui.dev/docs/guides/design-systems) and creating our own package for components.
-
-See `packages/ui` named `@revit/ui` for how this works.
-
-## 🆕 Add new dependencies
-
-### Pure JS dependencies
-
-If you're installing a JavaScript-only dependency that will be used across platforms, install it in `packages/app`:
-
-```sh
-cd packages/app
-yarn add date-fns
-cd ../..
-yarn
+```bash
+corepack enable
+corepack prepare yarn@4.5.0 --activate
+yarn install
 ```
 
-### Native dependencies
+## Environment Setup
 
-If you're installing a library with any native code, you must install it in `expo`:
+This repo currently uses app-local env files:
 
-```sh
-cd apps/mobile
-yarn add react-native-reanimated
-cd ..
-yarn
+- `apps/web/.env`
+- `apps/mobile/.env`
+
+### Web
+
+Set these values in `apps/web/.env`:
+
+```bash
+IGNORE_TS_CONFIG_PATHS=true
+TAMAGUI_TARGET=web
+TAMAGUI_DISABLE_WARN_DYNAMIC_LOAD=1
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-local-anon-key
+NEXT_PUBLIC_TRPC_API=http://localhost:3000
 ```
 
-## Update new dependencies
+### Mobile
 
-### Pure JS dependencies
+Set this in `apps/mobile/.env`:
 
-```sh
-yarn upgrade-interactive
+```bash
+EXPO_PUBLIC_TRPC_API=http://YOUR_LOCAL_IP:3000
 ```
 
-You can also install the native library inside of `packages/app` if you want to get autoimport for that package inside of the `app` folder. However, you need to be careful and install the _exact_ same version in both packages. If the versions mismatch at all, you'll potentially get terrible bugs. This is a classic monorepo issue. I use `lerna-update-wizard` to help with this (you don't need to use Lerna to use that lib).
+Use your machine's LAN IP, not `localhost`, when running the Expo app on a physical device.
 
-You may potentially want to have the native module transpiled for the next app. If you get error messages with `Cannot use import statement outside a module`, you may need to use `transpilePackages` in your `next.config.js` and add the module to the array there.
+## Running The Project
 
-### Deploying to Vercel
+### 1. Start Supabase
 
-- Root: `apps/next`
-- Install command to be `yarn set version stable && yarn install`
-- Build command: leave default setting
-- Output dir: leave default setting
+```bash
+yarn db:start
+```
+
+Useful database commands:
+
+```bash
+yarn db:stop
+yarn db:reset
+yarn db:generate
+```
+
+### 2. Start The Web App
+
+```bash
+yarn web
+```
+
+This runs the shared package builds first, then starts Next.js in `apps/web`.
+
+Other web commands:
+
+```bash
+yarn web:extract
+yarn web:prod
+yarn web:prod:serve
+```
+
+### 3. Start The Mobile App
+
+In a separate terminal:
+
+```bash
+yarn mobile
+```
+
+Platform-specific commands:
+
+```bash
+yarn ios
+yarn android
+yarn mobile:prebuild
+```
+
+## Development Commands
+
+```bash
+yarn build
+yarn test
+yarn test:watch
+yarn watch
+```
+
+## Package Notes
+
+### `apps/web`
+
+- Next.js App Router frontend
+- Uses `NextTamaguiProvider` and `TRPCProvider`
+- Route files mostly delegate to shared screens in `packages/app`
+
+### `apps/mobile`
+
+- Expo app using Expo Router
+- Loads fonts and wraps the app with shared providers
+- Uses the same feature screens as the web app
+
+### `packages/app`
+
+- Main cross-platform application layer
+- Contains auth, home, and user feature screens
+- Contains shared provider composition
+
+### `packages/ui`
+
+- Shared UI components and Tamagui exports
+- Intended to be reused by both web and mobile
+
+### `packages/api`
+
+- tRPC client/server types
+- Auth procedures
+- Persisted Zustand auth store
+- Platform-specific storage adapters for web and native
+
+### `packages/db`
+
+- Supabase client creation
+- Generated database types
+
+### `supabase`
+
+- Local Supabase project config
+- SQL migrations for schema changes
+
+## Current Route Map
+
+### Web
+
+- `/`
+- `/signin`
+- `/user/[id]`
+
+### Mobile
+
+- `/`
+- `/signin`
+- `/user/[id]`
+
+## Testing
+
+Web tests currently live in:
+
+- `apps/web/__tests__` for Vitest
+- `apps/web/e2e` for Playwright
+
+Run all root Vitest tests with:
+
+```bash
+yarn test
+```
+
+Run web-only tests from the web app directory if needed:
+
+```bash
+cd apps/web
+yarn test
+```
+
+## Notes
+
+- The repo uses workspace path aliases such as `@revit/app/*`, `@revit/ui/*`, `@revit/api/*`, and `@revit/db/*`.
+- The web app depends on local Supabase and a reachable tRPC endpoint.
+- The mobile app needs `EXPO_PUBLIC_TRPC_API` to point to a host the device or simulator can reach.

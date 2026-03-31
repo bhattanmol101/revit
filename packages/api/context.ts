@@ -9,6 +9,8 @@ export const createContext = async ({ req }: any) => {
     data: { user },
   } = await supabase.auth.getUser()
 
+  console.log("context", user)
+
   return {
     supabase,
     user,

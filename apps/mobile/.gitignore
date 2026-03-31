@@ -129,3 +129,4 @@ dist/
 
 expo-env.d.ts
 # @end mobile-cli
+.env

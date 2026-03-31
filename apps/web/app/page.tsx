@@ -1,6 +1,6 @@
-import { RootScreen } from '@revit/app/features/home/root-screen'
+import LandingScreen from '@revit/app/features/landing'
 
 export default function Page() {
 
-  return <RootScreen />
+  return <LandingScreen />
 }
