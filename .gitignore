@@ -1,39 +1,44 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+/node_modules/
+/.pnp/
+.pnp.*
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Expo generated files
+/.expo/
+/dist/
+/web-build/
+expo-env.d.ts
 
-# testing
-/coverage
+# Local package-manager data
+/.pnpm-store/
 
-# next.js
-/.next/
-/out/
+# Environment files
+.env
+.env.*
+!.env.example
 
-# production
-/build
+# Tests and tooling
+/coverage/
+*.tsbuildinfo
+.metro-health-check*
 
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+*.log
 
-# local env files
-.env*.local
+# Native signing and generated files
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
 
-# vercel
-.vercel
+# Hosting output
+/.vercel/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-.env*
-
-/db/migrations
+# Operating-system files
+.DS_Store
