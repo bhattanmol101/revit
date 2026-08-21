@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       follows: {
@@ -41,6 +66,82 @@ export type Database = {
           {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_media: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          position: number
+          post_id: string
+          storage_path: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          position: number
+          post_id: string
+          storage_path: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          post_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          post_type: Database["public"]["Enums"]["post_type"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          post_type: Database["public"]["Enums"]["post_type"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          post_type?: Database["public"]["Enums"]["post_type"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -85,7 +186,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      post_type: "ASK" | "SHARE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -211,7 +312,12 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  public: {
+  graphql_public: {
     Enums: {},
+  },
+  public: {
+    Enums: {
+      post_type: ["ASK", "SHARE"],
+    },
   },
 } as const
