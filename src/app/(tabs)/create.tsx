@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { CreateChoiceScreen } from "@/features/create/create-choice-screen";
 
 export default function CreateScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Create"
-      description="Ask for ratings and share a restaurant rating will start here."
-    />
-  );
+  return <CreateChoiceScreen />;
 }

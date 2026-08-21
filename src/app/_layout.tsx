@@ -71,6 +71,7 @@ function RootNavigator() {
       <Stack.Protected guard={canEnterApp}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="activity" options={{ title: "Activity" }} />
+        <Stack.Screen name="create/ask" options={{ title: "New Ask" }} />
         <Stack.Screen name="posts/[id]" options={{ title: "Post" }} />
         <Stack.Screen
           name="restaurants/[id]"

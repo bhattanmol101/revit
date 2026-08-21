@@ -4,6 +4,7 @@ export const routes = {
   activity: "/activity",
   auth: "/auth",
   create: "/create",
+  createAsk: "/create/ask",
   discover: "/discover",
   forums: "/forums",
   home: "/",
