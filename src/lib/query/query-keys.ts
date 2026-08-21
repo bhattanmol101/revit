@@ -1,4 +1,13 @@
 export const queryKeys = {
+  follows: {
+    all: ["follows"] as const,
+    followers: (profileId: string) =>
+      [...queryKeys.follows.all, "followers", profileId] as const,
+    following: (profileId: string) =>
+      [...queryKeys.follows.all, "following", profileId] as const,
+    status: (followerId: string, followingId: string) =>
+      [...queryKeys.follows.all, "status", followerId, followingId] as const,
+  },
   profiles: {
     all: ["profiles"] as const,
     byId: (profileId: string) =>

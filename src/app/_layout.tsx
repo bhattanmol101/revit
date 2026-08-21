@@ -78,7 +78,18 @@ function RootNavigator() {
         />
         <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
         <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />
-        <Stack.Screen name="users/[username]" options={{ title: "Profile" }} />
+        <Stack.Screen
+          name="users/[username]/index"
+          options={{ title: "Profile" }}
+        />
+        <Stack.Screen
+          name="users/[username]/followers"
+          options={{ title: "Followers" }}
+        />
+        <Stack.Screen
+          name="users/[username]/following"
+          options={{ title: "Following" }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={!session || needsOnboarding}>

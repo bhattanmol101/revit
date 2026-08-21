@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { RefreshControl, ScrollView, View } from "react-native";
 
 import type { Profile } from "@/api/profiles";
@@ -7,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { routes } from "@/lib/routes";
+import { useAuth } from "@/providers/auth-provider";
+import { useFollowStatus, useFollowToggle } from "@/queries/follows";
 
 import { useFollowCounts } from "@/queries/profiles";
 
@@ -30,9 +34,23 @@ const PROFILE_SECTIONS = [
   },
 ] as const;
 
-export function ProfileView({ isOwnProfile = false, profile }: ProfileViewProps) {
+export function ProfileView({
+  isOwnProfile = false,
+  profile,
+}: ProfileViewProps) {
+  const { user } = useAuth();
+  const isOwn = isOwnProfile || user?.id === profile.id;
   const counts = useFollowCounts(profile.id);
+  const followStatus = useFollowStatus(user?.id ?? "", profile.id);
+  const followToggle = useFollowToggle(user?.id ?? "", profile.id);
   const initials = getInitials(profile.display_name);
+
+  const refresh = async () => {
+    await Promise.all([
+      counts.refetch(),
+      ...(isOwn ? [] : [followStatus.refetch()]),
+    ]);
+  };
 
   return (
     <SafeAreaView
@@ -44,8 +62,8 @@ export function ProfileView({ isOwnProfile = false, profile }: ProfileViewProps)
         contentContainerClassName="mx-auto w-full max-w-4xl gap-8 px-5 py-8 sm:px-8"
         refreshControl={
           <RefreshControl
-            refreshing={counts.isRefetching}
-            onRefresh={() => void counts.refetch()}
+            refreshing={counts.isRefetching || followStatus.isRefetching}
+            onRefresh={() => void refresh()}
           />
         }
       >
@@ -81,6 +99,32 @@ export function ProfileView({ isOwnProfile = false, profile }: ProfileViewProps)
                   ? "Add a bio to tell people what you like."
                   : "No bio yet.")}
             </Text>
+
+            {!isOwn ? (
+              <Button
+                className="mt-2 self-start"
+                disabled={followStatus.isLoading || followToggle.isPending}
+                variant={followStatus.data ? "outline" : "default"}
+                onPress={() =>
+                  followToggle.mutate(!(followStatus.data ?? false))
+                }
+              >
+                <Text>
+                  {followToggle.isPending
+                    ? "Updating…"
+                    : followStatus.data
+                      ? "Following"
+                      : "Follow"}
+                </Text>
+              </Button>
+            ) : null}
+
+            {!isOwn && (followStatus.isError || followToggle.isError) ? (
+              <Text variant="small" className="text-destructive">
+                {followToggle.error?.message ??
+                  "We couldn’t load the follow status. Pull to refresh."}
+              </Text>
+            ) : null}
           </View>
         </View>
 
@@ -88,6 +132,7 @@ export function ProfileView({ isOwnProfile = false, profile }: ProfileViewProps)
           followers={counts.data?.followers}
           following={counts.data?.following}
           isLoading={counts.isLoading}
+          username={profile.username}
         />
 
         {counts.isError ? (
@@ -129,15 +174,25 @@ function FollowCounts({
   followers,
   following,
   isLoading,
+  username,
 }: {
   followers?: number;
   following?: number;
   isLoading: boolean;
+  username: string;
 }) {
   return (
     <View className="flex-row gap-8 border-y border-border py-4">
-      <Count label="Followers" value={followers} isLoading={isLoading} />
-      <Count label="Following" value={following} isLoading={isLoading} />
+      <Link href={routes.followers(username)} asChild>
+        <Button variant="ghost" className="h-auto items-start px-0 py-0">
+          <Count label="Followers" value={followers} isLoading={isLoading} />
+        </Button>
+      </Link>
+      <Link href={routes.following(username)} asChild>
+        <Button variant="ghost" className="h-auto items-start px-0 py-0">
+          <Count label="Following" value={following} isLoading={isLoading} />
+        </Button>
+      </Link>
     </View>
   );
 }
