@@ -9,17 +9,15 @@ import {
   type ReactNode,
 } from "react";
 
-import {
-  getProfile,
-  updateProfile as updateProfileRequest,
-  type Profile,
-  type UpdateProfileInput,
-} from "@/api/profiles";
+import type { Profile, UpdateProfileInput } from "@/api/profiles";
 import { supabase } from "@/lib/supabase/client";
+import { useProfile, useUpdateProfile } from "@/queries/profiles";
 
 type AuthContextValue = {
   isLoading: boolean;
   profile: Profile | null;
+  profileError: Error | null;
+  retryProfile: () => Promise<void>;
   session: Session | null;
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
   user: User | null;
@@ -38,8 +36,9 @@ export function needsProfileCompletion(profile: Profile | null) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const userId = session?.user.id ?? "";
+  const profileQuery = useProfile(userId);
+  const profileMutation = useUpdateProfile(userId);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,48 +58,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const refreshProfile = useCallback(async () => {
-    if (!session?.user.id) {
-      setProfile(null);
-      return;
-    }
-
-    setIsProfileLoading(true);
-
-    try {
-      setProfile(await getProfile(session.user.id));
-    } catch (error) {
-      console.error("Failed to load the authenticated profile", error);
-      setProfile(null);
-    } finally {
-      setIsProfileLoading(false);
-    }
-  }, [session?.user.id]);
-
-  useEffect(() => {
-    void refreshProfile();
-  }, [refreshProfile]);
+  const retryProfile = useCallback(async () => {
+    await profileQuery.refetch();
+  }, [profileQuery.refetch]);
 
   const updateProfile = useCallback(
     async (input: UpdateProfileInput) => {
-      if (!session?.user.id) {
-        throw new Error("You must be signed in to update your profile.");
-      }
-
-      setProfile(await updateProfileRequest(session.user.id, input));
+      await profileMutation.mutateAsync(input);
     },
-    [session?.user.id],
+    [profileMutation.mutateAsync],
   );
+
+  const profile = profileQuery.data ?? null;
+  const profileError =
+    profileQuery.error instanceof Error ? profileQuery.error : null;
+  const isLoading =
+    isSessionLoading || (Boolean(session) && profileQuery.isLoading);
 
   const value = useMemo(
     () => ({
-      isLoading: isSessionLoading || isProfileLoading,
+      isLoading,
       profile,
+      profileError,
+      retryProfile,
       session,
       updateProfile,
       user: session?.user ?? null,
     }),
-    [isProfileLoading, isSessionLoading, profile, session, updateProfile],
+    [isLoading, profile, profileError, retryProfile, session, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

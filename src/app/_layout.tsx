@@ -7,7 +7,9 @@ import { Uniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
+import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { Text } from "@/components/ui/text";
+import { AppProvider } from "@/providers/app-provider";
 import {
   AuthProvider,
   needsProfileCompletion,
@@ -23,13 +25,15 @@ export default function TabLayout() {
   return (
     <>
       <SafeAreaProvider>
-        <AuthProvider>
-          <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-          >
-            <RootNavigator />
-          </ThemeProvider>
-        </AuthProvider>
+        <AppProvider>
+          <AuthProvider>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <RootNavigator />
+            </ThemeProvider>
+          </AuthProvider>
+        </AppProvider>
       </SafeAreaProvider>
 
       <PortalHost />
@@ -38,7 +42,7 @@ export default function TabLayout() {
 }
 
 function RootNavigator() {
-  const { isLoading, profile, session } = useAuth();
+  const { isLoading, profile, profileError, retryProfile, session } = useAuth();
   const needsOnboarding = needsProfileCompletion(profile);
   const canEnterApp = Boolean(session) && !needsOnboarding;
 
@@ -50,6 +54,16 @@ function RootNavigator() {
 
   if (isLoading) {
     return <AuthLoadingScreen />;
+  }
+
+  if (session && profileError) {
+    return (
+      <ProfileMessageScreen
+        title="Profile unavailable"
+        description="We couldn&apos;t load your account profile. Check your connection and try again."
+        action={() => void retryProfile()}
+      />
+    );
   }
 
   return (

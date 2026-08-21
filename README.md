@@ -34,3 +34,4 @@ Implementation follows the [Expo SDK 57 documentation](https://docs.expo.dev/ver
 - All Supabase Data API database calls (`from`, `rpc`, and database-function access) must live in `src/api`. Screens, components, hooks, stores, and providers consume typed API functions and never query the database directly.
 - Keep Supabase Auth session operations in the dedicated Supabase/auth layer. Never expose the raw Supabase database client as a shortcut around `src/api`.
 - API modules select only required fields, normalize errors, apply bounded timeouts, retry safe reads only, and return application-ready typed data rather than raw Supabase responses.
+- All runtime consumers use TanStack Query adapters from `src/queries`; providers, screens, components, and feature modules do not invoke `src/api` request functions directly. Type-only and normalized-error imports are allowed.
