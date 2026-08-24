@@ -27,5 +27,7 @@ export const queryKeys = {
     all: ["ratings"] as const,
     mine: (postId: string, raterId: string) =>
       [...queryKeys.ratings.all, "mine", postId, raterId] as const,
+    summary: (postId: string) =>
+      [...queryKeys.ratings.all, "summary", postId] as const,
   },
 } as const;

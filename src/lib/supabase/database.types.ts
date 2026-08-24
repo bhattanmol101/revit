@@ -222,7 +222,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_ask_rating_summary: {
+        Args: { target_post_id: string }
+        Returns: {
+          average_score: number
+          rating_count: number
+        }[]
+      }
     }
     Enums: {
       post_type: "ASK" | "SHARE"

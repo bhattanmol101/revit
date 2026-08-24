@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   deleteAskRating,
+  getAskRatingSummary,
   getMyAskRating,
   type Rating,
+  type RatingSummary,
   saveAskRating,
 } from "@/api/ratings";
 import { queryKeys } from "@/lib/query/query-keys";
@@ -16,9 +18,18 @@ export function useMyAskRating(postId: string, raterId: string) {
   });
 }
 
+export function useAskRatingSummary(postId: string) {
+  return useQuery({
+    enabled: postId.length > 0,
+    queryFn: () => getAskRatingSummary(postId),
+    queryKey: queryKeys.ratings.summary(postId),
+  });
+}
+
 export function useSetMyAskRating(postId: string, raterId: string) {
   const queryClient = useQueryClient();
   const queryKey = queryKeys.ratings.mine(postId, raterId);
+  const summaryQueryKey = queryKeys.ratings.summary(postId);
 
   return useMutation({
     mutationFn: (score: number | null) =>
@@ -26,8 +37,13 @@ export function useSetMyAskRating(postId: string, raterId: string) {
         ? deleteAskRating(postId, raterId).then(() => null)
         : saveAskRating(postId, raterId, score),
     onMutate: async (score) => {
-      await queryClient.cancelQueries({ exact: true, queryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ exact: true, queryKey }),
+        queryClient.cancelQueries({ exact: true, queryKey: summaryQueryKey }),
+      ]);
       const previous = queryClient.getQueryData<Rating | null>(queryKey);
+      const previousSummary =
+        queryClient.getQueryData<RatingSummary>(summaryQueryKey);
 
       if (score === null) {
         queryClient.setQueryData(queryKey, null);
@@ -42,7 +58,14 @@ export function useSetMyAskRating(postId: string, raterId: string) {
         });
       }
 
-      return { previous };
+      if (previousSummary) {
+        queryClient.setQueryData(
+          summaryQueryKey,
+          updateRatingSummary(previousSummary, previous?.score ?? null, score),
+        );
+      }
+
+      return { previous, previousSummary };
     },
     onError: (_error, _score, context) => {
       if (context?.previous === undefined) {
@@ -50,10 +73,60 @@ export function useSetMyAskRating(postId: string, raterId: string) {
       } else {
         queryClient.setQueryData(queryKey, context.previous);
       }
+
+      if (context?.previousSummary === undefined) {
+        queryClient.removeQueries({ exact: true, queryKey: summaryQueryKey });
+      } else {
+        queryClient.setQueryData(summaryQueryKey, context.previousSummary);
+      }
     },
     onSuccess: (rating) => {
       queryClient.setQueryData(queryKey, rating);
     },
-    onSettled: () => queryClient.invalidateQueries({ exact: true, queryKey }),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ exact: true, queryKey }),
+        queryClient.invalidateQueries({
+          exact: true,
+          queryKey: summaryQueryKey,
+        }),
+      ]),
   });
+}
+
+function updateRatingSummary(
+  summary: RatingSummary,
+  previousScore: number | null,
+  nextScore: number | null,
+): RatingSummary {
+  const previousTotal = (summary.averageScore ?? 0) * summary.ratingCount;
+
+  if (previousScore === null && nextScore !== null) {
+    const ratingCount = summary.ratingCount + 1;
+    return {
+      averageScore: (previousTotal + nextScore) / ratingCount,
+      ratingCount,
+    };
+  }
+
+  if (previousScore !== null && nextScore === null) {
+    const ratingCount = Math.max(0, summary.ratingCount - 1);
+    return {
+      averageScore:
+        ratingCount === 0
+          ? null
+          : (previousTotal - previousScore) / ratingCount,
+      ratingCount,
+    };
+  }
+
+  if (previousScore !== null && nextScore !== null) {
+    return {
+      averageScore:
+        (previousTotal - previousScore + nextScore) / summary.ratingCount,
+      ratingCount: summary.ratingCount,
+    };
+  }
+
+  return summary;
 }

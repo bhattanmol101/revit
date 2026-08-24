@@ -5,9 +5,37 @@ import { normalizeApiError } from "./errors";
 import { runApiRequest } from "./request";
 
 export type Rating = Tables<"ratings">;
+export type RatingSummary = {
+  averageScore: number | null;
+  ratingCount: number;
+};
 
 const RATING_SELECT =
   "post_id, rater_id, score, created_at, updated_at" as const;
+
+export function getAskRatingSummary(postId: string): Promise<RatingSummary> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .rpc("get_ask_rating_summary", { target_post_id: postId })
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load the rating summary.");
+      }
+
+      const summary = data[0] as
+        | { average_score: number | null; rating_count: number }
+        | undefined;
+
+      return {
+        averageScore: summary?.average_score ?? null,
+        ratingCount: summary?.rating_count ?? 0,
+      };
+    },
+    { retries: 1 },
+  );
+}
 
 export function getMyAskRating(
   postId: string,
