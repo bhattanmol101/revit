@@ -178,6 +178,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          created_at: string
+          post_id: string
+          rater_id: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          rater_id: string
+          score: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          rater_id?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
