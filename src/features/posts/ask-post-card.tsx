@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
+import { AskRatingControl } from "@/features/ratings/ask-rating-control";
 import { routes } from "@/lib/routes";
 
 type AskPostCardProps = {
@@ -93,6 +94,8 @@ export function AskPostCard({
             ))}
           </View>
         ) : null}
+
+        <AskRatingControl postId={post.id} />
 
         {actions ? (
           <View className="flex-row flex-wrap justify-end gap-3 border-t border-border pt-4">
