@@ -14,8 +14,11 @@ export type CommentAuthor = Pick<
   "avatar_url" | "display_name" | "id" | "username"
 >;
 export type CommentWithAuthor = Comment & { author: CommentAuthor };
+export type CommentThread = CommentWithAuthor & {
+  replies: CommentWithAuthor[];
+};
 export type CommentPage = {
-  items: CommentWithAuthor[];
+  items: CommentThread[];
   nextOffset?: number;
   totalCount: number;
 };
@@ -26,26 +29,65 @@ export function getTopLevelComments(
 ): Promise<CommentPage> {
   return runApiRequest(
     async (signal) => {
-      const { count, data, error } = await supabase
-        .from("comments")
-        .select(COMMENT_SELECT, { count: "exact" })
-        .eq("post_id", postId)
-        .is("parent_id", null)
-        .order("created_at", { ascending: true })
-        .order("id", { ascending: true })
-        .range(offset, offset + COMMENT_PAGE_SIZE)
-        .abortSignal(signal);
+      const [topLevelResult, countResult] = await Promise.all([
+        supabase
+          .from("comments")
+          .select(COMMENT_SELECT)
+          .eq("post_id", postId)
+          .is("parent_id", null)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(offset, offset + COMMENT_PAGE_SIZE)
+          .abortSignal(signal),
+        supabase
+          .from("comments")
+          .select("id", { count: "exact", head: true })
+          .eq("post_id", postId)
+          .abortSignal(signal),
+      ]);
 
-      if (error) {
-        throw normalizeApiError(error, "We could not load the comments.");
+      if (topLevelResult.error) {
+        throw normalizeApiError(
+          topLevelResult.error,
+          "We could not load the comments.",
+        );
       }
 
-      const hasNextPage = data.length > COMMENT_PAGE_SIZE;
+      if (countResult.error) {
+        throw normalizeApiError(
+          countResult.error,
+          "We could not load the comment count.",
+        );
+      }
+
+      const hasNextPage = topLevelResult.data.length > COMMENT_PAGE_SIZE;
+      const topLevelComments = topLevelResult.data.slice(0, COMMENT_PAGE_SIZE);
+      const parentIds = topLevelComments.map((comment) => comment.id);
+      let replies: CommentWithAuthor[] = [];
+
+      if (parentIds.length > 0) {
+        const { data, error } = await supabase
+          .from("comments")
+          .select(COMMENT_SELECT)
+          .in("parent_id", parentIds)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .abortSignal(signal);
+
+        if (error) {
+          throw normalizeApiError(error, "We could not load the replies.");
+        }
+
+        replies = data;
+      }
 
       return {
-        items: data.slice(0, COMMENT_PAGE_SIZE),
+        items: topLevelComments.map((comment) => ({
+          ...comment,
+          replies: replies.filter((reply) => reply.parent_id === comment.id),
+        })),
         nextOffset: hasNextPage ? offset + COMMENT_PAGE_SIZE : undefined,
-        totalCount: count ?? 0,
+        totalCount: countResult.count ?? 0,
       };
     },
     { retries: 1 },
@@ -57,12 +99,35 @@ export function createTopLevelComment(input: {
   body: string;
   postId: string;
 }): Promise<CommentWithAuthor> {
+  return createComment(input);
+}
+
+export function createReply(input: {
+  authorId: string;
+  body: string;
+  parentId: string;
+  postId: string;
+}): Promise<CommentWithAuthor> {
+  return createComment(input);
+}
+
+function createComment(input: {
+  authorId: string;
+  body: string;
+  parentId?: string;
+  postId: string;
+}): Promise<CommentWithAuthor> {
   const body = validateCommentBody(input.body);
 
   return runApiRequest(async (signal) => {
     const { data, error } = await supabase
       .from("comments")
-      .insert({ author_id: input.authorId, body, post_id: input.postId })
+      .insert({
+        author_id: input.authorId,
+        body,
+        parent_id: input.parentId ?? null,
+        post_id: input.postId,
+      })
       .select(COMMENT_SELECT)
       .abortSignal(signal)
       .single();

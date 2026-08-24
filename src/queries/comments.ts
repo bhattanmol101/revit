@@ -6,6 +6,7 @@ import {
 
 import {
   createTopLevelComment,
+  createReply,
   deleteComment,
   getTopLevelComments,
   type CommentPage,
@@ -29,6 +30,19 @@ export function useCreateTopLevelComment(postId: string, authorId: string) {
   return useMutation({
     mutationFn: (body: string) =>
       createTopLevelComment({ authorId, body, postId }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.comments.byPost(postId),
+      }),
+  });
+}
+
+export function useCreateReply(postId: string, authorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ body, parentId }: { body: string; parentId: string }) =>
+      createReply({ authorId, body, parentId, postId }),
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.comments.byPost(postId),

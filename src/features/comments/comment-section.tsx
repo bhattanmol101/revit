@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 
-import type { CommentWithAuthor } from "@/api/comments";
+import type { CommentThread, CommentWithAuthor } from "@/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import {
   useCreateTopLevelComment,
+  useCreateReply,
   useDeleteComment,
   type useTopLevelComments,
   useUpdateComment,
@@ -36,13 +37,17 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
   const [editing, setEditing] = useState<CommentWithAuthor | null>(null);
   const [editBody, setEditBody] = useState("");
   const [deleting, setDeleting] = useState<CommentWithAuthor | null>(null);
+  const [replyingTo, setReplyingTo] = useState<CommentWithAuthor | null>(null);
+  const [replyBody, setReplyBody] = useState("");
   const createComment = useCreateTopLevelComment(postId, user?.id ?? "");
+  const createReply = useCreateReply(postId, user?.id ?? "");
   const updateComment = useUpdateComment(postId);
   const deleteComment = useDeleteComment(postId);
   const items = comments.data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = comments.data?.pages[0]?.totalCount ?? 0;
   const canPost = body.trim().length > 0 && !createComment.isPending;
   const canSave = editBody.trim().length > 0 && !updateComment.isPending;
+  const canReply = replyBody.trim().length > 0 && !createReply.isPending;
 
   const submit = async () => {
     if (!canPost) return;
@@ -59,6 +64,27 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
     updateComment.reset();
     setEditBody(comment.body);
     setEditing(comment);
+  };
+
+  const openReply = (comment: CommentWithAuthor) => {
+    createReply.reset();
+    setReplyBody("");
+    setReplyingTo(comment);
+  };
+
+  const submitReply = async () => {
+    if (!replyingTo || !canReply) return;
+
+    try {
+      await createReply.mutateAsync({
+        body: replyBody,
+        parentId: replyingTo.id,
+      });
+      setReplyingTo(null);
+      setReplyBody("");
+    } catch {
+      // Keep the reply draft visible and show the error for a retry.
+    }
   };
 
   const save = async () => {
@@ -142,15 +168,16 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       {items.length > 0 ? (
         <View className="gap-3">
           {items.map((comment) => (
-            <CommentItem
+            <CommentThreadItem
               key={comment.id}
               comment={comment}
-              isOwn={comment.author_id === user?.id}
-              onDelete={() => {
+              currentUserId={user?.id}
+              onDelete={(target) => {
                 deleteComment.reset();
-                setDeleting(comment);
+                setDeleting(target);
               }}
-              onEdit={() => openEditor(comment)}
+              onEdit={openEditor}
+              onReply={openReply}
             />
           ))}
         </View>
@@ -178,6 +205,55 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
           </Button>
         </View>
       ) : null}
+
+      <Dialog
+        open={replyingTo !== null}
+        onOpenChange={(open) => !open && setReplyingTo(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Reply{replyingTo ? ` to ${replyingTo.author.display_name}` : ""}
+            </DialogTitle>
+            <DialogDescription>
+              Your reply will appear beneath this comment.
+            </DialogDescription>
+          </DialogHeader>
+          <View className="gap-2">
+            <Input
+              accessibilityLabel="Write a reply"
+              className="min-h-28 items-start py-3"
+              editable={!createReply.isPending}
+              maxLength={2000}
+              multiline
+              onChangeText={setReplyBody}
+              placeholder="Write a reply…"
+              textAlignVertical="top"
+              value={replyBody}
+            />
+            <Text className="text-right" variant="muted">
+              {replyBody.length}/2000
+            </Text>
+            {createReply.isError ? (
+              <Text className="text-destructive" variant="small">
+                {createReply.error.message}
+              </Text>
+            ) : null}
+          </View>
+          <DialogFooter>
+            <Button
+              disabled={createReply.isPending}
+              onPress={() => setReplyingTo(null)}
+              variant="ghost"
+            >
+              <Text>Cancel</Text>
+            </Button>
+            <Button disabled={!canReply} onPress={() => void submitReply()}>
+              <Text>{createReply.isPending ? "Replying…" : "Post reply"}</Text>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={editing !== null}
@@ -264,16 +340,57 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
   );
 }
 
+function CommentThreadItem({
+  comment,
+  currentUserId,
+  onDelete,
+  onEdit,
+  onReply,
+}: {
+  comment: CommentThread;
+  currentUserId?: string;
+  onDelete: (comment: CommentWithAuthor) => void;
+  onEdit: (comment: CommentWithAuthor) => void;
+  onReply: (comment: CommentWithAuthor) => void;
+}) {
+  return (
+    <View className="gap-2">
+      <CommentItem
+        comment={comment}
+        isOwn={comment.author_id === currentUserId}
+        onDelete={() => onDelete(comment)}
+        onEdit={() => onEdit(comment)}
+        onReply={() => onReply(comment)}
+      />
+      {comment.replies.length > 0 ? (
+        <View className="ml-4 gap-2 border-l border-border pl-3 sm:ml-8 sm:pl-4">
+          {comment.replies.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              isOwn={reply.author_id === currentUserId}
+              onDelete={() => onDelete(reply)}
+              onEdit={() => onEdit(reply)}
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 function CommentItem({
   comment,
   isOwn,
   onDelete,
   onEdit,
+  onReply,
 }: {
   comment: CommentWithAuthor;
   isOwn: boolean;
   onDelete: () => void;
   onEdit: () => void;
+  onReply?: () => void;
 }) {
   return (
     <View className="gap-3 rounded-xl border border-border bg-card p-4">
@@ -323,6 +440,16 @@ function CommentItem({
         ) : null}
       </View>
       <Text className="leading-6">{comment.body}</Text>
+      {onReply ? (
+        <Button
+          className="self-start"
+          onPress={onReply}
+          size="sm"
+          variant="ghost"
+        >
+          <Text>Reply</Text>
+        </Button>
+      ) : null}
     </View>
   );
 }
