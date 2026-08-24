@@ -1,5 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { PostDetailScreen as PostDetail } from "@/features/posts/post-detail-screen";
 
 export default function PostDetailScreen() {
-  return <RoutePlaceholderScreen title="Post" description="Post details will appear here." />;
+  return <PostDetail />;
 }

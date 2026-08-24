@@ -1,4 +1,4 @@
-import type { Tables } from "@/lib/supabase/database.types";
+import type { Tables, TablesUpdate } from "@/lib/supabase/database.types";
 import { supabase } from "@/lib/supabase/client";
 
 import { normalizeApiError } from "./errors";
@@ -6,8 +6,36 @@ import { runApiRequest } from "./request";
 
 const POST_IMAGES_BUCKET = "post-images";
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const POST_PAGE_SIZE = 10;
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 export type Post = Tables<"posts">;
+export type PostMedia = Tables<"post_media">;
+
+export type PostAuthor = Pick<
+  Tables<"profiles">,
+  "avatar_url" | "display_name" | "id" | "username"
+>;
+
+export type PostWithDetails = Post & {
+  author: PostAuthor;
+  media: Array<PostMedia & { signedUrl: string }>;
+};
+
+export type PostPage = {
+  items: PostWithDetails[];
+  nextOffset?: number;
+};
+
+export type UpdateAskPostInput = Pick<TablesUpdate<"posts">, "body" | "title">;
+
+type RawPostWithDetails = Post & {
+  author: PostAuthor;
+  media: PostMedia[];
+};
+
+const POST_DETAILS_SELECT =
+  "id, author_id, post_type, entity_id, title, body, created_at, updated_at, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url), media:post_media(id, post_id, storage_path, position, alt_text, created_at)";
 
 export type AskImageUpload = {
   contentType:
@@ -105,6 +133,176 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
     },
     { timeoutMs: 60_000 },
   );
+}
+
+export function getPost(postId: string): Promise<PostWithDetails | null> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .eq("id", postId)
+        .abortSignal(signal)
+        .maybeSingle();
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load this post.");
+      }
+
+      if (!data) return null;
+
+      const [post] = await signPostMedia([data]);
+      return post;
+    },
+    { retries: 1 },
+  );
+}
+
+export function getAskPostsByAuthor(
+  authorId: string,
+  offset = 0,
+): Promise<PostPage> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .eq("author_id", authorId)
+        .eq("post_type", "ASK")
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(offset, offset + POST_PAGE_SIZE)
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load Ask posts.");
+      }
+
+      const hasNextPage = data.length > POST_PAGE_SIZE;
+      const items = await signPostMedia(data.slice(0, POST_PAGE_SIZE));
+
+      return {
+        items,
+        nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
+      };
+    },
+    { retries: 1 },
+  );
+}
+
+export function updateAskPost(
+  postId: string,
+  input: UpdateAskPostInput,
+): Promise<Post> {
+  const title = input.title?.trim() ?? "";
+  const body = input.body?.trim() || null;
+
+  if (title.length < 1 || title.length > 120) {
+    throw new Error("The title must be between 1 and 120 characters.");
+  }
+
+  if ((body?.length ?? 0) > 2000) {
+    throw new Error("The description must be 2,000 characters or fewer.");
+  }
+
+  return runApiRequest(async (signal) => {
+    const { data, error } = await supabase
+      .from("posts")
+      .update({ body, title })
+      .eq("id", postId)
+      .eq("post_type", "ASK")
+      .select(
+        "id, author_id, post_type, entity_id, title, body, created_at, updated_at",
+      )
+      .abortSignal(signal)
+      .single();
+
+    if (error) {
+      throw normalizeApiError(error, "We could not update this Ask post.");
+    }
+
+    return data;
+  });
+}
+
+export function deletePost(postId: string): Promise<void> {
+  return runApiRequest(async (signal) => {
+    const { data: media, error: mediaError } = await supabase
+      .from("post_media")
+      .select("storage_path")
+      .eq("post_id", postId)
+      .abortSignal(signal);
+
+    if (mediaError) {
+      throw normalizeApiError(
+        mediaError,
+        "We could not prepare this post for deletion.",
+      );
+    }
+
+    const { error: deleteError } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", postId)
+      .select("id")
+      .abortSignal(signal)
+      .single();
+
+    if (deleteError) {
+      throw normalizeApiError(deleteError, "We could not delete this post.");
+    }
+
+    const storagePaths = media.map(({ storage_path }) => storage_path);
+
+    if (storagePaths.length > 0) {
+      await supabase.storage.from(POST_IMAGES_BUCKET).remove(storagePaths);
+    }
+  });
+}
+
+async function signPostMedia(
+  posts: RawPostWithDetails[],
+): Promise<PostWithDetails[]> {
+  const storagePaths = posts.flatMap((post) =>
+    post.media.map(({ storage_path }) => storage_path),
+  );
+
+  if (storagePaths.length === 0) {
+    return posts.map((post) => ({ ...post, media: [] }));
+  }
+
+  const { data, error } = await supabase.storage
+    .from(POST_IMAGES_BUCKET)
+    .createSignedUrls(storagePaths, SIGNED_URL_TTL_SECONDS);
+
+  if (error) {
+    throw normalizeApiError(error, "We could not load post images.");
+  }
+
+  const signedUrls = new Map(
+    data.map(({ path, signedUrl, error: signedUrlError }) => {
+      if (!path || !signedUrl || signedUrlError) {
+        throw new Error(signedUrlError ?? "A post image could not be loaded.");
+      }
+
+      return [path, signedUrl] as const;
+    }),
+  );
+
+  return posts.map((post) => ({
+    ...post,
+    media: [...post.media]
+      .sort((first, second) => first.position - second.position)
+      .map((media) => {
+        const signedUrl = signedUrls.get(media.storage_path);
+
+        if (!signedUrl) {
+          throw new Error("A post image could not be loaded.");
+        }
+
+        return { ...media, signedUrl };
+      }),
+  }));
 }
 
 function validateAskPost(input: CreateAskPostInput) {

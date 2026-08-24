@@ -1,16 +1,24 @@
 import { Link } from "expo-router";
-import { RefreshControl, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 
 import type { Profile } from "@/api/profiles";
+import type { PostWithDetails } from "@/api/posts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { AskPostCard } from "@/features/posts/ask-post-card";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useFollowStatus, useFollowToggle } from "@/queries/follows";
+import { useAskPostsByAuthor } from "@/queries/posts";
 
 import { useFollowCounts } from "@/queries/profiles";
 
@@ -20,10 +28,6 @@ type ProfileViewProps = {
 };
 
 const PROFILE_SECTIONS = [
-  {
-    description: "Posts will appear here when they are shared.",
-    title: "Posts",
-  },
   {
     description: "Curated restaurant picks will appear here.",
     title: "Picks",
@@ -41,6 +45,7 @@ export function ProfileView({
   const { user } = useAuth();
   const isOwn = isOwnProfile || user?.id === profile.id;
   const counts = useFollowCounts(profile.id);
+  const posts = useAskPostsByAuthor(profile.id);
   const followStatus = useFollowStatus(user?.id ?? "", profile.id);
   const followToggle = useFollowToggle(user?.id ?? "", profile.id);
   const initials = getInitials(profile.display_name);
@@ -48,6 +53,7 @@ export function ProfileView({
   const refresh = async () => {
     await Promise.all([
       counts.refetch(),
+      posts.refetch(),
       ...(isOwn ? [] : [followStatus.refetch()]),
     ]);
   };
@@ -62,7 +68,11 @@ export function ProfileView({
         contentContainerClassName="mx-auto w-full max-w-4xl gap-8 px-5 py-8 sm:px-8"
         refreshControl={
           <RefreshControl
-            refreshing={counts.isRefetching || followStatus.isRefetching}
+            refreshing={
+              counts.isRefetching ||
+              posts.isRefetching ||
+              followStatus.isRefetching
+            }
             onRefresh={() => void refresh()}
           />
         }
@@ -153,6 +163,16 @@ export function ProfileView({
           </Card>
         ) : null}
 
+        <ProfilePosts
+          hasNextPage={posts.hasNextPage}
+          isError={posts.isError}
+          isFetchingNextPage={posts.isFetchingNextPage}
+          isLoading={posts.isLoading}
+          loadMore={() => void posts.fetchNextPage()}
+          posts={posts.data?.pages.flatMap((page) => page.items) ?? []}
+          retry={() => void posts.refetch()}
+        />
+
         <View className="gap-4">
           {PROFILE_SECTIONS.map((section) => (
             <Card key={section.title} className="gap-3 py-5">
@@ -167,6 +187,76 @@ export function ProfileView({
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ProfilePosts({
+  hasNextPage,
+  isError,
+  isFetchingNextPage,
+  isLoading,
+  loadMore,
+  posts,
+  retry,
+}: {
+  hasNextPage: boolean;
+  isError: boolean;
+  isFetchingNextPage: boolean;
+  isLoading: boolean;
+  loadMore: () => void;
+  posts: PostWithDetails[];
+  retry: () => void;
+}) {
+  return (
+    <View className="gap-4">
+      <Text variant="h2" className="border-0 pb-0 text-2xl">
+        Posts
+      </Text>
+
+      {isLoading ? (
+        <View className="gap-3">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </View>
+      ) : null}
+
+      {isError ? (
+        <Card className="gap-3 border-destructive/40 py-5">
+          <CardContent className="gap-3">
+            <Text variant="small" className="text-destructive">
+              We couldn’t load Ask posts.
+            </Text>
+            <Button variant="outline" className="self-start" onPress={retry}>
+              <Text>Try again</Text>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {!isLoading && !isError && posts.length === 0 ? (
+        <Card className="py-5">
+          <CardContent>
+            <Text variant="muted">No Ask posts yet.</Text>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {posts.map((post) => (
+        <AskPostCard key={post.id} post={post} />
+      ))}
+
+      {hasNextPage ? (
+        <Button
+          disabled={isFetchingNextPage}
+          variant="outline"
+          className="self-center"
+          onPress={loadMore}
+        >
+          {isFetchingNextPage ? <ActivityIndicator /> : null}
+          <Text>{isFetchingNextPage ? "Loading…" : "Load more"}</Text>
+        </Button>
+      ) : null}
+    </View>
   );
 }
 
