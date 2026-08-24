@@ -16,10 +16,12 @@ import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { CommentSection } from "@/features/comments/comment-section";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useDeletePost, usePost, useUpdateAskPost } from "@/queries/posts";
+import { useTopLevelComments } from "@/queries/comments";
 
 import { AskPostCard } from "./ask-post-card";
 
@@ -80,16 +82,17 @@ function AskPostDetail({
 }) {
   const { user } = useAuth();
   const isAuthor = user?.id === post.author_id;
+  const comments = useTopLevelComments(post.id);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen options={{ title: "Ask" }} />
       <ScrollView
-        contentContainerClassName="mx-auto w-full max-w-3xl px-5 py-6 sm:px-8"
+        contentContainerClassName="mx-auto w-full max-w-3xl gap-8 px-5 py-6 sm:px-8"
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => void refetch()}
+            onRefresh={() => void Promise.all([refetch(), comments.refetch()])}
           />
         }
       >
@@ -98,6 +101,7 @@ function AskPostDetail({
           post={post}
           actions={isAuthor ? <AuthorActions post={post} /> : undefined}
         />
+        <CommentSection comments={comments} postId={post.id} />
       </ScrollView>
     </SafeAreaView>
   );
