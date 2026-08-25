@@ -1,5 +1,14 @@
-import type { AskImageUpload, Post } from "@/api/posts";
-import { attachPostImages, deletePost } from "@/api/posts";
+import type {
+  AskImageUpload,
+  Post,
+  PostPage,
+  PostWithDetails,
+} from "@/api/posts";
+import {
+  attachPostImages,
+  deletePost,
+  getSharePostsByEntity,
+} from "@/api/posts";
 import { supabase } from "@/lib/supabase/client";
 
 import { normalizeApiError } from "./errors";
@@ -11,6 +20,19 @@ export type MyRestaurantRating = {
   body: string | null;
   postId: string;
   score: number;
+};
+
+export type RestaurantRatingSummary = {
+  averageScore: number | null;
+  ratingCount: number;
+};
+
+export type SharePostWithDetails = PostWithDetails & {
+  ratingScore: number;
+};
+
+export type SharePostPage = Omit<PostPage, "items"> & {
+  items: SharePostWithDetails[];
 };
 
 export type CreateShareRatingInput = {
@@ -52,6 +74,92 @@ export function getMyRestaurantRating(
     },
     { retries: 1 },
   );
+}
+
+export function getRestaurantRatingSummary(
+  entityId: string,
+): Promise<RestaurantRatingSummary> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .rpc("get_restaurant_rating_summary", { p_entity_id: entityId })
+        .abortSignal(signal)
+        .single();
+
+      if (error) {
+        throw normalizeApiError(
+          error,
+          "We could not load this restaurant’s rating.",
+        );
+      }
+
+      return {
+        averageScore: data.average_score,
+        ratingCount: data.rating_count,
+      };
+    },
+    { retries: 1 },
+  );
+}
+
+export function getShareRatingScore(postId: string): Promise<number | null> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("entity_ratings")
+        .select("score")
+        .eq("post_id", postId)
+        .abortSignal(signal)
+        .maybeSingle();
+
+      if (error) {
+        throw normalizeApiError(
+          error,
+          "We could not load this restaurant rating.",
+        );
+      }
+
+      return data?.score ?? null;
+    },
+    { retries: 1 },
+  );
+}
+
+export async function getSharePostsByRestaurant(
+  entityId: string,
+  offset = 0,
+): Promise<SharePostPage> {
+  const page = await getSharePostsByEntity(entityId, offset);
+
+  if (page.items.length === 0) return { ...page, items: [] };
+
+  const scores = await runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("entity_ratings")
+        .select("post_id, score")
+        .in(
+          "post_id",
+          page.items.map((post) => post.id),
+        )
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load restaurant ratings.");
+      }
+
+      return new Map(data.map((rating) => [rating.post_id, rating.score]));
+    },
+    { retries: 1 },
+  );
+
+  return {
+    ...page,
+    items: page.items.flatMap((post) => {
+      const ratingScore = scores.get(post.id);
+      return ratingScore === undefined ? [] : [{ ...post, ratingScore }];
+    }),
+  };
 }
 
 export async function createShareRating(

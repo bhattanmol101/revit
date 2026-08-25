@@ -33,8 +33,14 @@ export const queryKeys = {
   },
   shares: {
     all: ["shares"] as const,
+    byRestaurant: (entityId: string) =>
+      [...queryKeys.shares.all, "restaurant", entityId] as const,
     mine: (entityId: string, authorId: string) =>
       [...queryKeys.shares.all, "mine", entityId, authorId] as const,
+    score: (postId: string) =>
+      [...queryKeys.shares.all, "score", postId] as const,
+    summary: (entityId: string) =>
+      [...queryKeys.shares.all, "summary", entityId] as const,
   },
   posts: {
     all: ["posts"] as const,

@@ -472,6 +472,13 @@ export type Database = {
           rating_count: number
         }[]
       }
+      get_restaurant_rating_summary: {
+        Args: { p_entity_id: string }
+        Returns: {
+          average_score: number
+          rating_count: number
+        }[]
+      }
       normalize_entity_text: { Args: { value: string }; Returns: string }
       update_share_rating_post: {
         Args: { p_body?: string; p_post_id: string; p_score: number }

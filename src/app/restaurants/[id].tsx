@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { RestaurantDetailScreen } from "@/features/restaurants/restaurant-detail-screen";
 
-export default function RestaurantDetailScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Restaurant"
-      description="Restaurant ratings will appear here."
-    />
-  );
+export default function RestaurantDetailRoute() {
+  return <RestaurantDetailScreen />;
 }

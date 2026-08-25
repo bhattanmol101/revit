@@ -211,6 +211,38 @@ export function getAskPostsByAuthor(
   );
 }
 
+export function getSharePostsByEntity(
+  entityId: string,
+  offset = 0,
+): Promise<PostPage> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .eq("entity_id", entityId)
+        .eq("post_type", "SHARE")
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(offset, offset + POST_PAGE_SIZE)
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load restaurant ratings.");
+      }
+
+      const hasNextPage = data.length > POST_PAGE_SIZE;
+      const items = await signPostMedia(data.slice(0, POST_PAGE_SIZE));
+
+      return {
+        items,
+        nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
+      };
+    },
+    { retries: 1 },
+  );
+}
+
 export function updateAskPost(
   postId: string,
   input: UpdateAskPostInput,

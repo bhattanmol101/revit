@@ -22,8 +22,11 @@ import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useTopLevelComments } from "@/queries/comments";
 import { useDeletePost, usePost, useUpdateAskPost } from "@/queries/posts";
+import { useRestaurant } from "@/queries/restaurants";
+import { useShareRatingScore } from "@/queries/shares";
 
 import { AskPostCard } from "./ask-post-card";
+import { SharePostCard } from "./share-post-card";
 
 export function PostDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -53,14 +56,8 @@ export function PostDetailScreen() {
     );
   }
 
-  if (post.data.post_type !== "ASK") {
-    return (
-      <ProfileMessageScreen
-        title="Share post"
-        description="Share post presentation will be added with restaurant ratings."
-      />
-    );
-  }
+  if (post.data.post_type === "SHARE")
+    return <SharePostDetail post={post.data} />;
 
   return (
     <AskPostDetail
@@ -68,6 +65,64 @@ export function PostDetailScreen() {
       post={post.data}
       refetch={post.refetch}
     />
+  );
+}
+
+function SharePostDetail({ post }: { post: PostWithDetails }) {
+  const restaurant = useRestaurant(post.entity_id ?? "");
+  const ratingScore = useShareRatingScore(post.id);
+  const comments = useTopLevelComments(post.id);
+  const score = ratingScore.data;
+
+  if (restaurant.isLoading || ratingScore.isLoading)
+    return <PostDetailLoading />;
+
+  if (restaurant.isError || ratingScore.isError) {
+    return (
+      <ProfileMessageScreen
+        title="Share post unavailable"
+        description="We couldn’t load this restaurant rating. Check your connection and try again."
+        action={() =>
+          void Promise.all([restaurant.refetch(), ratingScore.refetch()])
+        }
+      />
+    );
+  }
+
+  if (!restaurant.data || score === null || score === undefined) {
+    return (
+      <ProfileMessageScreen
+        title="Share post unavailable"
+        description="This restaurant rating may have been removed or is no longer available."
+      />
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen options={{ title: "Restaurant rating" }} />
+      <ScrollView
+        contentContainerClassName="mx-auto w-full max-w-3xl gap-8 px-5 py-6 sm:px-8"
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() =>
+              void Promise.all([
+                restaurant.refetch(),
+                ratingScore.refetch(),
+                comments.refetch(),
+              ])
+            }
+          />
+        }
+      >
+        <SharePostCard
+          post={{ ...post, ratingScore: score }}
+          restaurant={restaurant.data}
+        />
+        <CommentSection comments={comments} postId={post.id} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
