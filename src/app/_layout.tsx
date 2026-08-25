@@ -8,9 +8,9 @@ import { Uniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
+import { Text } from "@/components/ui/text";
 import { Colors } from "@/constants/theme";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
-import { Text } from "@/components/ui/text";
 import { AppProvider } from "@/providers/app-provider";
 import {
   AuthProvider,
@@ -91,6 +91,10 @@ function RootNavigator() {
         <Stack.Screen
           name="restaurants/[id]"
           options={{ title: "Restaurant" }}
+        />
+        <Stack.Screen
+          name="restaurants/search"
+          options={{ title: "Find a restaurant" }}
         />
         <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
         <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />

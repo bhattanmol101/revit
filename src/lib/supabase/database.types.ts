@@ -91,6 +91,86 @@ export type Database = {
           },
         ]
       }
+      entities: {
+        Row: {
+          address_line_1: string
+          address_line_2: string | null
+          administrative_area: string | null
+          category_id: string
+          country_code: string | null
+          created_at: string
+          id: string
+          locality: string
+          name: string
+          normalized_address: string
+          normalized_locality: string
+          normalized_name: string
+          postal_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line_1: string
+          address_line_2?: string | null
+          administrative_area?: string | null
+          category_id: string
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          locality: string
+          name: string
+          normalized_address: string
+          normalized_locality: string
+          normalized_name: string
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line_1?: string
+          address_line_2?: string | null
+          administrative_area?: string | null
+          category_id?: string
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          locality?: string
+          name?: string
+          normalized_address?: string
+          normalized_locality?: string
+          normalized_name?: string
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entities_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "entity_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_categories: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -198,6 +278,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "posts_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -274,6 +361,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_restaurant_entity: {
+        Args: {
+          p_address_line_1: string
+          p_address_line_2?: string
+          p_administrative_area?: string
+          p_country_code?: string
+          p_locality: string
+          p_name: string
+          p_postal_code?: string
+        }
+        Returns: {
+          address_line_1: string
+          address_line_2: string | null
+          administrative_area: string | null
+          category_id: string
+          country_code: string | null
+          created_at: string
+          id: string
+          locality: string
+          name: string
+          normalized_address: string
+          normalized_locality: string
+          normalized_name: string
+          postal_code: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "entities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_ask_rating_summary: {
         Args: { target_post_id: string }
         Returns: {
@@ -281,6 +401,7 @@ export type Database = {
           rating_count: number
         }[]
       }
+      normalize_entity_text: { Args: { value: string }; Returns: string }
     }
     Enums: {
       post_type: "ASK" | "SHARE"

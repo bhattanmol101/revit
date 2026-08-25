@@ -10,6 +10,7 @@ export const routes = {
   home: "/",
   picks: "/picks",
   profile: "/profile",
+  restaurantSearch: "/restaurants/search",
   forum: (id: string) => ({ pathname: "/forums/[id]", params: { id } }),
   pick: (id: string) => ({ pathname: "/picks/[id]", params: { id } }),
   post: (id: string) => ({ pathname: "/posts/[id]", params: { id } }),

@@ -24,6 +24,11 @@ export const queryKeys = {
     followCounts: (profileId: string) =>
       [...queryKeys.profiles.all, profileId, "follow-counts"] as const,
   },
+  restaurants: {
+    all: ["restaurants"] as const,
+    search: (query: string) =>
+      [...queryKeys.restaurants.all, "search", query] as const,
+  },
   posts: {
     all: ["posts"] as const,
     byAuthor: (authorId: string) =>
