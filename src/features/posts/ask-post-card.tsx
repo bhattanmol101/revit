@@ -1,6 +1,5 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import type { ReactNode } from "react";
 import { View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
@@ -8,33 +7,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { AskRatingControl } from "@/features/ratings/ask-rating-control";
 import { routes } from "@/lib/routes";
 
+import { PostEngagementActions } from "./post-engagement-actions";
+
 type AskPostCardProps = {
-  actions?: ReactNode;
   isDetail?: boolean;
   post: PostWithDetails;
 };
 
-export function AskPostCard({
-  actions,
-  isDetail = false,
-  post,
-}: AskPostCardProps) {
+export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
   return (
-    <Card className="gap-4 py-5">
-      <CardHeader className="gap-4">
-        <View className="flex-row items-start justify-between gap-4">
+    <Card className="gap-0 overflow-hidden rounded-lg pb-0 pt-0.5 shadow-none">
+      <CardHeader className="gap-2 px-3 pt-2">
+        <View className="flex-row items-start justify-between gap-3">
           <Link href={routes.user(post.author.username)} asChild>
             <Button
               variant="ghost"
-              className="h-auto min-w-0 flex-1 justify-start gap-3 px-0 py-0"
+              className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0"
             >
               <Avatar
                 alt={`${post.author.display_name}'s avatar`}
-                className="size-10"
+                className="size-8"
               >
                 {post.author.avatar_url ? (
                   <AvatarImage
@@ -49,32 +46,37 @@ export function AskPostCard({
                 </AvatarFallback>
               </Avatar>
               <View className="min-w-0 flex-1 items-start">
-                <Text className="font-semibold" numberOfLines={1}>
+                <Text className="text-sm font-semibold" numberOfLines={1}>
                   {post.author.display_name}
                 </Text>
-                <Text variant="muted" numberOfLines={1}>
+                <Text className="text-xs" variant="muted" numberOfLines={1}>
                   @{post.author.username} · {formatPostDate(post.created_at)}
                 </Text>
               </View>
             </Button>
           </Link>
-          <Badge variant="secondary">
-            <Text>Ask</Text>
+          <Badge
+            className="rounded-md border-primary/35 bg-transparent px-1.5 py-0.5"
+            variant="outline"
+          >
+            <Text className="text-[0.6rem] font-semibold text-primary">
+              ASK
+            </Text>
           </Badge>
         </View>
 
-        <CardTitle
-          className={isDetail ? "text-2xl leading-8" : "text-xl leading-7"}
-        >
-          {post.title}
-        </CardTitle>
+        <CardTitle className="text-md">{post.title}</CardTitle>
       </CardHeader>
 
-      <CardContent className="gap-4">
-        {post.body ? <Text className="leading-6">{post.body}</Text> : null}
+      <CardContent className="gap-1 px-0 pt-1">
+        {post.body ? (
+          <Text className="px-3 text-[0.8rem] text-muted-foreground">
+            {post.body}
+          </Text>
+        ) : null}
 
         {post.media.length > 0 ? (
-          <View className="gap-3">
+          <View>
             {post.media.map((media, index) => (
               <Image
                 key={media.id}
@@ -82,34 +84,24 @@ export function AskPostCard({
                   media.alt_text ||
                   `Post image ${index + 1} of ${post.media.length}`
                 }
-                className={
-                  isDetail
-                    ? "h-72 w-full rounded-lg bg-muted sm:h-96"
-                    : "h-52 w-full rounded-lg bg-muted sm:h-72"
-                }
+                className="aspect-square w-full bg-muted"
                 contentFit="cover"
-                source={media.signedUrl}
+                recyclingKey={media.id}
+                source={{ uri: media.signedUrl }}
                 transition={150}
+                style={{
+                  width: "100%",
+                  aspectRatio: 1,
+                }}
               />
             ))}
           </View>
         ) : null}
-
-        <AskRatingControl postId={post.id} />
-
-        {actions ? (
-          <View className="flex-row flex-wrap justify-end gap-3 border-t border-border pt-4">
-            {actions}
-          </View>
-        ) : null}
-
-        {!isDetail ? (
-          <Link href={routes.post(post.id)} asChild>
-            <Button variant="outline" className="self-start">
-              <Text>View post</Text>
-            </Button>
-          </Link>
-        ) : null}
+        <View className="flex-row px-3 -mt-1">
+          <PostEngagementActions postId={post.id} />
+          <Separator className="h-11" orientation="vertical" />
+          <AskRatingControl postId={post.id} />
+        </View>
       </CardContent>
     </Card>
   );

@@ -21,7 +21,9 @@ export function getProfile(userId: string): Promise<Profile | null> {
     async (signal) => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url, created_at, updated_at")
+        .select(
+          "id, username, display_name, bio, avatar_url, created_at, updated_at",
+        )
         .eq("id", userId)
         .abortSignal(signal)
         .maybeSingle();
@@ -108,7 +110,9 @@ export function updateProfile(
       .from("profiles")
       .update(input)
       .eq("id", userId)
-      .select("id, username, display_name, bio, avatar_url, created_at, updated_at")
+      .select(
+        "id, username, display_name, bio, avatar_url, created_at, updated_at",
+      )
       .abortSignal(signal)
       .single();
 

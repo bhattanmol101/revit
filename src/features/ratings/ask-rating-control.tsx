@@ -1,60 +1,49 @@
-import { Star } from "lucide-react-native";
+import { RotateCcw, Star } from "lucide-react-native";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
+import { useTheme } from "@/hooks/use-theme";
+import { selectionFeedback } from "@/lib/feedback";
 import { useAuth } from "@/providers/auth-provider";
-import {
-  useAskRatingSummary,
-  useMyAskRating,
-  useSetMyAskRating,
-} from "@/queries/ratings";
+import { useMyAskRating, useSetMyAskRating } from "@/queries/ratings";
 
 const SCORES = [1, 2, 3, 4, 5] as const;
 
 export function AskRatingControl({ postId }: { postId: string }) {
   const { user } = useAuth();
+  const theme = useTheme();
   const raterId = user?.id ?? "";
-  const summary = useAskRatingSummary(postId);
   const rating = useMyAskRating(postId, raterId);
   const setRating = useSetMyAskRating(postId, raterId);
   const currentScore = rating.data?.score ?? null;
 
   if (!user) return null;
 
-  return (
-    <View className="gap-3 border-t border-border pt-4">
-      <RatingSummary
-        averageScore={summary.data?.averageScore ?? null}
-        isError={summary.isError}
-        isLoading={summary.isLoading}
-        ratingCount={summary.data?.ratingCount ?? 0}
-        retry={() => void summary.refetch()}
-      />
-
-      <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <Text className="font-medium">
-          {currentScore === null
-            ? "Rate this Ask"
-            : `Your rating: ${currentScore.toFixed(1)}`}
+  if (rating.error) {
+    return (
+      <View className="flex-row flex-wrap items-center gap-2">
+        <Text className="text-xs" variant="muted">
+          Your rating could not be loaded.
         </Text>
-        {currentScore !== null ? (
-          <Button
-            accessibilityLabel="Remove your rating"
-            disabled={setRating.isPending}
-            onPress={() => setRating.mutate(null)}
-            size="sm"
-            variant="ghost"
-          >
-            <Text>Remove</Text>
-          </Button>
-        ) : null}
+        <Button
+          onPress={() => void rating.refetch()}
+          className="h-7 px-1.5"
+          variant="link"
+        >
+          <Text className="text-xs">Try again</Text>
+        </Button>
       </View>
+    );
+  }
 
-      <View className="flex-row gap-2">
+  return (
+    <View className="flex-1 flex-col justify-center shrink-0 items-center gap-0.5">
+      <View className="flex-row items-center gap-1">
         {SCORES.map((score) => {
           const isSelected = currentScore === score;
+          const isActive = currentScore !== null && score <= currentScore;
 
           return (
             <Button
@@ -62,79 +51,46 @@ export function AskRatingControl({ postId }: { postId: string }) {
               accessibilityLabel={`Rate ${score} out of 5`}
               accessibilityState={{ selected: isSelected }}
               disabled={rating.isLoading || setRating.isPending}
-              onPress={() => setRating.mutate(score)}
-              size="icon"
-              variant={isSelected ? "default" : "outline"}
+              hitSlop={8}
+              onPress={() => {
+                selectionFeedback();
+                setRating.mutate(score);
+              }}
+              className="size-5 rounded-md px-0"
+              variant="ghost"
             >
-              <Icon as={Star} className="size-4" />
+              <Icon
+                as={Star}
+                className={
+                  isActive
+                    ? "size-5 text-rating"
+                    : "size-5 text-muted-foreground/55"
+                }
+                fill={isActive ? theme.rating : "none"}
+                strokeWidth={isActive ? 2.3 : 1.8}
+              />
             </Button>
           );
         })}
+        {currentScore !== null ? (
+          <Button
+            accessibilityLabel="Remove your rating"
+            disabled={setRating.isPending}
+            hitSlop={8}
+            onPress={() => setRating.mutate(null)}
+            className="size-4 rounded-md p-0 pl-4"
+            variant="ghost"
+          >
+            <Icon as={RotateCcw} className="size-4 text-red-300" />
+          </Button>
+        ) : null}
       </View>
 
-      {rating.isError ? (
-        <View className="flex-row flex-wrap items-center gap-2">
-          <Text variant="muted">Your rating could not be loaded.</Text>
-          <Button
-            onPress={() => void rating.refetch()}
-            size="sm"
-            variant="link"
-          >
-            <Text>Try again</Text>
-          </Button>
-        </View>
-      ) : null}
-
       {setRating.error ? (
-        <Text className="text-destructive" variant="small">
+        <Text className="text-xs text-destructive">
           {setRating.error.message}
         </Text>
       ) : null}
-    </View>
-  );
-}
-
-type RatingSummaryProps = {
-  averageScore: number | null;
-  isError: boolean;
-  isLoading: boolean;
-  ratingCount: number;
-  retry: () => void;
-};
-
-function RatingSummary({
-  averageScore,
-  isError,
-  isLoading,
-  ratingCount,
-  retry,
-}: RatingSummaryProps) {
-  if (isLoading) {
-    return <Text variant="muted">Loading ratings…</Text>;
-  }
-
-  if (isError) {
-    return (
-      <View className="flex-row flex-wrap items-center gap-2">
-        <Text variant="muted">Rating summary unavailable.</Text>
-        <Button onPress={retry} size="sm" variant="link">
-          <Text>Try again</Text>
-        </Button>
-      </View>
-    );
-  }
-
-  if (ratingCount === 0 || averageScore === null) {
-    return <Text variant="muted">No ratings yet</Text>;
-  }
-
-  return (
-    <View className="flex-row items-center gap-2">
-      <Icon as={Star} className="size-5 text-primary" />
-      <Text className="font-semibold">{averageScore.toFixed(1)}</Text>
-      <Text variant="muted">
-        average · {ratingCount} {ratingCount === 1 ? "rating" : "ratings"}
-      </Text>
     </View>
   );
 }

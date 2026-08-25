@@ -1,5 +1,6 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -7,6 +8,7 @@ import { Uniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
+import { Colors } from "@/constants/theme";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { Text } from "@/components/ui/text";
 import { AppProvider } from "@/providers/app-provider";
@@ -21,21 +23,34 @@ Uniwind.setTheme("system");
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = isDark ? Colors.dark : Colors.light;
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      border: colors.border,
+      card: colors.backgroundElement,
+      notification: colors.primary,
+      primary: colors.primary,
+      text: colors.text,
+    },
+  };
 
   return (
     <>
       <SafeAreaProvider>
         <AppProvider>
           <AuthProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
+            <ThemeProvider value={navigationTheme}>
               <RootNavigator />
             </ThemeProvider>
           </AuthProvider>
         </AppProvider>
       </SafeAreaProvider>
 
+      <StatusBar style={isDark ? "light" : "dark"} />
       <PortalHost />
     </>
   );

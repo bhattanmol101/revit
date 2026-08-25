@@ -20,8 +20,8 @@ import { CommentSection } from "@/features/comments/comment-section";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
-import { useDeletePost, usePost, useUpdateAskPost } from "@/queries/posts";
 import { useTopLevelComments } from "@/queries/comments";
+import { useDeletePost, usePost, useUpdateAskPost } from "@/queries/posts";
 
 import { AskPostCard } from "./ask-post-card";
 
@@ -96,11 +96,8 @@ function AskPostDetail({
           />
         }
       >
-        <AskPostCard
-          isDetail
-          post={post}
-          actions={isAuthor ? <AuthorActions post={post} /> : undefined}
-        />
+        <AskPostCard isDetail post={post} />
+        {isAuthor ? <AuthorActions post={post} /> : null}
         <CommentSection comments={comments} postId={post.id} />
       </ScrollView>
     </SafeAreaView>

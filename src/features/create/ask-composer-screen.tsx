@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { successFeedback } from "@/lib/feedback";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useCreateAskPost } from "@/queries/posts";
@@ -108,6 +109,7 @@ export function AskComposerScreen() {
         title,
       });
 
+      successFeedback();
       router.replace(routes.post(post.id));
     } catch {
       // The mutation error is rendered below and remains available for retry.
@@ -122,10 +124,10 @@ export function AskComposerScreen() {
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="mx-auto w-full max-w-2xl gap-7 px-5 py-6 sm:px-8"
+          contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6"
         >
-          <View className="gap-2">
-            <Text variant="h1" className="text-left text-3xl">
+          <View className="gap-2 py-1">
+            <Text variant="h1" className="text-left text-2xl">
               Ask for ratings
             </Text>
             <Text variant="muted" className="leading-5">
@@ -134,7 +136,7 @@ export function AskComposerScreen() {
             </Text>
           </View>
 
-          <View className="gap-2">
+          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Title</Text>
               <Text variant="muted">{title.length}/120</Text>
@@ -142,6 +144,7 @@ export function AskComposerScreen() {
             <Input
               accessibilityLabel="Ask title"
               autoFocus
+              className="h-10"
               editable={!createPost.isPending}
               maxLength={120}
               placeholder="What would you like people to rate?"
@@ -151,14 +154,14 @@ export function AskComposerScreen() {
             />
           </View>
 
-          <View className="gap-2">
+          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Details (optional)</Text>
               <Text variant="muted">{bodyLength}/2000</Text>
             </View>
             <Input
               accessibilityLabel="Ask details"
-              className="min-h-32 items-start py-3"
+              className="min-h-28 items-start py-2"
               editable={!createPost.isPending}
               maxLength={2000}
               multiline
@@ -169,7 +172,7 @@ export function AskComposerScreen() {
             />
           </View>
 
-          <View className="gap-3">
+          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Images (optional)</Text>
               <Text variant="muted">{images.length}/3</Text>
@@ -181,13 +184,13 @@ export function AskComposerScreen() {
                   <View key={image.uri} className="relative flex-1">
                     <Image
                       accessibilityLabel={`Selected image ${index + 1}`}
-                      className="h-36 w-full rounded-lg bg-muted sm:h-40"
+                      className="h-32 w-full rounded-md bg-muted sm:h-36"
                       contentFit="cover"
                       source={image.uri}
                     />
                     <Button
                       accessibilityLabel={`Remove image ${index + 1}`}
-                      className="absolute right-2 top-2 rounded-full bg-background/90"
+                      className="absolute right-2 top-2 rounded-md bg-background/90"
                       disabled={createPost.isPending}
                       size="icon"
                       variant="outline"

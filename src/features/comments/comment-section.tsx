@@ -19,8 +19,8 @@ import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import {
-  useCreateTopLevelComment,
   useCreateReply,
+  useCreateTopLevelComment,
   useDeleteComment,
   type useTopLevelComments,
   useUpdateComment,
@@ -113,15 +113,15 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
   };
 
   return (
-    <View className="gap-5">
+    <View className="gap-3">
       <View className="flex-row items-baseline justify-between gap-3">
         <Text className="text-xl font-semibold">Comments</Text>
-        <Text variant="muted">
+        <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
           {totalCount} {totalCount === 1 ? "comment" : "comments"}
         </Text>
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
+      <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
         <Input
           accessibilityLabel="Write a comment"
           className="min-h-24 items-start py-3"
@@ -149,7 +149,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       {comments.isLoading ? <CommentListLoading /> : null}
 
       {comments.isError && items.length === 0 ? (
-        <View className="items-start gap-3 rounded-xl border border-border p-5">
+        <View className="items-start gap-3 rounded-lg border border-border p-3">
           <Text className="font-medium">Comments could not be loaded.</Text>
           <Text variant="muted">Check your connection and try again.</Text>
           <Button variant="outline" onPress={() => void comments.refetch()}>
@@ -159,7 +159,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       ) : null}
 
       {!comments.isLoading && !comments.isError && items.length === 0 ? (
-        <View className="rounded-xl border border-dashed border-border p-5">
+        <View className="rounded-lg border border-dashed border-border p-3">
           <Text className="font-medium">No comments yet.</Text>
           <Text variant="muted">Start the conversation.</Text>
         </View>
@@ -363,7 +363,7 @@ function CommentThreadItem({
         onReply={() => onReply(comment)}
       />
       {comment.replies.length > 0 ? (
-        <View className="ml-4 gap-2 border-l border-border pl-3 sm:ml-8 sm:pl-4">
+        <View className="ml-4 gap-2 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
           {comment.replies.map((reply) => (
             <CommentItem
               key={reply.id}
@@ -371,6 +371,7 @@ function CommentThreadItem({
               isOwn={reply.author_id === currentUserId}
               onDelete={() => onDelete(reply)}
               onEdit={() => onEdit(reply)}
+              isReply
             />
           ))}
         </View>
@@ -381,19 +382,27 @@ function CommentThreadItem({
 
 function CommentItem({
   comment,
+  isReply = false,
   isOwn,
   onDelete,
   onEdit,
   onReply,
 }: {
   comment: CommentWithAuthor;
+  isReply?: boolean;
   isOwn: boolean;
   onDelete: () => void;
   onEdit: () => void;
   onReply?: () => void;
 }) {
   return (
-    <View className="gap-3 rounded-xl border border-border bg-card p-4">
+    <View
+      className={
+        isReply
+          ? "gap-2 rounded-md bg-muted/70 p-3"
+          : "gap-3 rounded-lg border border-border bg-card p-3 shadow-none"
+      }
+    >
       <View className="flex-row items-start justify-between gap-3">
         <Link href={routes.user(comment.author.username)} asChild>
           <Button

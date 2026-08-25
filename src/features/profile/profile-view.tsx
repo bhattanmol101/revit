@@ -5,9 +5,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
-
-import type { Profile } from "@/api/profiles";
 import type { PostWithDetails } from "@/api/posts";
+import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +64,7 @@ export function ProfileView({
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-4xl gap-8 px-5 py-8 sm:px-8"
+        contentContainerClassName="mx-auto w-full max-w-4xl gap-5 px-3 py-4 sm:px-6"
         refreshControl={
           <RefreshControl
             refreshing={
@@ -77,10 +76,10 @@ export function ProfileView({
           />
         }
       >
-        <View className="gap-5 sm:flex-row sm:items-center">
+        <View className="gap-4 rounded-lg border border-border bg-secondary p-4 sm:flex-row sm:items-center">
           <Avatar
             alt={`${profile.display_name}'s avatar`}
-            className="size-24 border border-border"
+            className="size-20 border-2 border-card shadow-none"
           >
             {profile.avatar_url ? (
               <AvatarImage
@@ -89,16 +88,16 @@ export function ProfileView({
               />
             ) : null}
             <AvatarFallback>
-              <Text className="text-2xl font-semibold">{initials}</Text>
+              <Text className="text-xl font-semibold">{initials}</Text>
             </AvatarFallback>
           </Avatar>
 
           <View className="min-w-0 flex-1 gap-2">
             <View className="gap-1">
-              <Text variant="h1" className="text-left text-3xl">
+              <Text variant="h1" className="text-left text-2xl">
                 {profile.display_name}
               </Text>
-              <Text variant="muted" className="text-base">
+              <Text variant="muted" className="text-sm">
                 @{profile.username}
               </Text>
             </View>
@@ -112,7 +111,7 @@ export function ProfileView({
 
             {!isOwn ? (
               <Button
-                className="mt-2 self-start"
+                className="mt-2 min-w-28 self-start"
                 disabled={followStatus.isLoading || followToggle.isPending}
                 variant={followStatus.data ? "outline" : "default"}
                 onPress={() =>
@@ -173,9 +172,12 @@ export function ProfileView({
           retry={() => void posts.refetch()}
         />
 
-        <View className="gap-4">
+        <View className="gap-3 sm:flex-row">
           {PROFILE_SECTIONS.map((section) => (
-            <Card key={section.title} className="gap-3 py-5">
+            <Card
+              key={section.title}
+              className="flex-1 gap-2 rounded-lg border-0 bg-accent py-3 shadow-none"
+            >
               <CardHeader>
                 <CardTitle>{section.title}</CardTitle>
               </CardHeader>
@@ -208,8 +210,8 @@ function ProfilePosts({
   retry: () => void;
 }) {
   return (
-    <View className="gap-4">
-      <Text variant="h2" className="border-0 pb-0 text-2xl">
+    <View className="-mx-2 gap-3 sm:mx-0">
+      <Text variant="h2" className="border-0 px-2 pb-0 text-xl sm:px-0">
         Posts
       </Text>
 
@@ -221,8 +223,8 @@ function ProfilePosts({
       ) : null}
 
       {isError ? (
-        <Card className="gap-3 border-destructive/40 py-5">
-          <CardContent className="gap-3">
+        <Card className="gap-3 rounded-lg border-destructive/40 py-3 shadow-none">
+          <CardContent className="gap-3 px-3">
             <Text variant="small" className="text-destructive">
               We couldn’t load Ask posts.
             </Text>
@@ -234,8 +236,8 @@ function ProfilePosts({
       ) : null}
 
       {!isLoading && !isError && posts.length === 0 ? (
-        <Card className="py-5">
-          <CardContent>
+        <Card className="rounded-lg py-3 shadow-none">
+          <CardContent className="px-3">
             <Text variant="muted">No Ask posts yet.</Text>
           </CardContent>
         </Card>
@@ -272,14 +274,20 @@ function FollowCounts({
   username: string;
 }) {
   return (
-    <View className="flex-row gap-8 border-y border-border py-4">
+    <View className="flex-row gap-3">
       <Link href={routes.followers(username)} asChild>
-        <Button variant="ghost" className="h-auto items-start px-0 py-0">
+        <Button
+          variant="secondary"
+          className="h-auto min-w-28 items-start rounded-md px-3 py-2.5"
+        >
           <Count label="Followers" value={followers} isLoading={isLoading} />
         </Button>
       </Link>
       <Link href={routes.following(username)} asChild>
-        <Button variant="ghost" className="h-auto items-start px-0 py-0">
+        <Button
+          variant="secondary"
+          className="h-auto min-w-28 items-start rounded-md px-3 py-2.5"
+        >
           <Count label="Following" value={following} isLoading={isLoading} />
         </Button>
       </Link>

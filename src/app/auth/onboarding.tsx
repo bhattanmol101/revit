@@ -58,7 +58,7 @@ export default function OnboardingScreen() {
       title="Make it yours"
       description="Choose the name and username people will see. You can add a bio and avatar later."
     >
-      <View className="gap-5">
+      <View className="gap-4">
         <View className="gap-2">
           <Text variant="small">Display name</Text>
           <Input

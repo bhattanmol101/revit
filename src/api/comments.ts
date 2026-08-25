@@ -1,5 +1,5 @@
-import type { Tables } from "@/lib/supabase/database.types";
 import { supabase } from "@/lib/supabase/client";
+import type { Tables } from "@/lib/supabase/database.types";
 
 import { normalizeApiError } from "./errors";
 import { runApiRequest } from "./request";
@@ -22,6 +22,24 @@ export type CommentPage = {
   nextOffset?: number;
   totalCount: number;
 };
+export function getCommentCount(postId: string): Promise<number> {
+  return runApiRequest(
+    async (signal) => {
+      const { count, error } = await supabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", postId)
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load the comment count.");
+      }
+
+      return count ?? 0;
+    },
+    { retries: 1 },
+  );
+}
 
 export function getTopLevelComments(
   postId: string,

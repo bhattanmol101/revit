@@ -9,10 +9,13 @@ const secureStoreStorage = {
 
 const browserStorage = {
   getItem: async (key: string) => globalThis.localStorage?.getItem(key) ?? null,
-  setItem: async (key: string, value: string) => globalThis.localStorage?.setItem(key, value),
+  setItem: async (key: string, value: string) =>
+    globalThis.localStorage?.setItem(key, value),
   removeItem: async (key: string) => globalThis.localStorage?.removeItem(key),
 };
 
 /** Native sessions are encrypted; web uses the browser's persistent storage. */
 export const authStorage =
-  Platform.OS === "ios" || Platform.OS === "android" ? secureStoreStorage : browserStorage;
+  Platform.OS === "ios" || Platform.OS === "android"
+    ? secureStoreStorage
+    : browserStorage;

@@ -1,4 +1,4 @@
-import { Link, type Href } from "expo-router";
+import { type Href, Link } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -52,7 +52,7 @@ export default function AuthScreen() {
           : "Start sharing the restaurants and recommendations you care about."
       }
     >
-      <View className="gap-5">
+      <View className="gap-4">
         <View className="gap-2">
           <Text variant="small">Email</Text>
           <Input

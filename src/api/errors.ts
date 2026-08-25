@@ -40,7 +40,7 @@ export function normalizeApiError(
   const message = details.message ?? fallbackMessage;
   const status = details.status;
   const isCancelled =
-    error instanceof Error && error.name === "AbortError" ||
+    (error instanceof Error && error.name === "AbortError") ||
     /abort|cancel/i.test(message);
   const retryable =
     isCancelled ||

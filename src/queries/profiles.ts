@@ -56,10 +56,7 @@ export function useUpdateProfile(profileId: string) {
         profile,
       );
 
-      if (
-        previousProfile &&
-        previousProfile.username !== profile.username
-      ) {
+      if (previousProfile && previousProfile.username !== profile.username) {
         queryClient.removeQueries({
           exact: true,
           queryKey: queryKeys.profiles.byUsername(previousProfile.username),

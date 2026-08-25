@@ -30,8 +30,8 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="mx-auto w-full max-w-4xl grow px-5 py-5 sm:px-8"
-        ItemSeparatorComponent={() => <View className="h-px bg-border" />}
+        contentContainerClassName="mx-auto w-full max-w-4xl grow px-3 py-3 sm:px-6"
+        ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
           <FollowListState
             profileLoading={profile.isLoading}
@@ -68,9 +68,9 @@ function FollowProfileRow({ profile }: { profile: FollowProfile }) {
     <Link href={routes.user(profile.username)} asChild>
       <Button
         variant="ghost"
-        className="h-auto w-full justify-start gap-4 rounded-none px-0 py-4"
+        className="h-auto w-full justify-start gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-none"
       >
-        <Avatar alt={`${profile.display_name}'s avatar`} className="size-12">
+        <Avatar alt={`${profile.display_name}'s avatar`} className="size-10">
           {profile.avatar_url ? (
             <AvatarImage
               accessibilityLabel={`${profile.display_name}'s avatar`}

@@ -1,18 +1,29 @@
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 
 import {
-  createTopLevelComment,
-  createReply,
-  deleteComment,
-  getTopLevelComments,
   type CommentPage,
+  createReply,
+  createTopLevelComment,
+  deleteComment,
+  getCommentCount,
+  getTopLevelComments,
   updateComment,
 } from "@/api/comments";
 import { queryKeys } from "@/lib/query/query-keys";
+
+export function useCommentCount(postId: string) {
+  return useQuery({
+    enabled: postId.length > 0,
+    queryFn: () => getCommentCount(postId),
+    queryKey: queryKeys.comments.count(postId),
+    staleTime: 30_000,
+  });
+}
 
 export function useTopLevelComments(postId: string) {
   return useInfiniteQuery({
