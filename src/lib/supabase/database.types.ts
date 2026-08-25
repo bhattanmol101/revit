@@ -171,6 +171,58 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_ratings: {
+        Row: {
+          author_id: string
+          created_at: string
+          entity_id: string
+          id: string
+          post_id: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          entity_id: string
+          id?: string
+          post_id: string
+          score: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          entity_id?: string
+          id?: string
+          post_id?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_ratings_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_ratings_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
