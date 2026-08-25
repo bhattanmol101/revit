@@ -26,8 +26,15 @@ export const queryKeys = {
   },
   restaurants: {
     all: ["restaurants"] as const,
+    byId: (restaurantId: string) =>
+      [...queryKeys.restaurants.all, "id", restaurantId] as const,
     search: (query: string) =>
       [...queryKeys.restaurants.all, "search", query] as const,
+  },
+  shares: {
+    all: ["shares"] as const,
+    mine: (entityId: string, authorId: string) =>
+      [...queryKeys.shares.all, "mine", entityId, authorId] as const,
   },
   posts: {
     all: ["posts"] as const,

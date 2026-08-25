@@ -446,6 +446,25 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_share_rating_post: {
+        Args: { p_body?: string; p_entity_id: string; p_score: number }
+        Returns: {
+          author_id: string
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          post_type: Database["public"]["Enums"]["post_type"]
+          title: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_ask_rating_summary: {
         Args: { target_post_id: string }
         Returns: {
@@ -454,6 +473,25 @@ export type Database = {
         }[]
       }
       normalize_entity_text: { Args: { value: string }; Returns: string }
+      update_share_rating_post: {
+        Args: { p_body?: string; p_post_id: string; p_score: number }
+        Returns: {
+          author_id: string
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          post_type: Database["public"]["Enums"]["post_type"]
+          title: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       post_type: "ASK" | "SHARE"

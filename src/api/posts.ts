@@ -1,5 +1,5 @@
-import type { Tables, TablesUpdate } from "@/lib/supabase/database.types";
 import { supabase } from "@/lib/supabase/client";
+import type { Tables, TablesUpdate } from "@/lib/supabase/database.types";
 
 import { normalizeApiError } from "./errors";
 import { runApiRequest } from "./request";
@@ -81,58 +81,79 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
         );
       }
 
-      const uploadedPaths: string[] = [];
-
       try {
-        for (const [index, image] of input.images.entries()) {
-          const position = index + 1;
-          const storagePath = `${input.authorId}/${post.id}/${position}.${image.extension}`;
-          const { error: uploadError } = await supabase.storage
-            .from(POST_IMAGES_BUCKET)
-            .upload(storagePath, image.data, {
-              cacheControl: "31536000",
-              contentType: image.contentType,
-              upsert: false,
-            });
-
-          if (uploadError) {
-            throw normalizeApiError(
-              uploadError,
-              "An image could not be uploaded.",
-            );
-          }
-
-          uploadedPaths.push(storagePath);
-        }
-
-        if (uploadedPaths.length > 0) {
-          const { error: mediaError } = await supabase
-            .from("post_media")
-            .insert(
-              uploadedPaths.map((storagePath, index) => ({
-                position: index + 1,
-                post_id: post.id,
-                storage_path: storagePath,
-              })),
-            )
-            .abortSignal(signal);
-
-          if (mediaError) {
-            throw normalizeApiError(
-              mediaError,
-              "We could not attach the images to your post.",
-            );
-          }
-        }
-
+        await attachPostImages({
+          authorId: input.authorId,
+          images: input.images,
+          postId: post.id,
+          signal,
+        });
         return post;
       } catch (error) {
-        await cleanUpFailedPost(post.id, uploadedPaths);
+        await cleanUpFailedPost(post.id, []);
         throw error;
       }
     },
     { timeoutMs: 60_000 },
   );
+}
+
+export async function attachPostImages({
+  authorId,
+  images,
+  postId,
+  signal,
+}: {
+  authorId: string;
+  images: AskImageUpload[];
+  postId: string;
+  signal: AbortSignal;
+}) {
+  const uploadedPaths: string[] = [];
+
+  try {
+    for (const [index, image] of images.entries()) {
+      const storagePath = `${authorId}/${postId}/${index + 1}.${image.extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from(POST_IMAGES_BUCKET)
+        .upload(storagePath, image.data, {
+          cacheControl: "31536000",
+          contentType: image.contentType,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw normalizeApiError(uploadError, "An image could not be uploaded.");
+      }
+
+      uploadedPaths.push(storagePath);
+    }
+
+    if (uploadedPaths.length === 0) return;
+
+    const { error: mediaError } = await supabase
+      .from("post_media")
+      .insert(
+        uploadedPaths.map((storagePath, index) => ({
+          position: index + 1,
+          post_id: postId,
+          storage_path: storagePath,
+        })),
+      )
+      .abortSignal(signal);
+
+    if (mediaError) {
+      throw normalizeApiError(
+        mediaError,
+        "We could not attach the images to your post.",
+      );
+    }
+  } catch (error) {
+    if (uploadedPaths.length > 0) {
+      await supabase.storage.from(POST_IMAGES_BUCKET).remove(uploadedPaths);
+    }
+    throw error;
+  }
 }
 
 export function getPost(postId: string): Promise<PostWithDetails | null> {

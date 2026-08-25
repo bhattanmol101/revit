@@ -62,6 +62,34 @@ export function createRestaurant(
   });
 }
 
+export function getRestaurant(
+  restaurantId: string,
+): Promise<Restaurant | null> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("entities")
+        .select(
+          "id, name, address_line_1, address_line_2, locality, administrative_area, country_code, postal_code, category:entity_categories!inner(slug)",
+        )
+        .eq("id", restaurantId)
+        .eq("category.slug", "restaurant")
+        .abortSignal(signal)
+        .maybeSingle();
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load this restaurant.");
+      }
+
+      if (!data) return null;
+
+      const { category: _category, ...restaurant } = data;
+      return restaurant;
+    },
+    { retries: 1 },
+  );
+}
+
 export function searchRestaurants(query: string): Promise<Restaurant[]> {
   const searchTerm = normalizeSearchTerm(query);
 

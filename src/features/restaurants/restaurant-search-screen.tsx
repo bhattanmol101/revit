@@ -1,4 +1,4 @@
-import { Link, router, Stack } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Search } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
@@ -16,6 +16,8 @@ import {
 } from "@/queries/restaurants";
 
 export function RestaurantSearchScreen() {
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const returnToShare = returnTo === "share";
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const search = useRestaurantSearch(deferredQuery);
@@ -85,7 +87,11 @@ export function RestaurantSearchScreen() {
           restaurants.length > 0 ? (
             <View className="gap-2">
               {restaurants.map((restaurant) => (
-                <RestaurantResult key={restaurant.id} restaurant={restaurant} />
+                <RestaurantResult
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  returnToShare={returnToShare}
+                />
               ))}
             </View>
           ) : (
@@ -104,6 +110,7 @@ export function RestaurantSearchScreen() {
             <AddRestaurantForm
               initialName={query}
               onCancel={() => setIsAddingRestaurant(false)}
+              returnToShare={returnToShare}
             />
           ) : (
             <Button
@@ -122,9 +129,11 @@ export function RestaurantSearchScreen() {
 function AddRestaurantForm({
   initialName,
   onCancel,
+  returnToShare,
 }: {
   initialName: string;
   onCancel: () => void;
+  returnToShare: boolean;
 }) {
   const createRestaurant = useCreateRestaurant();
   const [name, setName] = useState(initialName.trim());
@@ -153,7 +162,14 @@ function AddRestaurantForm({
         name,
         postal_code: postalCode || null,
       });
-      router.replace(routes.restaurant(restaurant.id));
+      router.replace(
+        returnToShare
+          ? {
+              pathname: "/create/share",
+              params: { restaurantId: restaurant.id },
+            }
+          : routes.restaurant(restaurant.id),
+      );
     } catch {
       // The API error remains visible below and supports a corrected retry.
     }
@@ -256,7 +272,35 @@ function AddRestaurantForm({
   );
 }
 
-function RestaurantResult({ restaurant }: { restaurant: Restaurant }) {
+function RestaurantResult({
+  restaurant,
+  returnToShare,
+}: {
+  restaurant: Restaurant;
+  returnToShare: boolean;
+}) {
+  if (returnToShare) {
+    return (
+      <Button
+        className="h-auto w-full items-start justify-start rounded-lg border border-border bg-card px-3 py-3 shadow-none"
+        variant="ghost"
+        onPress={() =>
+          router.replace({
+            pathname: "/create/share",
+            params: { restaurantId: restaurant.id },
+          })
+        }
+      >
+        <View className="min-w-0 flex-1 items-start gap-0.5">
+          <Text className="text-sm font-semibold">{restaurant.name}</Text>
+          <Text className="text-xs" variant="muted">
+            {formatRestaurantLocation(restaurant)}
+          </Text>
+        </View>
+      </Button>
+    );
+  }
+
   return (
     <Link href={routes.restaurant(restaurant.id)} asChild>
       <Button

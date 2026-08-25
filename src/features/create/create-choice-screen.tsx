@@ -24,7 +24,7 @@ export function CreateChoiceScreen() {
             Share your taste
           </Text>
           <Text variant="muted" className="text-base leading-6">
-            Ask people for their rating now, or share a restaurant rating later.
+            Ask people for their rating or share a restaurant rating.
           </Text>
         </View>
 
@@ -62,9 +62,12 @@ export function CreateChoiceScreen() {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3">
-              <Button disabled variant="outline" className="w-full">
-                <Text>Available in a later phase</Text>
-              </Button>
+              <Link href={routes.createShare} asChild>
+                <Button variant="outline" className="w-full">
+                  <Text>Rate a restaurant</Text>
+                  <Icon as={ArrowRight} />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </View>
