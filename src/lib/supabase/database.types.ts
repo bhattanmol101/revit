@@ -472,6 +472,25 @@ export type Database = {
           rating_count: number
         }[]
       }
+      get_home_feed: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          author_id: string
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          post_type: Database["public"]["Enums"]["post_type"]
+          title: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_restaurant_rating_summary: {
         Args: { p_entity_id: string }
         Returns: {

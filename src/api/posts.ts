@@ -179,6 +179,34 @@ export function getPost(postId: string): Promise<PostWithDetails | null> {
   );
 }
 
+export function getPostsByIds(postIds: string[]): Promise<PostWithDetails[]> {
+  if (postIds.length === 0) return Promise.resolve([]);
+
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .in("id", postIds)
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load feed posts.");
+      }
+
+      const byId = new Map(
+        (await signPostMedia(data)).map((post) => [post.id, post]),
+      );
+
+      return postIds.flatMap((postId) => {
+        const post = byId.get(postId);
+        return post ? [post] : [];
+      });
+    },
+    { retries: 1 },
+  );
+}
+
 export function getAskPostsByAuthor(
   authorId: string,
   offset = 0,

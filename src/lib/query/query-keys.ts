@@ -6,6 +6,9 @@ export const queryKeys = {
     count: (postId: string) =>
       [...queryKeys.comments.byPost(postId), "count"] as const,
   },
+  feed: {
+    home: ["feed", "home"] as const,
+  },
   follows: {
     all: ["follows"] as const,
     followers: (profileId: string) =>

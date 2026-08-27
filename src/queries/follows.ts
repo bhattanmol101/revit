@@ -6,12 +6,12 @@ import {
 } from "@tanstack/react-query";
 
 import {
+  type FollowPage,
   followProfile,
   getFollowers,
   getFollowing,
   getFollowStatus,
   unfollowProfile,
-  type FollowPage,
 } from "@/api/follows";
 import type { FollowCounts } from "@/api/profiles";
 import { queryKeys } from "@/lib/query/query-keys";
@@ -105,6 +105,9 @@ export function useFollowToggle(followerId: string, followingId: string) {
         }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.follows.following(followerId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.feed.home,
         }),
       ]);
     },
