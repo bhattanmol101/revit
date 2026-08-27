@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -256,6 +256,83 @@ export type Database = {
           },
         ]
       }
+      pick_items: {
+        Row: {
+          created_at: string
+          entity_id: string
+          note: string | null
+          pick_id: string
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          note?: string | null
+          pick_id: string
+          position: number
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          note?: string | null
+          pick_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_items_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_items_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      picks: {
+        Row: {
+          author_id: string
+          created_at: string
+          description: string | null
+          id: string
+          pick_type: Database["public"]["Enums"]["pick_type"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          pick_type?: Database["public"]["Enums"]["pick_type"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          pick_type?: Database["public"]["Enums"]["pick_type"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "picks_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_media: {
         Row: {
           alt_text: string | null
@@ -413,6 +490,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_personal_pick: {
+        Args: { p_description?: string; p_items?: Json; p_title: string }
+        Returns: {
+          author_id: string
+          created_at: string
+          description: string | null
+          id: string
+          pick_type: Database["public"]["Enums"]["pick_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "picks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_restaurant_entity: {
         Args: {
           p_address_line_1: string
@@ -518,8 +613,32 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_personal_pick: {
+        Args: {
+          p_description?: string
+          p_items?: Json
+          p_pick_id: string
+          p_title: string
+        }
+        Returns: {
+          author_id: string
+          created_at: string
+          description: string | null
+          id: string
+          pick_type: Database["public"]["Enums"]["pick_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "picks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
+      pick_type: "PERSONAL"
       post_type: "ASK" | "SHARE"
     }
     CompositeTypes: {
@@ -651,6 +770,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      pick_type: ["PERSONAL"],
       post_type: ["ASK", "SHARE"],
     },
   },

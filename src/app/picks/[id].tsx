@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { PickDetailScreen } from "@/features/picks/pick-detail-screen";
 
-export default function PickDetailScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Pick"
-      description="Pick details will appear here."
-    />
-  );
+export default function PickDetailRoute() {
+  return <PickDetailScreen />;
 }

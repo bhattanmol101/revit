@@ -5,6 +5,7 @@ export const routes = {
   auth: "/auth",
   create: "/create",
   createAsk: "/create/ask",
+  createPick: "/picks/create",
   createShare: "/create/share",
   discover: "/discover",
   forums: "/forums",
@@ -18,6 +19,10 @@ export const routes = {
   },
   forum: (id: string) => ({ pathname: "/forums/[id]", params: { id } }),
   pick: (id: string) => ({ pathname: "/picks/[id]", params: { id } }),
+  editPick: (pickId: string) => ({
+    pathname: "/picks/create",
+    params: { pickId },
+  }),
   post: (id: string) => ({ pathname: "/posts/[id]", params: { id } }),
   restaurant: (id: string) => ({
     pathname: "/restaurants/[id]",

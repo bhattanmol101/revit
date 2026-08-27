@@ -6,6 +6,10 @@ export const queryKeys = {
     count: (postId: string) =>
       [...queryKeys.comments.byPost(postId), "count"] as const,
   },
+  discover: {
+    all: ["discover"] as const,
+    search: (query: string) => [...queryKeys.discover.all, query] as const,
+  },
   feed: {
     home: ["feed", "home"] as const,
   },
@@ -50,6 +54,12 @@ export const queryKeys = {
     byAuthor: (authorId: string) =>
       [...queryKeys.posts.all, "author", authorId] as const,
     byId: (postId: string) => [...queryKeys.posts.all, "id", postId] as const,
+  },
+  picks: {
+    all: ["picks"] as const,
+    byAuthor: (authorId: string) =>
+      [...queryKeys.picks.all, "author", authorId] as const,
+    byId: (pickId: string) => [...queryKeys.picks.all, "id", pickId] as const,
   },
   ratings: {
     all: ["ratings"] as const,

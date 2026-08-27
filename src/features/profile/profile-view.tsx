@@ -17,6 +17,7 @@ import { AskPostCard } from "@/features/posts/ask-post-card";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useFollowStatus, useFollowToggle } from "@/queries/follows";
+import { usePersonalPicksByAuthor } from "@/queries/picks";
 import { useAskPostsByAuthor } from "@/queries/posts";
 
 import { useFollowCounts } from "@/queries/profiles";
@@ -27,10 +28,6 @@ type ProfileViewProps = {
 };
 
 const PROFILE_SECTIONS = [
-  {
-    description: "Curated restaurant picks will appear here.",
-    title: "Picks",
-  },
   {
     description: "Forum memberships and activity will appear here.",
     title: "Forums",
@@ -172,6 +169,8 @@ export function ProfileView({
           retry={() => void posts.refetch()}
         />
 
+        <ProfilePicks profileId={profile.id} />
+
         <View className="gap-3 sm:flex-row">
           {PROFILE_SECTIONS.map((section) => (
             <Card
@@ -189,6 +188,53 @@ export function ProfileView({
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ProfilePicks({ profileId }: { profileId: string }) {
+  const picks = usePersonalPicksByAuthor(profileId);
+
+  return (
+    <View className="gap-3">
+      <Text variant="h2" className="text-xl">
+        Picks
+      </Text>
+      {picks.isLoading ? <Skeleton className="h-20 w-full" /> : null}
+      {picks.isError ? (
+        <Card className="gap-3 border-destructive/40 py-3 shadow-none">
+          <CardContent className="gap-3 px-3">
+            <Text variant="small" className="text-destructive">
+              We couldn&apos;t load Picks.
+            </Text>
+            <Button
+              className="self-start"
+              size="sm"
+              variant="outline"
+              onPress={() => void picks.refetch()}
+            >
+              <Text>Try again</Text>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+      {!picks.isLoading && !picks.isError && picks.data?.length === 0 ? (
+        <Text variant="muted">No Picks yet.</Text>
+      ) : null}
+      {picks.data?.map((pick) => (
+        <Link key={pick.id} href={routes.pick(pick.id)} asChild>
+          <Card className="gap-1 py-3 shadow-none">
+            <CardHeader>
+              <CardTitle>{pick.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Text variant="muted">
+                {pick.description?.trim() || "Restaurant collection"}
+              </Text>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </View>
   );
 }
 

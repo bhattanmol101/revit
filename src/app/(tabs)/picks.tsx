@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { PicksScreen } from "@/features/picks/picks-screen";
 
-export default function PicksScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Picks"
-      description="Your curated restaurant lists will appear here."
-    />
-  );
+export default function PicksRoute() {
+  return <PicksScreen />;
 }
