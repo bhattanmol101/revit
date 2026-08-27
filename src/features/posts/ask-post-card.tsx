@@ -24,37 +24,41 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
     <Card className="gap-0 overflow-hidden rounded-lg pb-0 pt-0.5 shadow-none">
       <CardHeader className="gap-2 px-3 pt-2">
         <View className="flex-row items-start justify-between gap-3">
-          <Link href={routes.user(post.author.username)} asChild>
-            <Button
-              variant="ghost"
-              className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0"
+          <Avatar
+            alt={`${post.author.display_name}'s avatar`}
+            className="size-8"
+          >
+            {post.author.avatar_url ? (
+              <AvatarImage
+                accessibilityLabel={`${post.author.display_name}'s avatar`}
+                source={{ uri: post.author.avatar_url }}
+              />
+            ) : null}
+            <AvatarFallback>
+              <Text variant="small">
+                {getInitials(post.author.display_name)}
+              </Text>
+            </AvatarFallback>
+          </Avatar>
+          <View className="min-w-0 flex-1 items-start">
+            <Link
+              href={routes.user(post.author.username)}
+              className="pointer-cursor"
             >
-              <Avatar
-                alt={`${post.author.display_name}'s avatar`}
-                className="size-8"
-              >
-                {post.author.avatar_url ? (
-                  <AvatarImage
-                    accessibilityLabel={`${post.author.display_name}'s avatar`}
-                    source={{ uri: post.author.avatar_url }}
-                  />
-                ) : null}
-                <AvatarFallback>
-                  <Text variant="small">
-                    {getInitials(post.author.display_name)}
-                  </Text>
-                </AvatarFallback>
-              </Avatar>
-              <View className="min-w-0 flex-1 items-start">
-                <Text className="text-sm font-semibold" numberOfLines={1}>
-                  {post.author.display_name}
-                </Text>
-                <Text className="text-xs" variant="muted" numberOfLines={1}>
-                  @{post.author.username} · {formatPostDate(post.created_at)}
-                </Text>
-              </View>
-            </Button>
-          </Link>
+              <Text className="text-sm font-semibold" numberOfLines={1}>
+                {post.author.display_name}
+              </Text>
+            </Link>
+            <Link
+              href={routes.user(post.author.username)}
+              className="pointer-cursor"
+            >
+              <Text className="text-xs" variant="muted" numberOfLines={1}>
+                @{post.author.username} · {formatPostDate(post.created_at)}
+              </Text>
+            </Link>
+          </View>
+
           <Badge
             className="rounded-md border-primary/35 bg-transparent px-1.5 py-0.5"
             variant="outline"
