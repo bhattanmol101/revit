@@ -1,3 +1,4 @@
+import * as Linking from "expo-linking";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -20,8 +21,12 @@ export default function ResetPasswordScreen() {
       return;
     }
     setLoading(true);
-    const { error: requestError } =
-      await supabase.auth.resetPasswordForEmail(email);
+    const { error: requestError } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: Linking.createURL("auth/update-password"),
+      },
+    );
     setLoading(false);
     if (requestError) setError(requestError.message);
     else

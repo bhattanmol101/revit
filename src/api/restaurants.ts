@@ -90,6 +90,32 @@ export function getRestaurant(
   );
 }
 
+export function getRestaurantsByIds(
+  restaurantIds: string[],
+): Promise<Restaurant[]> {
+  if (restaurantIds.length === 0) return Promise.resolve([]);
+
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("entities")
+        .select(
+          "id, name, address_line_1, address_line_2, locality, administrative_area, country_code, postal_code, category:entity_categories!inner(slug)",
+        )
+        .in("id", restaurantIds)
+        .eq("category.slug", "restaurant")
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load restaurants.");
+      }
+
+      return data.map(({ category: _category, ...restaurant }) => restaurant);
+    },
+    { retries: 1 },
+  );
+}
+
 export function searchRestaurants(query: string): Promise<Restaurant[]> {
   const searchTerm = normalizeSearchTerm(query);
 

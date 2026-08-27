@@ -57,7 +57,14 @@ export default function TabLayout() {
 }
 
 function RootNavigator() {
-  const { isLoading, profile, profileError, retryProfile, session } = useAuth();
+  const {
+    isLoading,
+    isPasswordRecovery,
+    profile,
+    profileError,
+    retryProfile,
+    session,
+  } = useAuth();
   const needsOnboarding = needsProfileCompletion(profile);
   const canEnterApp = Boolean(session) && !needsOnboarding;
 
@@ -83,7 +90,7 @@ function RootNavigator() {
 
   return (
     <Stack>
-      <Stack.Protected guard={canEnterApp}>
+      <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="activity" options={{ title: "Activity" }} />
         <Stack.Screen name="create/ask" options={{ title: "New Ask" }} />
@@ -116,7 +123,9 @@ function RootNavigator() {
         />
       </Stack.Protected>
 
-      <Stack.Protected guard={!session || needsOnboarding}>
+      <Stack.Protected
+        guard={!session || needsOnboarding || isPasswordRecovery}
+      >
         <Stack.Screen name="auth" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
