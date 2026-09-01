@@ -22,6 +22,13 @@ export const queryKeys = {
     status: (followerId: string, followingId: string) =>
       [...queryKeys.follows.all, "status", followerId, followingId] as const,
   },
+  forums: {
+    all: ["forums"] as const,
+    byId: (forumId: string, userId: string) =>
+      [...queryKeys.forums.all, "id", forumId, userId] as const,
+    posts: (forumId: string) =>
+      [...queryKeys.forums.all, "posts", forumId] as const,
+  },
   profiles: {
     all: ["profiles"] as const,
     byId: (profileId: string) =>

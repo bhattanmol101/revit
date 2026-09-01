@@ -108,6 +108,14 @@ function RootNavigator() {
           options={{ title: "Find a restaurant" }}
         />
         <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
+        <Stack.Screen
+          name="forums/create"
+          options={{ title: "Create forum" }}
+        />
+        <Stack.Screen
+          name="forums/[id]/create"
+          options={{ title: "New forum post" }}
+        />
         <Stack.Screen name="picks/create" options={{ title: "Create Pick" }} />
         <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />
         <Stack.Screen

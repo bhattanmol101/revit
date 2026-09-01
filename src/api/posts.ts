@@ -35,7 +35,7 @@ type RawPostWithDetails = Post & {
 };
 
 const POST_DETAILS_SELECT =
-  "id, author_id, post_type, entity_id, title, body, created_at, updated_at, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url), media:post_media(id, post_id, storage_path, position, alt_text, created_at)";
+  "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url), media:post_media(id, post_id, storage_path, position, alt_text, created_at)";
 
 export type AskImageUpload = {
   contentType:
@@ -55,6 +55,42 @@ export type CreateAskPostInput = {
   title: string;
 };
 
+export type CreateForumAskPostInput = Omit<CreateAskPostInput, "images"> & {
+  forumId: string;
+};
+
+export type CreateForumSharePostInput = {
+  authorId: string;
+  body?: string;
+  entityId: string;
+  forumId: string;
+};
+
+export function createForumAskPost(
+  input: CreateForumAskPostInput,
+): Promise<Post> {
+  validateAskPost({ ...input, images: [] });
+  return createForumPost({
+    authorId: input.authorId,
+    body: input.body,
+    forumId: input.forumId,
+    postType: "ASK",
+    title: input.title,
+  });
+}
+
+export function createForumSharePost(
+  input: CreateForumSharePostInput,
+): Promise<Post> {
+  return createForumPost({
+    authorId: input.authorId,
+    body: input.body,
+    entityId: input.entityId,
+    forumId: input.forumId,
+    postType: "SHARE",
+  });
+}
+
 export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
   validateAskPost(input);
 
@@ -69,7 +105,7 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
           title: input.title.trim(),
         })
         .select(
-          "id, author_id, post_type, entity_id, title, body, created_at, updated_at",
+          "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
         )
         .abortSignal(signal)
         .single();
@@ -96,6 +132,46 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
     },
     { timeoutMs: 60_000 },
   );
+}
+
+function createForumPost({
+  authorId,
+  body,
+  entityId,
+  forumId,
+  postType,
+  title,
+}: {
+  authorId: string;
+  body?: string;
+  entityId?: string;
+  forumId: string;
+  postType: "ASK" | "SHARE";
+  title?: string;
+}): Promise<Post> {
+  return runApiRequest(async (signal) => {
+    const { data, error } = await supabase
+      .from("posts")
+      .insert({
+        author_id: authorId,
+        body: body?.trim() || null,
+        entity_id: entityId ?? null,
+        forum_id: forumId,
+        post_type: postType,
+        title: title?.trim() || null,
+      })
+      .select(
+        "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
+      )
+      .abortSignal(signal)
+      .single();
+
+    if (error) {
+      throw normalizeApiError(error, "We could not publish this forum post.");
+    }
+
+    return data;
+  });
 }
 
 export async function attachPostImages({
@@ -239,6 +315,34 @@ export function getAskPostsByAuthor(
   );
 }
 
+export function getForumPosts(forumId: string, offset = 0): Promise<PostPage> {
+  return runApiRequest(
+    async (signal) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .eq("forum_id", forumId)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(offset, offset + POST_PAGE_SIZE)
+        .abortSignal(signal);
+
+      if (error) {
+        throw normalizeApiError(error, "We could not load forum posts.");
+      }
+
+      const hasNextPage = data.length > POST_PAGE_SIZE;
+      const items = await signPostMedia(data.slice(0, POST_PAGE_SIZE));
+
+      return {
+        items,
+        nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
+      };
+    },
+    { retries: 1 },
+  );
+}
+
 export function getSharePostsByEntity(
   entityId: string,
   offset = 0,
@@ -293,7 +397,7 @@ export function updateAskPost(
       .eq("id", postId)
       .eq("post_type", "ASK")
       .select(
-        "id, author_id, post_type, entity_id, title, body, created_at, updated_at",
+        "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
       )
       .abortSignal(signal)
       .single();

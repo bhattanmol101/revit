@@ -56,6 +56,9 @@ export function PostDetailScreen() {
     );
   }
 
+  if (post.data.post_type === "SHARE" && post.data.forum_id)
+    return <ForumSharePostDetail post={post.data} />;
+
   if (post.data.post_type === "SHARE")
     return <SharePostDetail post={post.data} />;
 
@@ -65,6 +68,42 @@ export function PostDetailScreen() {
       post={post.data}
       refetch={post.refetch}
     />
+  );
+}
+
+function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
+  const restaurant = useRestaurant(post.entity_id ?? "");
+  const comments = useTopLevelComments(post.id);
+
+  if (restaurant.isLoading) return <PostDetailLoading />;
+  if (restaurant.isError || !restaurant.data) {
+    return (
+      <ProfileMessageScreen
+        title="Share post unavailable"
+        description="We couldn’t load this restaurant."
+        action={() => void restaurant.refetch()}
+      />
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen options={{ title: "Forum share" }} />
+      <ScrollView contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-5 py-6 sm:px-8">
+        <View className="gap-2 rounded-lg border border-border bg-card p-3">
+          <Text variant="small" className="text-primary">
+            FORUM SHARE
+          </Text>
+          <Text variant="h2">{restaurant.data.name}</Text>
+          <Text variant="muted">{restaurant.data.locality}</Text>
+          {post.body ? <Text>{post.body}</Text> : null}
+          <Text variant="muted" className="text-xs">
+            This post does not affect the restaurant’s global rating.
+          </Text>
+        </View>
+        <CommentSection comments={comments} postId={post.id} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

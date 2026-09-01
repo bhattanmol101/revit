@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { ForumDetailScreen } from "@/features/forums/forum-detail-screen";
 
-export default function ForumDetailScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Forum"
-      description="Forum details will appear here."
-    />
-  );
+export default function ForumDetailRoute() {
+  return <ForumDetailScreen />;
 }

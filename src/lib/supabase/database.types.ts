@@ -256,6 +256,80 @@ export type Database = {
           },
         ]
       }
+      forum_memberships: {
+        Row: {
+          created_at: string
+          forum_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          forum_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          forum_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_memberships_forum_id_fkey"
+            columns: ["forum_id"]
+            isOneToOne: false
+            referencedRelation: "forums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forums: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          rules: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          rules?: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          rules?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forums_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pick_items: {
         Row: {
           created_at: string
@@ -374,6 +448,7 @@ export type Database = {
           body: string | null
           created_at: string
           entity_id: string | null
+          forum_id: string | null
           id: string
           post_type: Database["public"]["Enums"]["post_type"]
           title: string | null
@@ -384,6 +459,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           entity_id?: string | null
+          forum_id?: string | null
           id?: string
           post_type: Database["public"]["Enums"]["post_type"]
           title?: string | null
@@ -394,6 +470,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           entity_id?: string | null
+          forum_id?: string | null
           id?: string
           post_type?: Database["public"]["Enums"]["post_type"]
           title?: string | null
@@ -412,6 +489,13 @@ export type Database = {
             columns: ["entity_id"]
             isOneToOne: false
             referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_forum_id_fkey"
+            columns: ["forum_id"]
+            isOneToOne: false
+            referencedRelation: "forums"
             referencedColumns: ["id"]
           },
         ]
@@ -508,6 +592,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      can_participate_in_forum: { Args: { p_forum_id: string }; Returns: boolean }
+      can_participate_in_post: { Args: { p_post_id: string }; Returns: boolean }
       create_restaurant_entity: {
         Args: {
           p_address_line_1: string
@@ -574,6 +660,7 @@ export type Database = {
           body: string | null
           created_at: string
           entity_id: string | null
+          forum_id: string | null
           id: string
           post_type: Database["public"]["Enums"]["post_type"]
           title: string | null

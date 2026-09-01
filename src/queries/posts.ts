@@ -7,14 +7,16 @@ import {
 
 import {
   createAskPost,
+  createForumAskPost,
+  createForumSharePost,
   deletePost,
   getAskPostsByAuthor,
   getPost,
-  updateAskPost,
   type PostPage,
   type UpdateAskPostInput,
+  updateAskPost,
 } from "@/api/posts";
-import { readLocalImage, type LocalImage } from "@/lib/media/read-local-image";
+import { type LocalImage, readLocalImage } from "@/lib/media/read-local-image";
 import { queryKeys } from "@/lib/query/query-keys";
 
 export type CreateAskPostMutationInput = {
@@ -40,6 +42,30 @@ export function useCreateAskPost() {
       });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.posts.byAuthor(post.author_id),
+      });
+    },
+  });
+}
+
+export function useCreateForumAskPost(forumId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createForumAskPost,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.forums.posts(forumId),
+      });
+    },
+  });
+}
+
+export function useCreateForumSharePost(forumId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createForumSharePost,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.forums.posts(forumId),
       });
     },
   });

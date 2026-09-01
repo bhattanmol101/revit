@@ -1,10 +1,5 @@
-import { RoutePlaceholderScreen } from "@/components/common/route-placeholder-screen";
+import { ForumsScreen } from "@/features/forums/forums-screen";
 
-export default function ForumsScreen() {
-  return (
-    <RoutePlaceholderScreen
-      title="Forums"
-      description="Public spaces for focused rating conversations will appear here."
-    />
-  );
+export default function ForumsRoute() {
+  return <ForumsScreen />;
 }
