@@ -55,7 +55,7 @@ export type CreateAskPostInput = {
   title: string;
 };
 
-export type CreateForumAskPostInput = Omit<CreateAskPostInput, "images"> & {
+export type CreateForumAskPostInput = CreateAskPostInput & {
   forumId: string;
 };
 
@@ -64,16 +64,18 @@ export type CreateForumSharePostInput = {
   body?: string;
   entityId: string;
   forumId: string;
+  images: AskImageUpload[];
 };
 
 export function createForumAskPost(
   input: CreateForumAskPostInput,
 ): Promise<Post> {
-  validateAskPost({ ...input, images: [] });
+  validateAskPost(input);
   return createForumPost({
     authorId: input.authorId,
     body: input.body,
     forumId: input.forumId,
+    images: input.images,
     postType: "ASK",
     title: input.title,
   });
@@ -87,6 +89,7 @@ export function createForumSharePost(
     body: input.body,
     entityId: input.entityId,
     forumId: input.forumId,
+    images: input.images,
     postType: "SHARE",
   });
 }
@@ -139,6 +142,7 @@ function createForumPost({
   body,
   entityId,
   forumId,
+  images,
   postType,
   title,
 }: {
@@ -146,6 +150,7 @@ function createForumPost({
   body?: string;
   entityId?: string;
   forumId: string;
+  images: AskImageUpload[];
   postType: "ASK" | "SHARE";
   title?: string;
 }): Promise<Post> {
@@ -170,7 +175,18 @@ function createForumPost({
       throw normalizeApiError(error, "We could not publish this forum post.");
     }
 
-    return data;
+    try {
+      await attachPostImages({
+        authorId,
+        images,
+        postId: data.id,
+        signal,
+      });
+      return data;
+    } catch (error) {
+      await cleanUpFailedPost(data.id, []);
+      throw error;
+    }
   });
 }
 

@@ -50,7 +50,13 @@ export function useCreateAskPost() {
 export function useCreateForumAskPost(forumId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createForumAskPost,
+    mutationFn: async (
+      input: CreateAskPostMutationInput & { forumId: string },
+    ) =>
+      createForumAskPost({
+        ...input,
+        images: await Promise.all(input.images.map(readLocalImage)),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.forums.posts(forumId),
@@ -62,7 +68,16 @@ export function useCreateForumAskPost(forumId: string) {
 export function useCreateForumSharePost(forumId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createForumSharePost,
+    mutationFn: async (
+      input: Omit<CreateAskPostMutationInput, "title"> & {
+        entityId: string;
+        forumId: string;
+      },
+    ) =>
+      createForumSharePost({
+        ...input,
+        images: await Promise.all(input.images.map(readLocalImage)),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.forums.posts(forumId),

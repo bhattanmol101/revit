@@ -1,12 +1,16 @@
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { ImagePlus } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { successFeedback } from "@/lib/feedback";
+import { readLocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useCreateForum } from "@/queries/forums";
@@ -17,6 +21,7 @@ export function CreateForumScreen() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
+  const [cover, setCover] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const slug = slugFromName(name);
   const canSubmit = Boolean(
     user && name.trim() && slug.trim().length >= 3 && !createForum.isPending,
@@ -26,6 +31,14 @@ export function CreateForumScreen() {
     if (!user || !canSubmit) return;
     try {
       const forum = await createForum.mutateAsync({
+        coverImage: cover
+          ? await readLocalImage({
+              file: cover.file,
+              fileName: cover.fileName,
+              mimeType: cover.mimeType,
+              uri: cover.uri,
+            })
+          : undefined,
         description,
         name,
         ownerId: user.id,
@@ -54,6 +67,35 @@ export function CreateForumScreen() {
           value={name}
           onChangeText={setName}
         />
+        <View className="gap-2">
+          <Text variant="small">Cover image (optional)</Text>
+          <Button
+            className="self-start"
+            variant="outline"
+            onPress={() =>
+              void (async () => {
+                if (Platform.OS !== "web") {
+                  const permission =
+                    await ImagePicker.requestMediaLibraryPermissionsAsync();
+                  if (!permission.granted) return;
+                }
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ["images"],
+                  quality: 0.85,
+                });
+                if (!result.canceled) setCover(result.assets[0]);
+              })()
+            }
+          >
+            <Icon as={ImagePlus} />
+            <Text>{cover ? "Change cover image" : "Add cover image"}</Text>
+          </Button>
+          {cover ? (
+            <Text variant="muted" className="text-xs">
+              Cover image selected
+            </Text>
+          ) : null}
+        </View>
         <Input
           accessibilityLabel="Forum description"
           className="min-h-24 items-start py-2"

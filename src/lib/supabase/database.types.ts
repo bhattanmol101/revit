@@ -291,6 +291,7 @@ export type Database = {
       }
       forums: {
         Row: {
+          cover_image_path: string | null
           created_at: string
           description: string | null
           id: string
@@ -301,6 +302,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cover_image_path?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -311,6 +313,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cover_image_path?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -324,6 +327,78 @@ export type Database = {
           {
             foreignKeyName: "forums_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string
+          comment_id: string | null
+          created_at: string
+          forum_id: string | null
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          post_id: string | null
+          read_at: string | null
+          recipient_id: string
+        }
+        Insert: {
+          actor_id: string
+          comment_id?: string | null
+          created_at?: string
+          forum_id?: string | null
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          post_id?: string | null
+          read_at?: string | null
+          recipient_id: string
+        }
+        Update: {
+          actor_id?: string
+          comment_id?: string | null
+          created_at?: string
+          forum_id?: string | null
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          post_id?: string | null
+          read_at?: string | null
+          recipient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_forum_id_fkey"
+            columns: ["forum_id"]
+            isOneToOne: false
+            referencedRelation: "forums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -725,6 +800,13 @@ export type Database = {
       }
     }
     Enums: {
+      notification_type:
+        | "FOLLOW"
+        | "ASK_RATING"
+        | "COMMENT"
+        | "REPLY"
+        | "FORUM_JOIN"
+        | "FORUM_POST"
       pick_type: "PERSONAL"
       post_type: "ASK" | "SHARE"
     }
@@ -857,6 +939,14 @@ export const Constants = {
   },
   public: {
     Enums: {
+      notification_type: [
+        "FOLLOW",
+        "ASK_RATING",
+        "COMMENT",
+        "REPLY",
+        "FORUM_JOIN",
+        "FORUM_POST",
+      ],
       pick_type: ["PERSONAL"],
       post_type: ["ASK", "SHARE"],
     },

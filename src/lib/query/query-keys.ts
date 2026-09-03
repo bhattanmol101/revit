@@ -29,6 +29,13 @@ export const queryKeys = {
     posts: (forumId: string) =>
       [...queryKeys.forums.all, "posts", forumId] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    list: (userId: string) =>
+      [...queryKeys.notifications.all, "list", userId] as const,
+    unread: (userId: string) =>
+      [...queryKeys.notifications.all, "unread", userId] as const,
+  },
   profiles: {
     all: ["profiles"] as const,
     byId: (profileId: string) =>

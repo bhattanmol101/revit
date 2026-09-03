@@ -2,11 +2,13 @@ import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
 import { normalizeApiError } from "./errors";
+import type { AskImageUpload } from "./posts";
 import { runApiRequest } from "./request";
 
 export type Forum = Tables<"forums">;
 
 export type ForumSummary = Forum & {
+  coverImageUrl: string | null;
   memberCount: number;
 };
 
@@ -31,7 +33,9 @@ export type CreateForumInput = Pick<
   "description" | "name" | "rules" | "slug"
 > & { ownerId: string };
 
-export function createForum(input: CreateForumInput): Promise<Forum> {
+export function createForum(
+  input: CreateForumInput & { coverImage?: AskImageUpload },
+): Promise<Forum> {
   return runApiRequest(async (signal) => {
     const { data, error } = await supabase
       .from("forums")
@@ -43,14 +47,48 @@ export function createForum(input: CreateForumInput): Promise<Forum> {
         slug: input.slug.trim(),
       })
       .select(
-        "id, owner_id, slug, name, description, rules, created_at, updated_at",
+        "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
       )
       .abortSignal(signal)
       .single();
 
     if (error)
       throw normalizeApiError(error, "We could not create this forum.");
-    return data;
+    if (!input.coverImage) return data;
+    const path = `${input.ownerId}/${data.id}/cover.${input.coverImage.extension}`;
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("forum-images")
+        .upload(path, input.coverImage.data, {
+          contentType: input.coverImage.contentType,
+          upsert: false,
+        });
+      if (uploadError)
+        throw normalizeApiError(
+          uploadError,
+          "We could not upload the forum cover.",
+        );
+
+      const { data: updated, error: updateError } = await supabase
+        .from("forums")
+        .update({ cover_image_path: path })
+        .eq("id", data.id)
+        .select(
+          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
+        )
+        .abortSignal(signal)
+        .single();
+      if (updateError)
+        throw normalizeApiError(
+          updateError,
+          "We could not save the forum cover.",
+        );
+      return updated;
+    } catch (cause) {
+      await supabase.storage.from("forum-images").remove([path]);
+      await supabase.from("forums").delete().eq("id", data.id);
+      throw cause;
+    }
   });
 }
 
@@ -60,7 +98,7 @@ export function getForums(): Promise<ForumSummary[]> {
       const { data: forums, error: forumsError } = await supabase
         .from("forums")
         .select(
-          "id, owner_id, slug, name, description, rules, created_at, updated_at",
+          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
         )
         .order("created_at", { ascending: false })
         .order("id", { ascending: true })
@@ -96,10 +134,12 @@ export function getForums(): Promise<ForumSummary[]> {
         );
       }
 
-      return forums.map((forum) => ({
+      const summaries = forums.map((forum) => ({
         ...forum,
         memberCount: counts.get(forum.id) ?? 0,
       }));
+
+      return signForumCovers(summaries);
     },
     { retries: 1 },
   );
@@ -114,7 +154,7 @@ export function getForum(
       const { data: forum, error: forumError } = await supabase
         .from("forums")
         .select(
-          "id, owner_id, slug, name, description, rules, created_at, updated_at",
+          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
         )
         .eq("id", forumId)
         .abortSignal(signal)
@@ -139,16 +179,42 @@ export function getForum(
         );
       }
 
-      return {
-        ...forum,
-        isMember: memberships.some(
-          (membership) => membership.user_id === userId,
-        ),
-        memberCount: memberships.length,
-      };
+      const [detail] = await signForumCovers([
+        {
+          ...forum,
+          isMember: memberships.some(
+            (membership) => membership.user_id === userId,
+          ),
+          memberCount: memberships.length,
+        },
+      ]);
+      return detail;
     },
     { retries: 1 },
   );
+}
+
+async function signForumCovers<T extends Forum>(
+  forums: T[],
+): Promise<Array<T & { coverImageUrl: string | null }>> {
+  const paths = forums.flatMap((forum) =>
+    forum.cover_image_path ? [forum.cover_image_path] : [],
+  );
+  if (paths.length === 0)
+    return forums.map((forum) => ({ ...forum, coverImageUrl: null }));
+
+  const { data, error } = await supabase.storage
+    .from("forum-images")
+    .createSignedUrls(paths, 60 * 60);
+  if (error) throw normalizeApiError(error, "We could not load forum covers.");
+
+  const urls = new Map(data.map(({ path, signedUrl }) => [path, signedUrl]));
+  return forums.map((forum) => ({
+    ...forum,
+    coverImageUrl: forum.cover_image_path
+      ? (urls.get(forum.cover_image_path) ?? null)
+      : null,
+  }));
 }
 
 export function joinForum(forumId: string, userId: string): Promise<void> {

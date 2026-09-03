@@ -1,13 +1,18 @@
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import { ImagePlus, X } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import type { Post } from "@/api/posts";
 import type { Restaurant } from "@/api/restaurants";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { successFeedback } from "@/lib/feedback";
+import type { LocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import {
@@ -24,6 +29,9 @@ export function ForumPostComposerScreen() {
   const [body, setBody] = useState("");
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [search, setSearch] = useState("");
+  const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+  const [isPicking, setIsPicking] = useState(false);
   const results = useRestaurantSearch(useDeferredValue(search));
   const createAsk = useCreateForumAskPost(id);
   const createShare = useCreateForumSharePost(id);
@@ -32,6 +40,56 @@ export function ForumPostComposerScreen() {
   const canPublish = Boolean(
     user && (type === "ASK" ? title.trim() : restaurant) && !isSaving,
   );
+
+  const pickImages = async () => {
+    setPickerError(null);
+    if (images.length >= 3) {
+      setPickerError("A forum post can contain up to three images.");
+      return;
+    }
+
+    setIsPicking(true);
+    try {
+      if (Platform.OS !== "web") {
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          setPickerError("Photo access is needed to add an image.");
+          return;
+        }
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsMultipleSelection: true,
+        mediaTypes: ["images"],
+        orderedSelection: true,
+        quality: 0.85,
+        selectionLimit: 3 - images.length,
+      });
+      if (result.canceled) return;
+      if (
+        result.assets.some(
+          (asset) => asset.fileSize && asset.fileSize > 10 * 1024 * 1024,
+        )
+      ) {
+        setPickerError("Each image must be smaller than 10 MB.");
+        return;
+      }
+      setImages((current) =>
+        [...current, ...result.assets]
+          .filter(
+            (asset, index, all) =>
+              all.findIndex((candidate) => candidate.uri === asset.uri) ===
+              index,
+          )
+          .slice(0, 3),
+      );
+    } catch {
+      setPickerError("We couldn’t open your photo library. Please try again.");
+    } finally {
+      setIsPicking(false);
+    }
+  };
 
   const publish = async () => {
     if (!user || !canPublish) return;
@@ -42,6 +100,7 @@ export function ForumPostComposerScreen() {
           authorId: user.id,
           body,
           forumId: id,
+          images: images.map(toLocalImage),
           title,
         });
       } else {
@@ -51,6 +110,7 @@ export function ForumPostComposerScreen() {
           body,
           entityId: restaurant.id,
           forumId: id,
+          images: images.map(toLocalImage),
         });
       }
       successFeedback();
@@ -141,6 +201,56 @@ export function ForumPostComposerScreen() {
           value={body}
           onChangeText={setBody}
         />
+        <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+          <View className="flex-row items-center justify-between">
+            <Text variant="small">Images (optional)</Text>
+            <Text variant="muted">{images.length}/3</Text>
+          </View>
+          {images.length > 0 ? (
+            <View className="gap-3 sm:flex-row">
+              {images.map((image, index) => (
+                <View key={image.uri} className="relative flex-1">
+                  <Image
+                    accessibilityLabel={`Selected image ${index + 1}`}
+                    className="h-32 w-full rounded-md bg-muted sm:h-36"
+                    contentFit="cover"
+                    source={image.uri}
+                  />
+                  <Button
+                    accessibilityLabel={`Remove image ${index + 1}`}
+                    className="absolute right-2 top-2 rounded-md bg-background/90"
+                    disabled={isSaving}
+                    size="icon"
+                    variant="outline"
+                    onPress={() =>
+                      setImages((current) =>
+                        current.filter(
+                          (candidate) => candidate.uri !== image.uri,
+                        ),
+                      )
+                    }
+                  >
+                    <Icon as={X} />
+                  </Button>
+                </View>
+              ))}
+            </View>
+          ) : null}
+          <Button
+            className="self-start"
+            disabled={images.length >= 3 || isSaving || isPicking}
+            variant="outline"
+            onPress={() => void pickImages()}
+          >
+            <Icon as={ImagePlus} />
+            <Text>{isPicking ? "Opening library…" : "Add images"}</Text>
+          </Button>
+          {pickerError ? (
+            <Text className="text-destructive" variant="small">
+              {pickerError}
+            </Text>
+          ) : null}
+        </View>
         {type === "SHARE" ? (
           <Text variant="muted" className="text-xs">
             Forum Shares are discussion posts only; they do not change the
@@ -167,4 +277,14 @@ export function ForumPostComposerScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function toLocalImage(image: ImagePicker.ImagePickerAsset): LocalImage {
+  return {
+    file: image.file,
+    fileName: image.fileName,
+    fileSize: image.fileSize,
+    mimeType: image.mimeType,
+    uri: image.uri,
+  };
 }

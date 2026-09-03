@@ -9,10 +9,12 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react-native";
-import { type ColorValue, Pressable } from "react-native";
+import { type ColorValue, Pressable, View } from "react-native";
 
 import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
+import { useAuth } from "@/providers/auth-provider";
+import { useUnreadNotificationCount } from "@/queries/notifications";
 
 export default function MainTabs() {
   const theme = useTheme();
@@ -81,13 +83,18 @@ function tabIcon(IconComponent: LucideIcon) {
 
 function ActivityButton() {
   const theme = useTheme();
+  const { user } = useAuth();
+  const unread = useUnreadNotificationCount(user?.id);
   return (
     <Link href={routes.activity} asChild>
       <Pressable
         accessibilityLabel="Open activity"
-        className="mr-3 rounded-md border border-border bg-card p-2 active:bg-secondary"
+        className="relative mr-3 rounded-md border border-border bg-card p-2 active:bg-secondary"
       >
         <Bell color={theme.text} size={19} />
+        {(unread.data ?? 0) > 0 ? (
+          <View className="absolute right-1 top-1 size-2 rounded-full bg-primary" />
+        ) : null}
       </Pressable>
     </Link>
   );

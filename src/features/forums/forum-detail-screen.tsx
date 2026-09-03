@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { MessageSquare, Users } from "lucide-react-native";
 import { useState } from "react";
@@ -48,6 +49,14 @@ export function ForumDetailScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6">
         <View className="gap-2 rounded-lg border border-border bg-card p-3 shadow-none">
+          {forumData.coverImageUrl ? (
+            <Image
+              accessibilityLabel={`${forumData.name} cover image`}
+              className="h-44 w-full rounded-md bg-muted"
+              contentFit="cover"
+              source={forumData.coverImageUrl}
+            />
+          ) : null}
           <View className="flex-row items-start justify-between gap-3">
             <View className="min-w-0 flex-1 gap-1">
               <Text variant="h1" className="text-left text-2xl">

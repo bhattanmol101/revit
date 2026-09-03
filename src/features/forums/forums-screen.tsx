@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, View } from "react-native";
@@ -63,6 +64,14 @@ export function ForumsScreen() {
         {forums.data?.map((forum) => (
           <Link key={forum.id} href={routes.forum(forum.id)} asChild>
             <Card className="gap-2 py-3 shadow-none">
+              {forum.coverImageUrl ? (
+                <Image
+                  accessibilityLabel={`${forum.name} cover image`}
+                  className="h-36 w-full bg-muted"
+                  contentFit="cover"
+                  source={forum.coverImageUrl}
+                />
+              ) : null}
               <CardHeader>
                 <CardTitle>{forum.name}</CardTitle>
               </CardHeader>
