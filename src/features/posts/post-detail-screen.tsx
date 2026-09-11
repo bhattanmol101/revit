@@ -234,7 +234,9 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
     try {
       await deletePost.mutateAsync(post.id);
       setIsDeleteOpen(false);
-      router.replace(routes.profile);
+      router.replace(
+        post.forum_id ? routes.forum(post.forum_id) : routes.profile,
+      );
     } catch {
       // The mutation error stays visible in the confirmation for a retry.
     }

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createPersonalPick,
+  deletePersonalPick,
   getPersonalPick,
   getPersonalPicksByAuthor,
   type SavePersonalPickInput,
@@ -58,6 +59,20 @@ export function useUpdatePersonalPick(pickId: string, authorId: string) {
           queryKey: queryKeys.picks.byId(pick.id),
         }),
       ]);
+    },
+  });
+}
+
+export function useDeletePersonalPick(pickId: string, authorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deletePersonalPick(pickId),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.picks.byId(pickId) });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.picks.byAuthor(authorId),
+      });
     },
   });
 }

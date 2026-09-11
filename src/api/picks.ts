@@ -39,6 +39,20 @@ export function updatePersonalPick(
   return savePersonalPick("update_personal_pick", input, pickId);
 }
 
+export function deletePersonalPick(pickId: string): Promise<void> {
+  return runApiRequest(async (signal) => {
+    const { error } = await supabase
+      .from("picks")
+      .delete()
+      .eq("id", pickId)
+      .abortSignal(signal);
+
+    if (error) {
+      throw normalizeApiError(error, "We could not delete this Pick.");
+    }
+  });
+}
+
 export function getPersonalPick(
   pickId: string,
 ): Promise<PersonalPickDetail | null> {

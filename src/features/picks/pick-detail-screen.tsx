@@ -1,20 +1,31 @@
 import { Link, router, useLocalSearchParams } from "expo-router";
-import { Edit3, MapPin } from "lucide-react-native";
+import { Edit3, MapPin, Trash2 } from "lucide-react-native";
+import { useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
-import { usePersonalPick } from "@/queries/picks";
+import { useDeletePersonalPick, usePersonalPick } from "@/queries/picks";
 
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const pick = usePersonalPick(id);
+  const deletePick = useDeletePersonalPick(id, user?.id ?? "");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   if (pick.isLoading) return <PickLoadingState />;
   const personalPick = pick.data;
@@ -32,14 +43,24 @@ export function PickDetailScreen() {
               {personalPick.title}
             </Text>
             {isOwner ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onPress={() => router.push(routes.editPick(personalPick.id))}
-              >
-                <Icon as={Edit3} />
-                <Text>Edit</Text>
-              </Button>
+              <View className="flex-row gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onPress={() => router.push(routes.editPick(personalPick.id))}
+                >
+                  <Icon as={Edit3} />
+                  <Text>Edit</Text>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onPress={() => setIsDeleteOpen(true)}
+                >
+                  <Icon as={Trash2} />
+                  <Text>Delete</Text>
+                </Button>
+              </View>
             ) : null}
           </View>
           {personalPick.description ? (
@@ -80,6 +101,34 @@ export function PickDetailScreen() {
           ))}
         </View>
       </ScrollView>
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this Pick?</DialogTitle>
+            <DialogDescription>
+              This permanently deletes the list. The restaurants themselves are
+              not affected.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onPress={() => setIsDeleteOpen(false)}>
+              <Text>Cancel</Text>
+            </Button>
+            <Button
+              disabled={deletePick.isPending}
+              variant="destructive"
+              onPress={() =>
+                void deletePick
+                  .mutateAsync()
+                  .then(() => router.replace(routes.picks))
+                  .catch(() => {})
+              }
+            >
+              <Text>{deletePick.isPending ? "Deleting…" : "Delete Pick"}</Text>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SafeAreaView>
   );
 }
