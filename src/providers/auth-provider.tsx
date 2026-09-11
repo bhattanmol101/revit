@@ -14,6 +14,7 @@ import {
 import type { Profile, UpdateProfileInput } from "@/api/profiles";
 import { supabase } from "@/lib/supabase/client";
 import { useProfile, useUpdateProfile } from "@/queries/profiles";
+import { usePostImageCleanup } from "@/queries/posts";
 
 type AuthContextValue = {
   clearPasswordRecovery: () => void;
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userId = session?.user.id ?? "";
   const profileQuery = useProfile(userId);
   const profileMutation = useUpdateProfile(userId);
+  usePostImageCleanup(userId);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,10 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (handledUrls.current.has(url)) return;
       handledUrls.current.add(url);
 
-      const result = await createRecoverySession(url);
-
-      if (isMounted && result === "recovery") {
-        setIsPasswordRecovery(true);
+      try {
+        const result = await createRecoverySession(url);
+        if (isMounted && result === "recovery") {
+          setIsPasswordRecovery(true);
+        }
+      } catch {
+        // The auth screens remain available so the user can request a fresh link.
       }
     };
 

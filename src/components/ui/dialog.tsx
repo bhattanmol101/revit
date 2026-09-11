@@ -1,18 +1,18 @@
-import { Icon } from "@/components/ui/icon";
-import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
-import { cn } from "@/lib/utils";
 import * as DialogPrimitive from "@rn-primitives/dialog";
 import { X } from "lucide-react-native";
 import * as React from "react";
 import {
+  type GestureResponderEvent,
   Platform,
   Text,
   View,
-  type GestureResponderEvent,
   type ViewProps,
 } from "react-native";
 import { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { FullWindowOverlay as RNFullWindowOverlay } from "react-native-screens";
+import { Icon } from "@/components/ui/icon";
+import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
+import { cn } from "@/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -46,7 +46,7 @@ function DialogOverlay({
     <FullWindowOverlay>
       <DialogPrimitive.Overlay
         className={cn(
-          "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-black/65 p-4",
+          "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-scrim/70 p-4",
           Platform.select({
             web: "animate-in fade-in-0 fixed cursor-default [&>*]:cursor-auto",
           }),
@@ -85,7 +85,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            "bg-card border-border/60 z-50 mx-auto flex w-full flex-col gap-5 rounded-3xl border p-6 shadow-2xl shadow-black/20 sm:max-w-lg sm:p-7",
+            "bg-elevated border-border z-50 mx-auto flex w-full flex-col gap-4 rounded-xl border p-4 shadow-xl shadow-black/20 sm:max-w-lg",
             Platform.select({
               web: "animate-in fade-in-0 zoom-in-95 web:max-w-[calc(100%-2rem)] duration-200",
             }),
@@ -96,7 +96,7 @@ function DialogContent({
           {children}
           <DialogPrimitive.Close
             className={cn(
-              "absolute right-4 top-4 rounded-full bg-muted p-2 opacity-80 active:opacity-100",
+              "absolute right-3 top-3 rounded-md bg-elevated p-2 opacity-80 active:opacity-100",
               Platform.select({
                 web: "ring-offset-background focus:ring-ring data-[state=open]:bg-accent transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2",
               }),
@@ -145,7 +145,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       className={cn(
-        "text-foreground text-xl font-bold leading-none",
+        "text-foreground text-xl font-semibold leading-7",
         className,
       )}
       {...props}
@@ -159,7 +159,10 @@ function DialogDescription({
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn(
+        "text-muted-foreground text-[13px] leading-[18px]",
+        className,
+      )}
       {...props}
     />
   );

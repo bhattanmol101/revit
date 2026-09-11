@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
+import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
 import type { LocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
@@ -119,7 +122,7 @@ export function ForumPostComposerScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6"
@@ -165,7 +168,7 @@ export function ForumPostComposerScreen() {
               </Button>
             ) : (
               <>
-                <Input
+                <SearchInput
                   accessibilityLabel="Search restaurants"
                   placeholder="Search restaurant"
                   value={search}
@@ -174,7 +177,7 @@ export function ForumPostComposerScreen() {
                 {results.data?.map((item) => (
                   <Button
                     key={item.id}
-                    className="justify-start"
+                    className="min-h-12 h-auto justify-start border border-border bg-card px-3 py-2"
                     variant="outline"
                     onPress={() => {
                       setRestaurant(item);
@@ -190,14 +193,11 @@ export function ForumPostComposerScreen() {
             )}
           </View>
         )}
-        <Input
+        <Textarea
           accessibilityLabel="Post details"
-          className="min-h-28 items-start py-2"
           editable={!isSaving}
           maxLength={2000}
-          multiline
           placeholder="Add context (optional)"
-          textAlignVertical="top"
           value={body}
           onChangeText={setBody}
         />
@@ -262,19 +262,19 @@ export function ForumPostComposerScreen() {
             {error.message}
           </Text>
         ) : null}
-        <View className="flex-row justify-end gap-2">
-          <Button
-            disabled={isSaving}
-            variant="ghost"
-            onPress={() => router.back()}
-          >
-            <Text>Cancel</Text>
-          </Button>
-          <Button disabled={!canPublish} onPress={() => void publish()}>
-            <Text>{isSaving ? "Publishing…" : "Publish"}</Text>
-          </Button>
-        </View>
       </ScrollView>
+      <StickyActionFooter>
+        <Button
+          disabled={isSaving}
+          variant="secondary"
+          onPress={() => router.back()}
+        >
+          <Text>Cancel</Text>
+        </Button>
+        <Button disabled={!canPublish} onPress={() => void publish()}>
+          <Text>{isSaving ? "Publishing…" : "Publish"}</Text>
+        </Button>
+      </StickyActionFooter>
     </SafeAreaView>
   );
 }

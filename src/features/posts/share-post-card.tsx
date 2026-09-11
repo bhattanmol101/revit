@@ -1,4 +1,3 @@
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { MessageCircle, Star } from "lucide-react-native";
 import { View } from "react-native";
@@ -9,10 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
 import { useCommentCount } from "@/queries/comments";
+
+import { PostMediaGallery } from "./post-media-gallery";
 
 export function SharePostCard({
   post,
@@ -26,12 +28,12 @@ export function SharePostCard({
   const commentCount = comments.data ?? 0;
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-lg pb-0 pt-0.5 shadow-none">
-      <CardHeader className="gap-2 px-3 pt-2">
+    <Card className="gap-0 overflow-hidden pb-0 pt-0">
+      <CardHeader className="gap-3 px-3 pb-3 pt-3">
         <View className="flex-row items-start justify-between gap-3">
           <Link href={routes.user(post.author.username)} asChild>
             <Button
-              className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0"
+              className="min-h-11 h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0"
               variant="ghost"
             >
               <Avatar
@@ -60,13 +62,8 @@ export function SharePostCard({
               </View>
             </Button>
           </Link>
-          <Badge
-            className="rounded-md border-primary/35 bg-transparent px-1.5 py-0.5"
-            variant="outline"
-          >
-            <Text className="text-[0.6rem] font-semibold text-primary">
-              SHARE
-            </Text>
+          <Badge className="px-2 py-0.5" variant="outline">
+            <Text className="text-[11px] font-medium">SHARE</Text>
           </Badge>
         </View>
 
@@ -75,7 +72,7 @@ export function SharePostCard({
             className="h-auto justify-start gap-1 px-0 py-0"
             variant="ghost"
           >
-            <Text className="text-base font-semibold">{restaurant.name}</Text>
+            <Text className="text-lg font-semibold">{restaurant.name}</Text>
             <Text className="text-xs text-muted-foreground">
               {restaurant.locality}
             </Text>
@@ -83,48 +80,34 @@ export function SharePostCard({
         </Link>
 
         <View className="flex-row items-center gap-1.5">
-          <Icon as={Star} className="size-5 text-rating" fill={theme.rating} />
-          <Text className="text-base font-semibold">
+          <Icon as={Star} className="size-4 text-rating" fill={theme.rating} />
+          <Text className="text-[13px] font-medium text-rating">
             {post.ratingScore.toFixed(1)}
           </Text>
         </View>
-      </CardHeader>
-
-      <CardContent className="gap-2 px-0 pt-1">
         {post.body ? (
-          <Text className="px-3 text-[0.8rem] text-muted-foreground">
+          <Text className="text-[13px] leading-5" variant="muted">
             {post.body}
           </Text>
         ) : null}
+      </CardHeader>
 
-        {post.media.length > 0 ? (
-          <View>
-            {post.media.map((media, index) => (
-              <Image
-                key={media.id}
-                accessibilityLabel={
-                  media.alt_text ||
-                  `Post image ${index + 1} of ${post.media.length}`
-                }
-                className="aspect-square w-full bg-muted"
-                contentFit="cover"
-                recyclingKey={media.id}
-                source={{ uri: media.signedUrl }}
-                transition={150}
-              />
-            ))}
-          </View>
-        ) : null}
+      <CardContent className="gap-0 px-0">
+        <PostMediaGallery media={post.media} />
 
-        <View className="px-3 pb-1">
+        <Separator />
+        <View className="min-h-14 justify-center px-3 py-2">
           <Link href={routes.post(post.id)} asChild>
             <Button
               accessibilityLabel={`View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
-              className="h-9 self-start rounded-md px-2"
+              className="h-8 self-start gap-1.5 px-1.5"
               variant="ghost"
             >
-              <Icon as={MessageCircle} className="size-5 text-foreground" />
-              <Text className="text-sm font-semibold">
+              <Icon
+                as={MessageCircle}
+                className="size-4 text-muted-foreground"
+              />
+              <Text className="text-[13px] font-medium text-muted-foreground">
                 {comments.isLoading || comments.isError ? "—" : commentCount}
               </Text>
             </Button>

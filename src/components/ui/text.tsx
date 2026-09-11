@@ -1,12 +1,12 @@
-import { cn } from "@/lib/utils";
 import { Slot } from "@rn-primitives/slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { Platform, Text as RNText, type Role } from "react-native";
+import { cn } from "@/lib/utils";
 
 const textVariants = cva(
   cn(
-    "text-foreground text-base",
+    "text-foreground text-[15px] leading-5",
     Platform.select({
       web: "select-text",
     }),
@@ -16,30 +16,30 @@ const textVariants = cva(
       variant: {
         default: "",
         h1: cn(
-          "text-center text-4xl font-black tracking-[-0.04em] sm:text-5xl",
+          "text-[28px] font-bold leading-9 tracking-[-0.02em]",
           Platform.select({ web: "scroll-m-20 text-balance" }),
         ),
         h2: cn(
-          "text-3xl font-bold tracking-[-0.03em]",
+          "text-2xl font-semibold leading-8 tracking-[-0.02em]",
           Platform.select({ web: "scroll-m-20 first:mt-0" }),
         ),
         h3: cn(
-          "text-2xl font-bold tracking-[-0.02em]",
+          "text-xl font-semibold leading-7 tracking-[-0.01em]",
           Platform.select({ web: "scroll-m-20" }),
         ),
         h4: cn(
-          "text-xl font-bold tracking-[-0.01em]",
+          "text-lg font-semibold leading-6",
           Platform.select({ web: "scroll-m-20" }),
         ),
-        p: "mt-3 leading-7 sm:mt-6",
+        p: "leading-6",
         blockquote: "mt-4 border-l-2 pl-3 italic sm:mt-6 sm:pl-6",
         code: cn(
           "bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
         ),
-        lead: "text-muted-foreground text-xl",
-        large: "text-lg font-semibold",
-        small: "text-sm font-medium leading-none",
-        muted: "text-muted-foreground text-sm",
+        lead: "text-muted-foreground text-lg leading-6",
+        large: "text-lg font-semibold leading-6",
+        small: "text-sm font-medium leading-5",
+        muted: "text-muted-foreground text-[13px] leading-[18px]",
       },
     },
     defaultVariants: {

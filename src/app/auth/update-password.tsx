@@ -31,16 +31,25 @@ export default function UpdatePasswordScreen() {
     }
 
     setLoading(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-
-    if (updateError) {
-      setError(updateError.message);
-      return;
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+      });
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+      clearPasswordRecovery();
+      router.replace(routes.home);
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "We couldn’t update your password. Please try again.",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    clearPasswordRecovery();
-    router.replace(routes.home);
   };
 
   return (
@@ -52,6 +61,7 @@ export default function UpdatePasswordScreen() {
         <View className="gap-2">
           <Text variant="small">New password</Text>
           <Input
+            accessibilityLabel="New password"
             autoComplete="new-password"
             editable={!loading}
             onChangeText={setPassword}
@@ -63,6 +73,7 @@ export default function UpdatePasswordScreen() {
         <View className="gap-2">
           <Text variant="small">Confirm new password</Text>
           <Input
+            accessibilityLabel="Confirm new password"
             autoComplete="new-password"
             editable={!loading}
             onChangeText={setConfirmation}
@@ -72,7 +83,13 @@ export default function UpdatePasswordScreen() {
           />
         </View>
         {error ? (
-          <Text className="text-sm text-destructive">{error}</Text>
+          <Text
+            accessibilityLiveRegion="polite"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {error}
+          </Text>
         ) : null}
         <Button disabled={loading} onPress={() => void submit()}>
           <Text>{loading ? "Saving…" : "Save new password"}</Text>

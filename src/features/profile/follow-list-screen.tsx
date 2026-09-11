@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, View } from "react-native";
 import type { FollowProfile } from "@/api/follows";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -68,9 +69,9 @@ function FollowProfileRow({ profile }: { profile: FollowProfile }) {
     <Link href={routes.user(profile.username)} asChild>
       <Button
         variant="ghost"
-        className="h-auto w-full justify-start gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-none"
+        className="min-h-12 h-auto w-full justify-start gap-3 border border-border bg-card px-3 py-2"
       >
-        <Avatar alt={`${profile.display_name}'s avatar`} className="size-10">
+        <Avatar alt={`${profile.display_name}'s avatar`} className="size-8">
           {profile.avatar_url ? (
             <AvatarImage
               accessibilityLabel={`${profile.display_name}'s avatar`}
@@ -127,34 +128,34 @@ function FollowListState({
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 py-16">
-        <Text variant="muted" className="text-center">
-          We couldn’t load this list.
-        </Text>
-        <Button variant="outline" onPress={retry}>
-          <Text>Try again</Text>
-        </Button>
-      </View>
+      <FeedbackState
+        actionLabel="Retry"
+        className="my-4"
+        onAction={retry}
+        title="Couldn’t load this list."
+        variant="error"
+      />
     );
   }
 
   return (
-    <View className="flex-1 items-center justify-center gap-2 py-16">
-      <Text variant="large">
-        {profileMissing
+    <FeedbackState
+      className="my-4"
+      description={
+        profileMissing
+          ? undefined
+          : kind === "followers"
+            ? "People who follow this profile will appear here."
+            : "People followed by this profile will appear here."
+      }
+      title={
+        profileMissing
           ? "Profile not found"
           : kind === "followers"
             ? "No followers yet"
-            : "Not following anyone yet"}
-      </Text>
-      {!profileMissing ? (
-        <Text variant="muted" className="text-center">
-          {kind === "followers"
-            ? "People who follow this profile will appear here."
-            : "People followed by this profile will appear here."}
-        </Text>
-      ) : null}
-    </View>
+            : "Not following anyone yet"
+      }
+    />
   );
 }
 

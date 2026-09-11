@@ -62,6 +62,7 @@ export default function OnboardingScreen() {
         <View className="gap-2">
           <Text variant="small">Display name</Text>
           <Input
+            accessibilityLabel="Display name"
             onChangeText={setDisplayName}
             placeholder="Your name"
             value={displayName}
@@ -70,6 +71,7 @@ export default function OnboardingScreen() {
         <View className="gap-2">
           <Text variant="small">Username</Text>
           <Input
+            accessibilityLabel="Username"
             autoCapitalize="none"
             autoCorrect={false}
             onChangeText={(value) => setUsername(value.toLowerCase())}
@@ -78,7 +80,13 @@ export default function OnboardingScreen() {
           />
         </View>
         {error ? (
-          <Text className="text-sm text-destructive">{error}</Text>
+          <Text
+            accessibilityLiveRegion="polite"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {error}
+          </Text>
         ) : null}
         <Button disabled={loading} onPress={submit}>
           <Text>{loading ? "Saving…" : "Continue"}</Text>

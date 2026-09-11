@@ -11,7 +11,9 @@ export const queryKeys = {
     search: (query: string) => [...queryKeys.discover.all, query] as const,
   },
   feed: {
-    home: ["feed", "home"] as const,
+    all: ["feed"] as const,
+    home: (mode: "following" | "for-you") =>
+      [...queryKeys.feed.all, "home", mode] as const,
   },
   follows: {
     all: ["follows"] as const,

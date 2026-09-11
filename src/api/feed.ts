@@ -19,17 +19,31 @@ export type HomeFeedPost =
   | (PostWithDetails & { post_type: "ASK" })
   | HomeFeedSharePost;
 
-export type HomeFeedPage = Omit<PostPage, "items"> & {
+export type HomeFeedPage = Omit<PostPage, "items" | "nextOffset"> & {
   items: HomeFeedPost[];
+  nextCursor?: HomeFeedCursor;
 };
 
-export async function getHomeFeed(offset = 0): Promise<HomeFeedPage> {
-  const postIds = await runApiRequest(
+export type HomeFeedCursor = {
+  createdAt: string;
+  id: string;
+};
+
+export type HomeFeedMode = "following" | "for-you";
+
+export async function getHomeFeed(
+  mode: HomeFeedMode,
+  cursor?: HomeFeedCursor,
+  requestSignal?: AbortSignal,
+): Promise<HomeFeedPage> {
+  const feedRows = await runApiRequest(
     async (signal) => {
       const { data, error } = await supabase
         .rpc("get_home_feed", {
+          p_before_created_at: cursor?.createdAt,
+          p_before_id: cursor?.id,
           p_limit: HOME_FEED_PAGE_SIZE + 1,
-          p_offset: offset,
+          p_mode: mode,
         })
         .abortSignal(signal);
 
@@ -37,13 +51,19 @@ export async function getHomeFeed(offset = 0): Promise<HomeFeedPage> {
         throw normalizeApiError(error, "We could not load your feed.");
       }
 
-      return data.map((post) => post.id);
+      return data;
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 
-  const hasNextPage = postIds.length > HOME_FEED_PAGE_SIZE;
-  const visiblePostIds = postIds.slice(0, HOME_FEED_PAGE_SIZE);
+  const hasNextPage = feedRows.length > HOME_FEED_PAGE_SIZE;
+  const visibleRows = feedRows.slice(0, HOME_FEED_PAGE_SIZE);
+  const visiblePostIds = visibleRows.map((post) => post.id);
+  const lastRow = visibleRows.at(-1);
+  const nextCursor =
+    hasNextPage && lastRow
+      ? { createdAt: lastRow.created_at, id: lastRow.id }
+      : undefined;
 
   const posts = await getPostsByIds(visiblePostIds);
   const sharePosts = posts.filter(
@@ -56,7 +76,7 @@ export async function getHomeFeed(offset = 0): Promise<HomeFeedPage> {
   if (sharePosts.length === 0) {
     return {
       items: posts as HomeFeedPost[],
-      nextOffset: hasNextPage ? offset + HOME_FEED_PAGE_SIZE : undefined,
+      nextCursor,
     };
   }
 
@@ -91,7 +111,7 @@ export async function getHomeFeed(offset = 0): Promise<HomeFeedPage> {
             },
           ];
     }),
-    nextOffset: hasNextPage ? offset + HOME_FEED_PAGE_SIZE : undefined,
+    nextCursor,
   };
 }
 

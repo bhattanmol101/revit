@@ -10,6 +10,7 @@ import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -73,7 +74,7 @@ export function ProfileView({
           />
         }
       >
-        <View className="gap-4 rounded-lg border border-border bg-secondary p-4 sm:flex-row sm:items-center">
+        <View className="gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
           <Avatar
             alt={`${profile.display_name}'s avatar`}
             className="size-20 border-2 border-card shadow-none"
@@ -142,21 +143,12 @@ export function ProfileView({
         />
 
         {counts.isError ? (
-          <Card className="gap-3 border-destructive/40 py-4">
-            <CardContent className="gap-3">
-              <Text variant="small" className="text-destructive">
-                We couldn&apos;t load follow totals.
-              </Text>
-              <Button
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onPress={() => void counts.refetch()}
-              >
-                <Text>Try again</Text>
-              </Button>
-            </CardContent>
-          </Card>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void counts.refetch()}
+            title="Couldn’t load follow totals."
+            variant="error"
+          />
         ) : null}
 
         <ProfilePosts
@@ -201,24 +193,15 @@ function ProfilePicks({ profileId }: { profileId: string }) {
       </Text>
       {picks.isLoading ? <Skeleton className="h-20 w-full" /> : null}
       {picks.isError ? (
-        <Card className="gap-3 border-destructive/40 py-3 shadow-none">
-          <CardContent className="gap-3 px-3">
-            <Text variant="small" className="text-destructive">
-              We couldn&apos;t load Picks.
-            </Text>
-            <Button
-              className="self-start"
-              size="sm"
-              variant="outline"
-              onPress={() => void picks.refetch()}
-            >
-              <Text>Try again</Text>
-            </Button>
-          </CardContent>
-        </Card>
+        <FeedbackState
+          actionLabel="Retry"
+          onAction={() => void picks.refetch()}
+          title="Couldn’t load Picks."
+          variant="error"
+        />
       ) : null}
       {!picks.isLoading && !picks.isError && picks.data?.length === 0 ? (
-        <Text variant="muted">No Picks yet.</Text>
+        <FeedbackState title="No Picks yet" />
       ) : null}
       {picks.data?.map((pick) => (
         <Link key={pick.id} href={routes.pick(pick.id)} asChild>
@@ -269,24 +252,16 @@ function ProfilePosts({
       ) : null}
 
       {isError ? (
-        <Card className="gap-3 rounded-lg border-destructive/40 py-3 shadow-none">
-          <CardContent className="gap-3 px-3">
-            <Text variant="small" className="text-destructive">
-              We couldn’t load Ask posts.
-            </Text>
-            <Button variant="outline" className="self-start" onPress={retry}>
-              <Text>Try again</Text>
-            </Button>
-          </CardContent>
-        </Card>
+        <FeedbackState
+          actionLabel="Retry"
+          onAction={retry}
+          title="Couldn’t load Ask posts."
+          variant="error"
+        />
       ) : null}
 
       {!isLoading && !isError && posts.length === 0 ? (
-        <Card className="rounded-lg py-3 shadow-none">
-          <CardContent className="px-3">
-            <Text variant="muted">No Ask posts yet.</Text>
-          </CardContent>
-        </Card>
+        <FeedbackState title="No Ask posts yet" />
       ) : null}
 
       {posts.map((post) => (

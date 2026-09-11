@@ -1,6 +1,7 @@
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { ImagePlus } from "lucide-react-native";
+import { ImagePlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 
@@ -8,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
 import { readLocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
@@ -51,7 +54,7 @@ export function CreateForumScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6">
         <View className="gap-1">
           <Text variant="h1" className="text-left text-2xl">
@@ -91,30 +94,38 @@ export function CreateForumScreen() {
             <Text>{cover ? "Change cover image" : "Add cover image"}</Text>
           </Button>
           {cover ? (
-            <Text variant="muted" className="text-xs">
-              Cover image selected
-            </Text>
+            <View className="relative">
+              <Image
+                accessibilityLabel="Selected forum cover"
+                className="h-36 w-full rounded-lg bg-muted"
+                contentFit="cover"
+                source={cover.uri}
+              />
+              <Button
+                accessibilityLabel="Remove cover image"
+                className="absolute right-2 top-2 bg-background/90"
+                size="icon"
+                variant="outline"
+                onPress={() => setCover(null)}
+              >
+                <Icon as={X} />
+              </Button>
+            </View>
           ) : null}
         </View>
-        <Input
+        <Textarea
           accessibilityLabel="Forum description"
-          className="min-h-24 items-start py-2"
           editable={!createForum.isPending}
           maxLength={1000}
-          multiline
           placeholder="What is this forum for? (optional)"
-          textAlignVertical="top"
           value={description}
           onChangeText={setDescription}
         />
-        <Input
+        <Textarea
           accessibilityLabel="Forum rules"
-          className="min-h-24 items-start py-2"
           editable={!createForum.isPending}
           maxLength={2000}
-          multiline
           placeholder="Rules (optional)"
-          textAlignVertical="top"
           value={rules}
           onChangeText={setRules}
         />
@@ -123,19 +134,19 @@ export function CreateForumScreen() {
             {createForum.error.message}
           </Text>
         ) : null}
-        <View className="flex-row justify-end gap-2">
-          <Button
-            disabled={createForum.isPending}
-            variant="ghost"
-            onPress={() => router.back()}
-          >
-            <Text>Cancel</Text>
-          </Button>
-          <Button disabled={!canSubmit} onPress={() => void submit()}>
-            <Text>{createForum.isPending ? "Creating…" : "Create forum"}</Text>
-          </Button>
-        </View>
       </ScrollView>
+      <StickyActionFooter>
+        <Button
+          disabled={createForum.isPending}
+          variant="secondary"
+          onPress={() => router.back()}
+        >
+          <Text>Cancel</Text>
+        </Button>
+        <Button disabled={!canSubmit} onPress={() => void submit()}>
+          <Text>{createForum.isPending ? "Creating…" : "Create forum"}</Text>
+        </Button>
+      </StickyActionFooter>
     </SafeAreaView>
   );
 }

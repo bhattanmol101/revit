@@ -1,4 +1,4 @@
-import { RotateCcw, Star } from "lucide-react-native";
+import { Star, X } from "lucide-react-native";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export function AskRatingControl({ postId }: { postId: string }) {
 
   if (rating.error) {
     return (
-      <View className="flex-row flex-wrap items-center gap-2">
+      <View className="flex-1 flex-row flex-wrap items-center justify-end gap-2">
         <Text className="text-xs" variant="muted">
           Your rating could not be loaded.
         </Text>
@@ -39,8 +39,8 @@ export function AskRatingControl({ postId }: { postId: string }) {
   }
 
   return (
-    <View className="flex-1 flex-col justify-center shrink-0 items-center gap-0.5">
-      <View className="flex-row items-center gap-1">
+    <View className="min-w-0 flex-1 items-end justify-center gap-0.5">
+      <View className="flex-row items-center gap-0.5">
         {SCORES.map((score) => {
           const isSelected = currentScore === score;
           const isActive = currentScore !== null && score <= currentScore;
@@ -56,15 +56,15 @@ export function AskRatingControl({ postId }: { postId: string }) {
                 selectionFeedback();
                 setRating.mutate(score);
               }}
-              className="size-5 rounded-md px-0"
+              className="size-6 px-0"
               variant="ghost"
             >
               <Icon
                 as={Star}
                 className={
                   isActive
-                    ? "size-5 text-rating"
-                    : "size-5 text-muted-foreground/55"
+                    ? "size-[18px] text-rating"
+                    : "size-[18px] text-muted-foreground/60"
                 }
                 fill={isActive ? theme.rating : "none"}
                 strokeWidth={isActive ? 2.3 : 1.8}
@@ -78,13 +78,17 @@ export function AskRatingControl({ postId }: { postId: string }) {
             disabled={setRating.isPending}
             hitSlop={8}
             onPress={() => setRating.mutate(null)}
-            className="size-4 rounded-md p-0 pl-4"
+            className="ml-1 size-6 p-0"
             variant="ghost"
           >
-            <Icon as={RotateCcw} className="size-4 text-red-300" />
+            <Icon as={X} className="size-4 text-muted-foreground" />
           </Button>
         ) : null}
       </View>
+
+      <Text className="text-[11px]" variant="muted">
+        Your rating
+      </Text>
 
       {setRating.error ? (
         <Text className="text-xs text-destructive">

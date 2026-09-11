@@ -1,11 +1,9 @@
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
@@ -13,6 +11,7 @@ import { AskRatingControl } from "@/features/ratings/ask-rating-control";
 import { routes } from "@/lib/routes";
 
 import { PostEngagementActions } from "./post-engagement-actions";
+import { PostMediaGallery } from "./post-media-gallery";
 
 type AskPostCardProps = {
   isDetail?: boolean;
@@ -21,8 +20,8 @@ type AskPostCardProps = {
 
 export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
   return (
-    <Card className="gap-0 overflow-hidden rounded-lg pb-0 pt-0.5 shadow-none">
-      <CardHeader className="gap-2 px-3 pt-2">
+    <Card className="gap-0 overflow-hidden pb-0 pt-0">
+      <CardHeader className="gap-3 px-3 pb-3 pt-3">
         <View className="flex-row items-start justify-between gap-3">
           <Avatar
             alt={`${post.author.display_name}'s avatar`}
@@ -59,51 +58,25 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
             </Link>
           </View>
 
-          <Badge
-            className="rounded-md border-primary/35 bg-transparent px-1.5 py-0.5"
-            variant="outline"
-          >
-            <Text className="text-[0.6rem] font-semibold text-primary">
-              ASK
-            </Text>
+          <Badge className="px-2 py-0.5" variant="outline">
+            <Text className="text-[11px] font-medium">ASK</Text>
           </Badge>
         </View>
 
-        <CardTitle className="text-md">{post.title}</CardTitle>
-      </CardHeader>
-
-      <CardContent className="gap-1 px-0 pt-1">
+        <CardTitle className="text-lg leading-6">{post.title}</CardTitle>
         {post.body ? (
-          <Text className="px-3 text-[0.8rem] text-muted-foreground">
+          <Text className="text-[13px] leading-5" variant="muted">
             {post.body}
           </Text>
         ) : null}
+      </CardHeader>
 
-        {post.media.length > 0 ? (
-          <View>
-            {post.media.map((media, index) => (
-              <Image
-                key={media.id}
-                accessibilityLabel={
-                  media.alt_text ||
-                  `Post image ${index + 1} of ${post.media.length}`
-                }
-                className="aspect-square w-full bg-muted"
-                contentFit="cover"
-                recyclingKey={media.id}
-                source={{ uri: media.signedUrl }}
-                transition={150}
-                style={{
-                  width: "100%",
-                  aspectRatio: 1,
-                }}
-              />
-            ))}
-          </View>
-        ) : null}
-        <View className="flex-row px-3 -mt-1">
+      <CardContent className="gap-0 px-0">
+        <PostMediaGallery isDetail={isDetail} media={post.media} />
+        <Separator />
+        <View className="min-h-14 flex-row items-stretch px-3 py-2">
           <PostEngagementActions postId={post.id} />
-          <Separator className="h-11" orientation="vertical" />
+          <Separator className="mx-3 h-10 self-center" orientation="vertical" />
           <AskRatingControl postId={post.id} />
         </View>
       </CardContent>

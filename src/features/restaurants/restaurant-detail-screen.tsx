@@ -3,6 +3,7 @@ import { MapPin, Star } from "lucide-react-native";
 import { RefreshControl, ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -121,24 +122,18 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
 
           {posts.isLoading ? <RestaurantPostsLoading /> : null}
           {posts.isError && sharePosts.length === 0 ? (
-            <View className="items-start gap-3 rounded-lg border border-border bg-card p-3">
-              <Text className="font-medium">Ratings could not be loaded.</Text>
-              <Button
-                size="sm"
-                variant="outline"
-                onPress={() => void posts.refetch()}
-              >
-                <Text>Try again</Text>
-              </Button>
-            </View>
+            <FeedbackState
+              actionLabel="Retry"
+              onAction={() => void posts.refetch()}
+              title="Couldn’t load ratings."
+              variant="error"
+            />
           ) : null}
           {!posts.isLoading && !posts.isError && sharePosts.length === 0 ? (
-            <View className="rounded-lg border border-dashed border-border p-3">
-              <Text className="font-medium">No ratings yet.</Text>
-              <Text variant="muted">
-                Be the first to share your experience.
-              </Text>
-            </View>
+            <FeedbackState
+              description="Be the first to share your experience."
+              title="No ratings yet"
+            />
           ) : null}
           {sharePosts.map((post) => (
             <SharePostCard

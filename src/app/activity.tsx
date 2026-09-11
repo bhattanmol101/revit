@@ -1,10 +1,9 @@
 import { Link } from "expo-router";
-import { Bell } from "lucide-react-native";
 import { useEffect } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 import type { ActivityNotification } from "@/api/notifications";
-import { Icon } from "@/components/ui/icon";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -18,13 +17,15 @@ export default function ActivityScreen() {
   const { user } = useAuth();
   const notifications = useNotifications(user?.id);
   const markRead = useMarkNotificationsRead(user?.id);
+  const markReadPending = markRead.isPending;
+  const markReadNow = markRead.mutate;
   const hasUnread = notifications.data?.some(
     (notification) => notification.read_at === null,
   );
 
   useEffect(() => {
-    if (hasUnread && !markRead.isPending) void markRead.mutateAsync();
-  }, [hasUnread, markRead]);
+    if (hasUnread && !markReadPending) markReadNow();
+  }, [hasUnread, markReadNow, markReadPending]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
@@ -39,9 +40,12 @@ export default function ActivityScreen() {
           <Text variant="muted">Loading activity…</Text>
         ) : null}
         {notifications.isError ? (
-          <Text className="text-destructive" variant="small">
-            {notifications.error.message}
-          </Text>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void notifications.refetch()}
+            title="Couldn’t load activity."
+            variant="error"
+          />
         ) : null}
         {notifications.data?.length === 0 ? <EmptyActivity /> : null}
         {notifications.data?.map((notification) => (
@@ -54,14 +58,10 @@ export default function ActivityScreen() {
 
 function EmptyActivity() {
   return (
-    <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-8">
-      <Icon as={Bell} className="text-muted-foreground" size={24} />
-      <Text className="font-semibold">Nothing new yet</Text>
-      <Text variant="muted" className="text-center">
-        Follows, ratings, comments, replies, and forum activity will appear
-        here.
-      </Text>
-    </View>
+    <FeedbackState
+      description="Follows, ratings, comments, replies, and forum activity will appear here."
+      title="Nothing new yet"
+    />
   );
 }
 
@@ -78,8 +78,8 @@ function ActivityItem({
 
   return (
     <Link href={destination} asChild>
-      <Pressable className="flex-row gap-3 rounded-lg border border-border bg-card p-3 active:bg-secondary">
-        <View className="size-9 items-center justify-center rounded-md bg-primary/10">
+      <Pressable className="min-h-12 flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 active:bg-selected">
+        <View className="size-8 items-center justify-center rounded-full bg-selected">
           <Text className="font-bold text-primary">
             {notification.actor.display_name.slice(0, 1).toUpperCase()}
           </Text>

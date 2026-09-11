@@ -4,6 +4,7 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
@@ -43,31 +44,18 @@ export function PicksScreen() {
           </View>
         ) : null}
         {picks.isError ? (
-          <Card className="gap-3 border-destructive/40 py-3 shadow-none">
-            <CardContent className="gap-3 px-3">
-              <Text className="text-destructive" variant="small">
-                {picks.error.message}
-              </Text>
-              <Button
-                className="self-start"
-                size="sm"
-                variant="outline"
-                onPress={() => void picks.refetch()}
-              >
-                <Text>Try again</Text>
-              </Button>
-            </CardContent>
-          </Card>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void picks.refetch()}
+            title="Couldn’t load Picks."
+            variant="error"
+          />
         ) : null}
         {!picks.isLoading && !picks.isError && items.length === 0 ? (
-          <Card className="gap-2 py-4 shadow-none">
-            <CardContent className="gap-2">
-              <Text className="font-semibold">No Picks yet</Text>
-              <Text variant="muted">
-                Create your first ordered restaurant list.
-              </Text>
-            </CardContent>
-          </Card>
+          <FeedbackState
+            description="Create your first ordered restaurant list."
+            title="No Picks yet"
+          />
         ) : null}
         {items.map((pick) => (
           <Link key={pick.id} href={routes.pick(pick.id)} asChild>

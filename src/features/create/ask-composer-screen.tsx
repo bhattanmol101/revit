@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
@@ -117,7 +119,7 @@ export function AskComposerScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.select({ ios: "padding", default: undefined })}
@@ -136,7 +138,7 @@ export function AskComposerScreen() {
             </Text>
           </View>
 
-          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+          <View className="gap-2">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Title</Text>
               <Text variant="muted">{title.length}/120</Text>
@@ -144,7 +146,6 @@ export function AskComposerScreen() {
             <Input
               accessibilityLabel="Ask title"
               autoFocus
-              className="h-10"
               editable={!createPost.isPending}
               maxLength={120}
               placeholder="What would you like people to rate?"
@@ -154,25 +155,22 @@ export function AskComposerScreen() {
             />
           </View>
 
-          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+          <View className="gap-2">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Details (optional)</Text>
               <Text variant="muted">{bodyLength}/2000</Text>
             </View>
-            <Input
+            <Textarea
               accessibilityLabel="Ask details"
-              className="min-h-28 items-start py-2"
               editable={!createPost.isPending}
               maxLength={2000}
-              multiline
               placeholder="Add context that will help people answer."
-              textAlignVertical="top"
               value={body}
               onChangeText={setBody}
             />
           </View>
 
-          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+          <View className="gap-3">
             <View className="flex-row items-center justify-between">
               <Text variant="small">Images (optional)</Text>
               <Text variant="muted">{images.length}/3</Text>
@@ -239,22 +237,19 @@ export function AskComposerScreen() {
               {createPost.error.message}
             </Text>
           ) : null}
-
-          <View className="gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
-            <Button
-              disabled={createPost.isPending}
-              variant="ghost"
-              onPress={() => router.back()}
-            >
-              <Text>Cancel</Text>
-            </Button>
-            <Button disabled={!canPublish} onPress={() => void publish()}>
-              <Text>
-                {createPost.isPending ? "Publishing…" : "Publish Ask"}
-              </Text>
-            </Button>
-          </View>
         </ScrollView>
+        <StickyActionFooter>
+          <Button
+            disabled={createPost.isPending}
+            variant="secondary"
+            onPress={() => router.back()}
+          >
+            <Text>Cancel</Text>
+          </Button>
+          <Button disabled={!canPublish} onPress={() => void publish()}>
+            <Text>{createPost.isPending ? "Publishing…" : "Publish Ask"}</Text>
+          </Button>
+        </StickyActionFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

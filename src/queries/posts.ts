@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 import {
+  cleanUpPendingPostImages,
   createAskPost,
   createForumAskPost,
   createForumSharePost,
@@ -16,6 +17,7 @@ import {
   type UpdateAskPostInput,
   updateAskPost,
 } from "@/api/posts";
+import { useEffect } from "react";
 import { type LocalImage, readLocalImage } from "@/lib/media/read-local-image";
 import { queryKeys } from "@/lib/query/query-keys";
 
@@ -25,6 +27,18 @@ export type CreateAskPostMutationInput = {
   images: LocalImage[];
   title: string;
 };
+
+export function usePostImageCleanup(userId: string) {
+  const cleanup = useMutation({
+    mutationFn: () => cleanUpPendingPostImages(userId),
+    retry: 2,
+  });
+  const startCleanup = cleanup.mutate;
+
+  useEffect(() => {
+    if (userId) startCleanup();
+  }, [startCleanup, userId]);
+}
 
 export function useCreateAskPost() {
   const queryClient = useQueryClient();

@@ -517,6 +517,32 @@ export type Database = {
           },
         ]
       }
+      post_image_cleanup: {
+        Row: {
+          created_at: string
+          owner_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          owner_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          owner_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_image_cleanup_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           author_id: string
@@ -728,8 +754,36 @@ export type Database = {
           rating_count: number
         }[]
       }
+      create_ask_post_with_media: {
+        Args: {
+          p_body?: string
+          p_media_paths?: string[]
+          p_post_id: string
+          p_title: string
+        }
+        Returns: Database["public"]["Tables"]["posts"]["Row"]
+      }
+      create_share_rating_post_with_media: {
+        Args: {
+          p_body?: string
+          p_entity_id: string
+          p_media_paths?: string[]
+          p_post_id: string
+          p_score: number
+        }
+        Returns: Database["public"]["Tables"]["posts"]["Row"]
+      }
+      delete_post_with_cleanup: {
+        Args: { p_post_id: string }
+        Returns: string[]
+      }
       get_home_feed: {
-        Args: { p_limit?: number; p_offset?: number }
+        Args: {
+          p_before_created_at?: string
+          p_before_id?: string
+          p_limit?: number
+          p_mode?: string
+        }
         Returns: {
           author_id: string
           body: string | null

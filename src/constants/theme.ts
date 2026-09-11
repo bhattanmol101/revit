@@ -9,24 +9,36 @@ import { Platform } from "react-native";
 
 export const Colors = {
   light: {
-    text: "#0F172A",
-    background: "#F6F8FC",
+    text: "#12151A",
+    background: "#F7F8FA",
     backgroundElement: "#FFFFFF",
-    backgroundSelected: "#E7EFFF",
-    textSecondary: "#64748B",
+    backgroundElevated: "#F1F3F6",
+    backgroundSelected: "#EAF2FF",
+    textSecondary: "#626875",
+    textDisabled: "#9BA1AC",
     primary: "#2563EB",
-    rating: "#F5A800",
-    border: "#D6DEEA",
+    rating: "#D99A00",
+    destructive: "#DC2626",
+    success: "#16A34A",
+    warning: "#D97706",
+    border: "#D9DDE5",
+    scrim: "#111318",
   },
   dark: {
-    text: "#EAF0FA",
-    background: "#090F1F",
-    backgroundElement: "#11182A",
-    backgroundSelected: "#1C2D52",
-    textSecondary: "#94A3B8",
-    primary: "#60A5FA",
-    rating: "#FBBF24",
-    border: "#2C3850",
+    text: "#F5F7FA",
+    background: "#090A0D",
+    backgroundElement: "#111318",
+    backgroundElevated: "#171A21",
+    backgroundSelected: "#1B2536",
+    textSecondary: "#9298A5",
+    textDisabled: "#626875",
+    primary: "#3B82F6",
+    rating: "#F5B301",
+    destructive: "#EF4444",
+    success: "#22C55E",
+    warning: "#F59E0B",
+    border: "#292D36",
+    scrim: "#000000",
   },
 } as const;
 
@@ -58,13 +70,19 @@ export const Fonts = Platform.select({
 });
 
 export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+  micro: 4,
+  related: 8,
+  internal: 12,
+  gutter: 16,
+  section: 24,
+  exceptional: 32,
+} as const;
+
+export const Radius = {
+  control: 6,
+  surface: 8,
+  overlay: 12,
+  avatar: 24,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 54, android: 76 }) ?? 0;

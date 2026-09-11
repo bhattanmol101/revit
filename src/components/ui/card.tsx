@@ -1,6 +1,6 @@
+import { View } from "react-native";
 import { Text, TextClassContext } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { View } from "react-native";
 
 function Card({
   className,
@@ -10,7 +10,7 @@ function Card({
     <TextClassContext.Provider value="text-card-foreground">
       <View
         className={cn(
-          "bg-card border-border/70 flex flex-col gap-6 rounded-3xl border py-6 shadow-lg shadow-black/5",
+          "bg-card border-border flex flex-col gap-3 rounded-lg border py-3",
           className,
         )}
         {...props}
@@ -24,7 +24,7 @@ function CardHeader({
   ...props
 }: React.ComponentProps<typeof View> & React.RefAttributes<View>) {
   return (
-    <View className={cn("flex flex-col gap-1.5 px-6", className)} {...props} />
+    <View className={cn("flex flex-col gap-1 px-3", className)} {...props} />
   );
 }
 
@@ -60,7 +60,7 @@ function CardContent({
   className,
   ...props
 }: React.ComponentProps<typeof View> & React.RefAttributes<View>) {
-  return <View className={cn("px-6", className)} {...props} />;
+  return <View className={cn("px-3", className)} {...props} />;
 }
 
 function CardFooter({
@@ -69,7 +69,7 @@ function CardFooter({
 }: React.ComponentProps<typeof View> & React.RefAttributes<View>) {
   return (
     <View
-      className={cn("flex flex-row items-center px-6", className)}
+      className={cn("flex flex-row items-center px-3", className)}
       {...props}
     />
   );

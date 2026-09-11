@@ -1,12 +1,12 @@
-import { TextClassContext } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
 import { Slot } from "@rn-primitives/slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Platform, View } from "react-native";
+import { TextClassContext } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
   cn(
-    "border-border group shrink-0 flex-row items-center justify-center gap-1 overflow-hidden rounded-full border px-3 py-1",
+    "border-border group shrink-0 flex-row items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-1",
     Platform.select({
       web: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-fit whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3",
     }),
@@ -26,9 +26,10 @@ const badgeVariants = cva(
           "bg-destructive border-transparent",
           Platform.select({ web: "[a&]:hover:bg-destructive/90" }),
         ),
-        outline: Platform.select({
-          web: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        }),
+        outline: cn(
+          "border-primary bg-transparent",
+          Platform.select({ web: "[a&]:hover:bg-selected" }),
+        ),
       },
     },
     defaultVariants: {
@@ -43,7 +44,7 @@ const badgeTextVariants = cva("text-xs font-medium", {
       default: "text-primary-foreground",
       secondary: "text-secondary-foreground",
       destructive: "text-white",
-      outline: "text-foreground",
+      outline: "text-primary",
     },
   },
   defaultVariants: {
@@ -68,5 +69,5 @@ function Badge({ className, variant, asChild, ...props }: BadgeProps) {
   );
 }
 
-export { Badge, badgeTextVariants, badgeVariants };
 export type { BadgeProps };
+export { Badge, badgeTextVariants, badgeVariants };

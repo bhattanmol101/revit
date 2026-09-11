@@ -8,9 +8,11 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import type { Restaurant } from "@/api/restaurants";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
+import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/hooks/use-theme";
 import { selectionFeedback, successFeedback } from "@/lib/feedback";
 import { routes } from "@/lib/routes";
@@ -164,7 +166,7 @@ export function ShareComposerScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.select({ ios: "padding", default: undefined })}
@@ -206,7 +208,7 @@ export function ShareComposerScreen() {
               </View>
             ) : (
               <>
-                <Input
+                <SearchInput
                   accessibilityLabel="Search restaurants"
                   autoFocus
                   placeholder="Search by name or location"
@@ -224,7 +226,7 @@ export function ShareComposerScreen() {
                 {results.data?.map((item) => (
                   <Button
                     key={item.id}
-                    className="h-auto justify-start rounded-md border border-border px-3 py-2.5"
+                    className="min-h-12 h-auto justify-start border border-border bg-card px-3 py-2"
                     variant="ghost"
                     onPress={() => selectRestaurant(item)}
                   >
@@ -309,14 +311,11 @@ export function ShareComposerScreen() {
                   <Text variant="small">Review (optional)</Text>
                   <Text variant="muted">{body.length}/2000</Text>
                 </View>
-                <Input
+                <Textarea
                   accessibilityLabel="Restaurant review"
-                  className="min-h-28 items-start py-2"
                   editable={!isSaving}
                   maxLength={2000}
-                  multiline
                   placeholder="What did you like, or what should people know?"
-                  textAlignVertical="top"
                   value={body}
                   onChangeText={setBody}
                 />
@@ -389,29 +388,28 @@ export function ShareComposerScreen() {
               {mutationError.message}
             </Text>
           ) : null}
-
-          <View className="gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
-            <Button
-              disabled={isSaving}
-              variant="ghost"
-              onPress={() => router.back()}
-            >
-              <Text>Cancel</Text>
-            </Button>
-            <Button
-              disabled={!canPublish || existingRating.isLoading}
-              onPress={() => void publish()}
-            >
-              <Text>
-                {isSaving
-                  ? "Saving…"
-                  : isUpdating
-                    ? "Update rating"
-                    : "Publish rating"}
-              </Text>
-            </Button>
-          </View>
         </ScrollView>
+        <StickyActionFooter>
+          <Button
+            disabled={isSaving}
+            variant="secondary"
+            onPress={() => router.back()}
+          >
+            <Text>Cancel</Text>
+          </Button>
+          <Button
+            disabled={!canPublish || existingRating.isLoading}
+            onPress={() => void publish()}
+          >
+            <Text>
+              {isSaving
+                ? "Saving…"
+                : isUpdating
+                  ? "Update rating"
+                  : "Publish rating"}
+            </Text>
+          </Button>
+        </StickyActionFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

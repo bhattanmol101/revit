@@ -29,31 +29,29 @@ export function CreateChoiceScreen() {
         </View>
 
         <View className="gap-3 sm:flex-row">
-          <Card className="flex-1 gap-3 rounded-lg border-0 bg-primary py-4 shadow-none">
+          <Card className="flex-1 gap-3 py-3">
             <CardHeader className="gap-3 px-3">
-              <View className="size-10 items-center justify-center rounded-md bg-white/15">
-                <Icon as={MessageCircleQuestion} className="text-white" />
+              <View className="size-9 items-center justify-center rounded-md bg-selected">
+                <Icon as={MessageCircleQuestion} className="text-primary" />
               </View>
-              <CardTitle className="text-xl text-white">
-                Ask for ratings
-              </CardTitle>
-              <CardDescription className="leading-6 text-white/80">
+              <CardTitle className="text-lg">Ask for ratings</CardTitle>
+              <CardDescription className="leading-5">
                 Post a question and let people respond with a 1–5 rating.
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3">
               <Link href={routes.createAsk} asChild>
-                <Button className="w-full bg-white shadow-none">
-                  <Text className="text-primary">Start an Ask</Text>
-                  <Icon as={ArrowRight} className="text-primary" />
+                <Button className="w-full">
+                  <Text>Start an Ask</Text>
+                  <Icon as={ArrowRight} />
                 </Button>
               </Link>
             </CardContent>
           </Card>
 
-          <Card className="flex-1 gap-3 rounded-lg border-0 bg-accent py-4 shadow-none">
+          <Card className="flex-1 gap-3 py-3">
             <CardHeader className="gap-3 px-3">
-              <View className="size-10 items-center justify-center rounded-md bg-card">
+              <View className="size-9 items-center justify-center rounded-md bg-elevated">
                 <Icon as={Star} className="text-rating" />
               </View>
               <CardTitle>Share a restaurant rating</CardTitle>

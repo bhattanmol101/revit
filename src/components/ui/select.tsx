@@ -1,7 +1,3 @@
-import { Icon } from "@/components/ui/icon";
-import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
-import { TextClassContext } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
 import * as SelectPrimitive from "@rn-primitives/select";
 import {
   Check,
@@ -10,9 +6,13 @@ import {
   ChevronUpIcon,
 } from "lucide-react-native";
 import * as React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, View } from "react-native";
 import { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { FullWindowOverlay as RNFullWindowOverlay } from "react-native-screens";
+import { Icon } from "@/components/ui/icon";
+import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
+import { TextClassContext } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 
 type Option = SelectPrimitive.Option;
 
@@ -55,7 +55,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        "border-input dark:bg-input/30 dark:active:bg-input/50 bg-background flex h-10 flex-row items-center justify-between gap-2 rounded-md border px-3 py-2 shadow-sm shadow-black/5 sm:h-9",
+        "border-input bg-card flex h-11 flex-row items-center justify-between gap-2 rounded-lg border px-3 py-2",
         Platform.select({
           web: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:hover:bg-input/50 w-fit whitespace-nowrap text-sm outline-none transition-[color,box-shadow] focus-visible:ring-[3px] disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0",
         }),
@@ -92,7 +92,7 @@ function SelectContent({
     <SelectPrimitive.Portal hostName={portalHost}>
       <FullWindowOverlay>
         <SelectPrimitive.Overlay
-          style={Platform.select({ native: StyleSheet.absoluteFill })}
+          className="absolute inset-0"
           asChild={Platform.OS !== "web"}
         >
           <NativeOnlyAnimatedView
@@ -104,7 +104,7 @@ function SelectContent({
             <TextClassContext.Provider value="text-popover-foreground">
               <SelectPrimitive.Content
                 className={cn(
-                  "bg-popover border-border relative z-50 min-w-[8rem] rounded-md border shadow-md shadow-black/5",
+                  "bg-popover border-border relative z-50 min-w-[8rem] rounded-lg border",
                   Platform.select({
                     web: cn(
                       "animate-in fade-in-0 zoom-in-95 origin-(--radix-select-content-transform-origin) max-h-52 overflow-y-auto overflow-x-hidden",
@@ -256,6 +256,7 @@ function SelectScrollDownButton({
 }
 
 export {
+  type Option,
   Select,
   SelectContent,
   SelectGroup,
@@ -266,5 +267,4 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-  type Option,
 };

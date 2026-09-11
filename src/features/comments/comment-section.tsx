@@ -13,9 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import {
@@ -122,15 +123,12 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       </View>
 
       <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-        <Input
+        <Textarea
           accessibilityLabel="Write a comment"
-          className="min-h-24 items-start py-3"
           editable={!createComment.isPending}
           maxLength={2000}
-          multiline
           onChangeText={setBody}
           placeholder="Add to the conversation…"
-          textAlignVertical="top"
           value={body}
         />
         <View className="flex-row items-center justify-between gap-3">
@@ -149,20 +147,19 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       {comments.isLoading ? <CommentListLoading /> : null}
 
       {comments.isError && items.length === 0 ? (
-        <View className="items-start gap-3 rounded-lg border border-border p-3">
-          <Text className="font-medium">Comments could not be loaded.</Text>
-          <Text variant="muted">Check your connection and try again.</Text>
-          <Button variant="outline" onPress={() => void comments.refetch()}>
-            <Text>Try again</Text>
-          </Button>
-        </View>
+        <FeedbackState
+          actionLabel="Retry"
+          onAction={() => void comments.refetch()}
+          title="Couldn’t load comments."
+          variant="error"
+        />
       ) : null}
 
       {!comments.isLoading && !comments.isError && items.length === 0 ? (
-        <View className="rounded-lg border border-dashed border-border p-3">
-          <Text className="font-medium">No comments yet.</Text>
-          <Text variant="muted">Start the conversation.</Text>
-        </View>
+        <FeedbackState
+          description="Start the conversation."
+          title="No comments yet"
+        />
       ) : null}
 
       {items.length > 0 ? (
@@ -220,15 +217,12 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
             </DialogDescription>
           </DialogHeader>
           <View className="gap-2">
-            <Input
+            <Textarea
               accessibilityLabel="Write a reply"
-              className="min-h-28 items-start py-3"
               editable={!createReply.isPending}
               maxLength={2000}
-              multiline
               onChangeText={setReplyBody}
               placeholder="Write a reply…"
-              textAlignVertical="top"
               value={replyBody}
             />
             <Text className="text-right" variant="muted">
@@ -244,7 +238,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
             <Button
               disabled={createReply.isPending}
               onPress={() => setReplyingTo(null)}
-              variant="ghost"
+              variant="secondary"
             >
               <Text>Cancel</Text>
             </Button>
@@ -265,13 +259,10 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
             <DialogDescription>Update what you wrote.</DialogDescription>
           </DialogHeader>
           <View className="gap-2">
-            <Input
-              className="min-h-28 items-start py-3"
+            <Textarea
               editable={!updateComment.isPending}
               maxLength={2000}
-              multiline
               onChangeText={setEditBody}
-              textAlignVertical="top"
               value={editBody}
             />
             <Text className="text-right" variant="muted">
@@ -287,7 +278,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
             <Button
               disabled={updateComment.isPending}
               onPress={() => setEditing(null)}
-              variant="ghost"
+              variant="secondary"
             >
               <Text>Cancel</Text>
             </Button>
@@ -320,7 +311,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
             <Button
               disabled={deleteComment.isPending}
               onPress={() => setDeleting(null)}
-              variant="ghost"
+              variant="secondary"
             >
               <Text>Cancel</Text>
             </Button>
@@ -407,7 +398,7 @@ function CommentItem({
         <Link href={routes.user(comment.author.username)} asChild>
           <Button
             variant="ghost"
-            className="h-auto min-w-0 flex-1 justify-start gap-3 px-0 py-0"
+            className="min-h-11 h-auto min-w-0 flex-1 justify-start gap-3 px-0 py-0"
           >
             <Avatar
               alt={`${comment.author.display_name}'s avatar`}
@@ -466,8 +457,8 @@ function CommentItem({
 function CommentListLoading() {
   return (
     <View className="gap-3">
-      <Skeleton className="h-28 w-full rounded-xl" />
-      <Skeleton className="h-28 w-full rounded-xl" />
+      <Skeleton className="h-28 w-full rounded-lg" />
+      <Skeleton className="h-28 w-full rounded-lg" />
     </View>
   );
 }

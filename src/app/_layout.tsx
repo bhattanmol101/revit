@@ -8,6 +8,7 @@ import { Uniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
+import { AuthenticatedShell } from "@/components/navigation/authenticated-shell";
 import { Text } from "@/components/ui/text";
 import { Colors } from "@/constants/theme";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
@@ -89,55 +90,60 @@ function RootNavigator() {
   }
 
   return (
-    <Stack>
-      <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="activity" options={{ title: "Activity" }} />
-        <Stack.Screen name="create/ask" options={{ title: "New Ask" }} />
-        <Stack.Screen
-          name="create/share"
-          options={{ title: "Rate a restaurant" }}
-        />
-        <Stack.Screen name="posts/[id]" options={{ title: "Post" }} />
-        <Stack.Screen
-          name="restaurants/[id]"
-          options={{ title: "Restaurant" }}
-        />
-        <Stack.Screen
-          name="restaurants/search"
-          options={{ title: "Find a restaurant" }}
-        />
-        <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
-        <Stack.Screen
-          name="forums/create"
-          options={{ title: "Create forum" }}
-        />
-        <Stack.Screen
-          name="forums/[id]/create"
-          options={{ title: "New forum post" }}
-        />
-        <Stack.Screen name="picks/create" options={{ title: "Create Pick" }} />
-        <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />
-        <Stack.Screen
-          name="users/[username]/index"
-          options={{ title: "Profile" }}
-        />
-        <Stack.Screen
-          name="users/[username]/followers"
-          options={{ title: "Followers" }}
-        />
-        <Stack.Screen
-          name="users/[username]/following"
-          options={{ title: "Following" }}
-        />
-      </Stack.Protected>
+    <AuthenticatedShell enabled={canEnterApp && !isPasswordRecovery}>
+      <Stack>
+        <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="activity" options={{ title: "Activity" }} />
+          <Stack.Screen name="create/ask" options={{ title: "New Ask" }} />
+          <Stack.Screen
+            name="create/share"
+            options={{ title: "Rate a restaurant" }}
+          />
+          <Stack.Screen name="posts/[id]" options={{ title: "Post" }} />
+          <Stack.Screen
+            name="restaurants/[id]"
+            options={{ title: "Restaurant" }}
+          />
+          <Stack.Screen
+            name="restaurants/search"
+            options={{ title: "Find a restaurant" }}
+          />
+          <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
+          <Stack.Screen
+            name="forums/create"
+            options={{ title: "Create forum" }}
+          />
+          <Stack.Screen
+            name="forums/[id]/create"
+            options={{ title: "New forum post" }}
+          />
+          <Stack.Screen
+            name="picks/create"
+            options={{ title: "Create Pick" }}
+          />
+          <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />
+          <Stack.Screen
+            name="users/[username]/index"
+            options={{ title: "Profile" }}
+          />
+          <Stack.Screen
+            name="users/[username]/followers"
+            options={{ title: "Followers" }}
+          />
+          <Stack.Screen
+            name="users/[username]/following"
+            options={{ title: "Following" }}
+          />
+        </Stack.Protected>
 
-      <Stack.Protected
-        guard={!session || needsOnboarding || isPasswordRecovery}
-      >
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected
+          guard={!session || needsOnboarding || isPasswordRecovery}
+        >
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+    </AuthenticatedShell>
   );
 }
 

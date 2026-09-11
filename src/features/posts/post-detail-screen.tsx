@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { CommentSection } from "@/features/comments/comment-section";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
@@ -89,7 +90,7 @@ function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen options={{ title: "Forum share" }} />
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-5 py-6 sm:px-8">
+      <ScrollView contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6">
         <View className="gap-2 rounded-lg border border-border bg-card p-3">
           <Text variant="small" className="text-primary">
             FORUM SHARE
@@ -141,7 +142,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen options={{ title: "Restaurant rating" }} />
       <ScrollView
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-8 px-5 py-6 sm:px-8"
+        contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6"
         refreshControl={
           <RefreshControl
             refreshing={false}
@@ -182,7 +183,7 @@ function AskPostDetail({
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen options={{ title: "Ask" }} />
       <ScrollView
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-8 px-5 py-6 sm:px-8"
+        contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6"
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
@@ -272,12 +273,9 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
             </View>
             <View className="gap-2">
               <Text variant="small">Details (optional)</Text>
-              <Input
-                className="min-h-28 items-start py-3"
+              <Textarea
                 editable={!updatePost.isPending}
                 maxLength={2000}
-                multiline
-                textAlignVertical="top"
                 value={body}
                 onChangeText={setBody}
               />
@@ -296,7 +294,7 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
           <DialogFooter>
             <Button
               disabled={updatePost.isPending}
-              variant="ghost"
+              variant="secondary"
               onPress={() => setIsEditOpen(false)}
             >
               <Text>Cancel</Text>
@@ -326,7 +324,7 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
           <DialogFooter>
             <Button
               disabled={deletePost.isPending}
-              variant="ghost"
+              variant="secondary"
               onPress={() => setIsDeleteOpen(false)}
             >
               <Text>Cancel</Text>

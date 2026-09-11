@@ -97,44 +97,36 @@ export function createForumSharePost(
 export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
   validateAskPost(input);
 
-  return runApiRequest(
-    async (signal) => {
-      const { data: post, error: postError } = await supabase
-        .from("posts")
-        .insert({
-          author_id: input.authorId,
-          body: input.body?.trim() || null,
-          post_type: "ASK",
-          title: input.title.trim(),
+  const postId = crypto.randomUUID();
+  await reservePostImageCleanup(input.authorId, postId, input.images);
+  const uploadedPaths = await uploadPostImages({
+    authorId: input.authorId,
+    images: input.images,
+    postId,
+  });
+
+  try {
+    return await runApiRequest(async (signal) => {
+      const { data, error } = await supabase
+        .rpc("create_ask_post_with_media", {
+          p_body: input.body?.trim() || undefined,
+          p_media_paths: uploadedPaths,
+          p_post_id: postId,
+          p_title: input.title.trim(),
         })
-        .select(
-          "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
-        )
         .abortSignal(signal)
         .single();
 
-      if (postError) {
-        throw normalizeApiError(
-          postError,
-          "We could not create your Ask post.",
-        );
+      if (error) {
+        throw normalizeApiError(error, "We could not create your Ask post.");
       }
 
-      try {
-        await attachPostImages({
-          authorId: input.authorId,
-          images: input.images,
-          postId: post.id,
-          signal,
-        });
-        return post;
-      } catch (error) {
-        await cleanUpFailedPost(post.id, []);
-        throw error;
-      }
-    },
-    { timeoutMs: 60_000 },
-  );
+      return data;
+    });
+  } catch (error) {
+    await removePostImages(uploadedPaths);
+    throw error;
+  }
 }
 
 function createForumPost({
@@ -201,26 +193,14 @@ export async function attachPostImages({
   postId: string;
   signal: AbortSignal;
 }) {
-  const uploadedPaths: string[] = [];
+  const uploadedPaths = await uploadPostImages({
+    authorId,
+    images,
+    postId,
+    signal,
+  });
 
   try {
-    for (const [index, image] of images.entries()) {
-      const storagePath = `${authorId}/${postId}/${index + 1}.${image.extension}`;
-      const { error: uploadError } = await supabase.storage
-        .from(POST_IMAGES_BUCKET)
-        .upload(storagePath, image.data, {
-          cacheControl: "31536000",
-          contentType: image.contentType,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        throw normalizeApiError(uploadError, "An image could not be uploaded.");
-      }
-
-      uploadedPaths.push(storagePath);
-    }
-
     if (uploadedPaths.length === 0) return;
 
     const { error: mediaError } = await supabase
@@ -241,10 +221,73 @@ export async function attachPostImages({
       );
     }
   } catch (error) {
-    if (uploadedPaths.length > 0) {
-      await supabase.storage.from(POST_IMAGES_BUCKET).remove(uploadedPaths);
-    }
+    await removePostImages(uploadedPaths);
     throw error;
+  }
+}
+
+export async function uploadPostImages({
+  authorId,
+  images,
+  postId,
+  signal,
+}: {
+  authorId: string;
+  images: AskImageUpload[];
+  postId: string;
+  signal?: AbortSignal;
+}) {
+  const uploadedPaths: string[] = [];
+
+  try {
+    for (const [index, image] of images.entries()) {
+      signal?.throwIfAborted();
+      const storagePath = `${authorId}/${postId}/${index + 1}.${image.extension}`;
+      const { error } = await supabase.storage
+        .from(POST_IMAGES_BUCKET)
+        .upload(storagePath, image.data, {
+          cacheControl: "31536000",
+          contentType: image.contentType,
+          upsert: false,
+        });
+
+      if (error) {
+        throw normalizeApiError(error, "An image could not be uploaded.");
+      }
+      uploadedPaths.push(storagePath);
+    }
+
+    return uploadedPaths;
+  } catch (error) {
+    await removePostImages(uploadedPaths);
+    throw error;
+  }
+}
+
+export async function reservePostImageCleanup(
+  ownerId: string,
+  postId: string,
+  images: AskImageUpload[],
+) {
+  if (images.length === 0) return;
+  const { error } = await supabase.from("post_image_cleanup").insert(
+    images.map((image, index) => ({
+      owner_id: ownerId,
+      storage_path: `${ownerId}/${postId}/${index + 1}.${image.extension}`,
+    })),
+  );
+  if (error) {
+    throw normalizeApiError(error, "We could not prepare the image upload.");
+  }
+}
+
+export async function removePostImages(storagePaths: string[]) {
+  if (storagePaths.length === 0) return;
+  const { error } = await supabase.storage
+    .from(POST_IMAGES_BUCKET)
+    .remove(storagePaths);
+  if (error) {
+    throw normalizeApiError(error, "We could not clean up post images.");
   }
 }
 
@@ -428,37 +471,49 @@ export function updateAskPost(
 
 export function deletePost(postId: string): Promise<void> {
   return runApiRequest(async (signal) => {
-    const { data: media, error: mediaError } = await supabase
-      .from("post_media")
-      .select("storage_path")
-      .eq("post_id", postId)
+    const { data: storagePaths, error: deleteError } = await supabase
+      .rpc("delete_post_with_cleanup", { p_post_id: postId })
       .abortSignal(signal);
-
-    if (mediaError) {
-      throw normalizeApiError(
-        mediaError,
-        "We could not prepare this post for deletion.",
-      );
-    }
-
-    const { error: deleteError } = await supabase
-      .from("posts")
-      .delete()
-      .eq("id", postId)
-      .select("id")
-      .abortSignal(signal)
-      .single();
 
     if (deleteError) {
       throw normalizeApiError(deleteError, "We could not delete this post.");
     }
 
-    const storagePaths = media.map(({ storage_path }) => storage_path);
-
     if (storagePaths.length > 0) {
-      await supabase.storage.from(POST_IMAGES_BUCKET).remove(storagePaths);
+      await removePostImages(storagePaths);
+      const { error: cleanupError } = await supabase
+        .from("post_image_cleanup")
+        .delete()
+        .in("storage_path", storagePaths)
+        .abortSignal(signal);
+      if (cleanupError) {
+        throw normalizeApiError(cleanupError, "Image cleanup will be retried.");
+      }
     }
   });
+}
+
+export async function cleanUpPendingPostImages(ownerId: string) {
+  const { data, error } = await supabase
+    .from("post_image_cleanup")
+    .select("storage_path")
+    .eq("owner_id", ownerId);
+
+  if (error) {
+    throw normalizeApiError(error, "We could not resume image cleanup.");
+  }
+
+  const storagePaths = data.map((item) => item.storage_path);
+  if (storagePaths.length === 0) return;
+
+  await removePostImages(storagePaths);
+  const { error: cleanupError } = await supabase
+    .from("post_image_cleanup")
+    .delete()
+    .in("storage_path", storagePaths);
+  if (cleanupError) {
+    throw normalizeApiError(cleanupError, "Image cleanup will be retried.");
+  }
 }
 
 async function signPostMedia(

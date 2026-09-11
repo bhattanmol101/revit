@@ -28,19 +28,29 @@ export default function AuthScreen() {
       return;
     }
     setLoading(true);
-    const result =
-      mode === "signIn"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
-    setLoading(false);
-    if (result.error) {
-      setError(result.error.message);
-      return;
-    }
-    if (mode === "signUp" && !result.data.session)
-      setMessage(
-        "Check your email to confirm your account, then return here to sign in.",
+    try {
+      const result =
+        mode === "signIn"
+          ? await supabase.auth.signInWithPassword({ email, password })
+          : await supabase.auth.signUp({ email, password });
+      if (result.error) {
+        setError(result.error.message);
+        return;
+      }
+      if (mode === "signUp" && !result.data.session) {
+        setMessage(
+          "Check your email to confirm your account, then return here to sign in.",
+        );
+      }
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "We couldn’t sign you in. Please try again.",
       );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,6 +66,7 @@ export default function AuthScreen() {
         <View className="gap-2">
           <Text variant="small">Email</Text>
           <Input
+            accessibilityLabel="Email address"
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect={false}
@@ -69,6 +80,7 @@ export default function AuthScreen() {
         <View className="gap-2">
           <Text variant="small">Password</Text>
           <Input
+            accessibilityLabel="Password"
             autoComplete={
               mode === "signIn" ? "current-password" : "new-password"
             }
@@ -79,7 +91,13 @@ export default function AuthScreen() {
           />
         </View>
         {error ? (
-          <Text className="text-sm text-destructive">{error}</Text>
+          <Text
+            accessibilityLiveRegion="polite"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {error}
+          </Text>
         ) : null}
         {message ? (
           <Text className="text-sm text-muted-foreground">{message}</Text>

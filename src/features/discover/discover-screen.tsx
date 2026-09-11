@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { MapPin, Search, UserRound } from "lucide-react-native";
+import { MapPin, UserRound } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
@@ -11,9 +11,10 @@ import type {
 import type { Restaurant } from "@/api/restaurants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useDiscover } from "@/queries/discover";
@@ -37,19 +38,14 @@ export function DiscoverScreen() {
           <Text variant="muted">Find people, posts, and restaurants.</Text>
         </View>
 
-        <View className="flex-row items-center gap-2 rounded-lg border border-border bg-card px-3">
-          <Icon as={Search} className="size-5 text-muted-foreground" />
-          <Input
-            accessibilityLabel="Search Revit"
-            autoCapitalize="none"
-            autoCorrect={false}
-            className="h-11 flex-1 border-0 bg-transparent px-0 shadow-none"
-            placeholder="Search people, posts, or restaurants"
-            returnKeyType="search"
-            value={query}
-            onChangeText={setQuery}
-          />
-        </View>
+        <SearchInput
+          accessibilityLabel="Search Revit"
+          autoCapitalize="none"
+          autoCorrect={false}
+          placeholder="Search people, posts, or restaurants"
+          value={query}
+          onChangeText={setQuery}
+        />
 
         {!hasSearchTerm ? (
           <SearchState
@@ -66,18 +62,12 @@ export function DiscoverScreen() {
         ) : null}
 
         {hasSearchTerm && results.isError ? (
-          <View className="items-start gap-3 rounded-lg border border-destructive/40 bg-card p-3">
-            <Text variant="small" className="text-destructive">
-              {results.error.message}
-            </Text>
-            <Button
-              size="sm"
-              variant="outline"
-              onPress={() => void results.refetch()}
-            >
-              <Text>Try again</Text>
-            </Button>
-          </View>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void results.refetch()}
+            title="Couldn’t load search results."
+            variant="error"
+          />
         ) : null}
 
         {hasSearchTerm && !results.isLoading && !results.isError ? (
@@ -129,7 +119,7 @@ function ProfileResults({ profiles }: { profiles: DiscoveryProfile[] }) {
           asChild
         >
           <Button
-            className="h-auto justify-start gap-3 rounded-md px-2 py-2"
+            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
             variant="ghost"
           >
             <Avatar alt={`${profile.displayName}'s avatar`} className="size-9">
@@ -161,7 +151,7 @@ function PostResults({ posts }: { posts: DiscoveryPost[] }) {
       {posts.map((post) => (
         <Link key={post.id} href={routes.post(post.id)} asChild>
           <Button
-            className="h-auto justify-start gap-3 rounded-md px-2 py-2"
+            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
             variant="ghost"
           >
             <View className="size-9 items-center justify-center rounded-md bg-accent">
@@ -194,7 +184,7 @@ function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
           asChild
         >
           <Button
-            className="h-auto justify-start gap-3 rounded-md px-2 py-2"
+            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
             variant="ghost"
           >
             <View className="size-9 items-center justify-center rounded-md bg-accent">
@@ -228,9 +218,7 @@ function ResultSection({
         <Icon as={UserRound} className="size-4 text-muted-foreground" />
         <Text className="text-base font-semibold">{title}</Text>
       </View>
-      <View className="gap-1 rounded-lg border border-border bg-card p-2 shadow-none">
-        {children}
-      </View>
+      <View className="gap-2">{children}</View>
     </View>
   );
 }
@@ -242,14 +230,7 @@ function SearchState({
   description: string;
   title: string;
 }) {
-  return (
-    <View className="gap-1 rounded-lg border border-border bg-card p-3 shadow-none">
-      <Text className="font-semibold">{title}</Text>
-      <Text variant="muted" className="text-sm leading-5">
-        {description}
-      </Text>
-    </View>
-  );
+  return <FeedbackState description={description} title={title} />;
 }
 
 function getInitials(displayName: string) {

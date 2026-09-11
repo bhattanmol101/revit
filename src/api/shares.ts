@@ -5,9 +5,10 @@ import type {
   PostWithDetails,
 } from "@/api/posts";
 import {
-  attachPostImages,
-  deletePost,
   getSharePostsByEntity,
+  removePostImages,
+  reservePostImageCleanup,
+  uploadPostImages,
 } from "@/api/posts";
 import { supabase } from "@/lib/supabase/client";
 
@@ -167,12 +168,22 @@ export async function createShareRating(
 ): Promise<Post> {
   validateShareRating(input);
 
-  return runApiRequest(
-    async (signal) => {
+  const postId = crypto.randomUUID();
+  await reservePostImageCleanup(input.authorId, postId, input.images);
+  const uploadedPaths = await uploadPostImages({
+    authorId: input.authorId,
+    images: input.images,
+    postId,
+  });
+
+  try {
+    return await runApiRequest(async (signal) => {
       const { data, error } = await supabase
-        .rpc("create_share_rating_post", {
+        .rpc("create_share_rating_post_with_media", {
           p_body: nullIfBlank(input.body),
           p_entity_id: input.entityId,
+          p_media_paths: uploadedPaths,
+          p_post_id: postId,
           p_score: input.score,
         })
         .abortSignal(signal)
@@ -185,27 +196,15 @@ export async function createShareRating(
         );
       }
 
-      const post = data as Post;
-
-      if (!post) {
+      if (!data) {
         throw new Error("We could not publish your restaurant rating.");
       }
-
-      try {
-        await attachPostImages({
-          authorId: input.authorId,
-          images: input.images,
-          postId: post.id,
-          signal,
-        });
-        return post;
-      } catch (uploadError) {
-        await deletePost(post.id).catch(() => undefined);
-        throw uploadError;
-      }
-    },
-    { timeoutMs: 60_000 },
-  );
+      return data as Post;
+    });
+  } catch (error) {
+    await removePostImages(uploadedPaths);
+    throw error;
+  }
 }
 
 export function updateShareRating(

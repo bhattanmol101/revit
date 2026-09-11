@@ -1,13 +1,13 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { Search } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import type { Restaurant } from "@/api/restaurants";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import {
@@ -41,18 +41,13 @@ export function RestaurantSearchScreen() {
           </Text>
         </View>
 
-        <View className="flex-row items-center gap-2 rounded-lg border border-border bg-card px-3">
-          <Icon as={Search} className="size-5 text-muted-foreground" />
-          <Input
-            accessibilityLabel="Search restaurants"
-            autoCapitalize="words"
-            className="h-11 flex-1 border-0 bg-transparent px-0 shadow-none"
-            placeholder="Restaurant name or locality"
-            returnKeyType="search"
-            value={query}
-            onChangeText={setQuery}
-          />
-        </View>
+        <SearchInput
+          accessibilityLabel="Search restaurants"
+          autoCapitalize="words"
+          placeholder="Restaurant name or locality"
+          value={query}
+          onChangeText={setQuery}
+        />
 
         {!hasSearchTerm ? (
           <SearchState
@@ -69,18 +64,12 @@ export function RestaurantSearchScreen() {
         ) : null}
 
         {hasSearchTerm && search.isError ? (
-          <View className="items-start gap-3 rounded-lg border border-destructive/40 bg-card p-3">
-            <Text className="text-destructive" variant="small">
-              {search.error.message}
-            </Text>
-            <Button
-              size="sm"
-              variant="outline"
-              onPress={() => void search.refetch()}
-            >
-              <Text>Try again</Text>
-            </Button>
-          </View>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void search.refetch()}
+            title="Couldn’t load restaurants."
+            variant="error"
+          />
         ) : null}
 
         {hasSearchTerm && !search.isLoading && !search.isError ? (
@@ -186,7 +175,7 @@ function AddRestaurantForm({
 
       <Input
         accessibilityLabel="Restaurant name"
-        className="h-10 rounded-md"
+        className="h-11 rounded-md"
         editable={!createRestaurant.isPending}
         placeholder="Restaurant name"
         value={name}
@@ -194,7 +183,7 @@ function AddRestaurantForm({
       />
       <Input
         accessibilityLabel="Address line 1"
-        className="h-10 rounded-md"
+        className="h-11 rounded-md"
         editable={!createRestaurant.isPending}
         placeholder="Street address"
         value={addressLine1}
@@ -202,7 +191,7 @@ function AddRestaurantForm({
       />
       <Input
         accessibilityLabel="Address line 2"
-        className="h-10 rounded-md"
+        className="h-11 rounded-md"
         editable={!createRestaurant.isPending}
         placeholder="Suite, floor, or landmark (optional)"
         value={addressLine2}
@@ -211,7 +200,7 @@ function AddRestaurantForm({
       <View className="gap-2 sm:flex-row">
         <Input
           accessibilityLabel="Locality"
-          className="h-10 flex-1 rounded-md"
+          className="h-11 flex-1 rounded-md"
           editable={!createRestaurant.isPending}
           placeholder="City or locality"
           value={locality}
@@ -219,7 +208,7 @@ function AddRestaurantForm({
         />
         <Input
           accessibilityLabel="State or region"
-          className="h-10 flex-1 rounded-md"
+          className="h-11 flex-1 rounded-md"
           editable={!createRestaurant.isPending}
           placeholder="State or region (optional)"
           value={administrativeArea}
@@ -230,7 +219,7 @@ function AddRestaurantForm({
         <Input
           accessibilityLabel="Country code"
           autoCapitalize="characters"
-          className="h-10 flex-1 rounded-md"
+          className="h-11 flex-1 rounded-md"
           editable={!createRestaurant.isPending}
           maxLength={2}
           placeholder="Country code"
@@ -239,7 +228,7 @@ function AddRestaurantForm({
         />
         <Input
           accessibilityLabel="Postal code"
-          className="h-10 flex-1 rounded-md"
+          className="h-11 flex-1 rounded-md"
           editable={!createRestaurant.isPending}
           placeholder="Postal code (optional)"
           value={postalCode}
@@ -282,7 +271,7 @@ function RestaurantResult({
   if (returnToShare) {
     return (
       <Button
-        className="h-auto w-full items-start justify-start rounded-lg border border-border bg-card px-3 py-3 shadow-none"
+        className="min-h-12 h-auto w-full items-start justify-start border border-border bg-card px-3 py-2"
         variant="ghost"
         onPress={() =>
           router.replace({
@@ -304,7 +293,7 @@ function RestaurantResult({
   return (
     <Link href={routes.restaurant(restaurant.id)} asChild>
       <Button
-        className="h-auto w-full items-start justify-start rounded-lg border border-border bg-card px-3 py-3 shadow-none"
+        className="min-h-12 h-auto w-full items-start justify-start border border-border bg-card px-3 py-2"
         variant="ghost"
       >
         <View className="min-w-0 flex-1 items-start gap-0.5">
@@ -325,14 +314,7 @@ function SearchState({
   description: string;
   title: string;
 }) {
-  return (
-    <View className="gap-1 rounded-lg border border-border bg-card p-3">
-      <Text className="text-sm font-semibold">{title}</Text>
-      <Text className="text-sm leading-5" variant="muted">
-        {description}
-      </Text>
-    </View>
-  );
+  return <FeedbackState description={description} title={title} />;
 }
 
 function formatRestaurantLocation(restaurant: Restaurant) {

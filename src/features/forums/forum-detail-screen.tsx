@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
@@ -134,28 +135,15 @@ export function ForumDetailScreen() {
           ) : null}
           {posts.isLoading ? <PostsLoadingState /> : null}
           {posts.isError ? (
-            <Card className="gap-3 border-destructive/40 py-3 shadow-none">
-              <CardContent className="gap-3 px-3">
-                <Text className="text-destructive" variant="small">
-                  {posts.error.message}
-                </Text>
-                <Button
-                  className="self-start"
-                  size="sm"
-                  variant="outline"
-                  onPress={() => void posts.refetch()}
-                >
-                  <Text>Try again</Text>
-                </Button>
-              </CardContent>
-            </Card>
+            <FeedbackState
+              actionLabel="Retry"
+              onAction={() => void posts.refetch()}
+              title="Couldn’t load forum posts."
+              variant="error"
+            />
           ) : null}
           {!posts.isLoading && !posts.isError && postItems.length === 0 ? (
-            <Card className="py-4 shadow-none">
-              <CardContent>
-                <Text variant="muted">No forum posts yet.</Text>
-              </CardContent>
-            </Card>
+            <FeedbackState title="No forum posts yet" />
           ) : null}
           {postItems.map((post) => (
             <Link key={post.id} href={routes.post(post.id)} asChild>
@@ -190,7 +178,7 @@ export function ForumDetailScreen() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="ghost" onPress={() => setIsDeleteOpen(false)}>
+            <Button variant="secondary" onPress={() => setIsDeleteOpen(false)}>
               <Text>Cancel</Text>
             </Button>
             <Button

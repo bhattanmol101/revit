@@ -11,10 +11,14 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import type { Restaurant } from "@/api/restaurants";
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
+import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { selectionFeedback, successFeedback } from "@/lib/feedback";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
@@ -138,7 +142,7 @@ export function PickEditorScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6"
@@ -152,8 +156,8 @@ export function PickEditorScreen() {
           </Text>
         </View>
 
-        <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-          <Input
+        <View className="gap-3">
+          <Textarea
             accessibilityLabel="Pick title"
             editable={!isSaving}
             maxLength={100}
@@ -165,7 +169,6 @@ export function PickEditorScreen() {
             accessibilityLabel="Pick description"
             editable={!isSaving}
             maxLength={1000}
-            multiline
             placeholder="A note about this collection (optional)"
             value={description}
             onChangeText={setDescription}
@@ -174,7 +177,7 @@ export function PickEditorScreen() {
 
         <View className="gap-2">
           <Text className="text-sm font-semibold">Restaurants</Text>
-          <Input
+          <SearchInput
             accessibilityLabel="Find a restaurant for this Pick"
             editable={!isSaving}
             placeholder="Search restaurants to add"
@@ -200,7 +203,7 @@ export function PickEditorScreen() {
             return (
               <Button
                 key={restaurant.id}
-                className="h-auto justify-start rounded-md border border-border px-3 py-2.5"
+                className="min-h-12 h-auto justify-start border border-border bg-card px-3 py-2"
                 disabled={isAdded || isSaving}
                 variant="ghost"
                 onPress={() => addRestaurant(restaurant)}
@@ -225,11 +228,10 @@ export function PickEditorScreen() {
         <View className="gap-2">
           <Text className="text-sm font-semibold">Your order</Text>
           {items.length === 0 ? (
-            <View className="rounded-lg border border-dashed border-border px-3 py-4">
-              <Text variant="muted">
-                Add at least one restaurant to continue.
-              </Text>
-            </View>
+            <FeedbackState
+              description="Search above and add at least one restaurant to continue."
+              title="No restaurants added"
+            />
           ) : null}
           {items.map((item, index) => (
             <View
@@ -293,7 +295,8 @@ export function PickEditorScreen() {
             {mutationError.message}
           </Text>
         ) : null}
-
+      </ScrollView>
+      <StickyActionFooter>
         <Button
           disabled={!title.trim() || items.length === 0 || isSaving}
           onPress={save}
@@ -303,7 +306,7 @@ export function PickEditorScreen() {
             {isSaving ? "Saving…" : isEditing ? "Save Pick" : "Publish Pick"}
           </Text>
         </Button>
-      </ScrollView>
+      </StickyActionFooter>
     </SafeAreaView>
   );
 }

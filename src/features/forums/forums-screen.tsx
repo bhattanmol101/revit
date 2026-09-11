@@ -5,6 +5,7 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
@@ -35,35 +36,22 @@ export function ForumsScreen() {
 
         {forums.isLoading ? <LoadingState /> : null}
         {forums.isError ? (
-          <Card className="gap-3 border-destructive/40 py-3 shadow-none">
-            <CardContent className="gap-3 px-3">
-              <Text className="text-destructive" variant="small">
-                {forums.error.message}
-              </Text>
-              <Button
-                className="self-start"
-                size="sm"
-                variant="outline"
-                onPress={() => void forums.refetch()}
-              >
-                <Text>Try again</Text>
-              </Button>
-            </CardContent>
-          </Card>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void forums.refetch()}
+            title="Couldn’t load forums."
+            variant="error"
+          />
         ) : null}
         {!forums.isLoading && !forums.isError && forums.data?.length === 0 ? (
-          <Card className="gap-2 py-4 shadow-none">
-            <CardContent className="gap-2">
-              <Text className="font-semibold">No forums yet</Text>
-              <Text variant="muted">
-                Public forums will appear here as they are opened.
-              </Text>
-            </CardContent>
-          </Card>
+          <FeedbackState
+            description="Public forums will appear here as they are opened."
+            title="No forums yet"
+          />
         ) : null}
         {forums.data?.map((forum) => (
           <Link key={forum.id} href={routes.forum(forum.id)} asChild>
-            <Card className="gap-2 py-3 shadow-none">
+            <Card className="gap-0 overflow-hidden py-0">
               {forum.coverImageUrl ? (
                 <Image
                   accessibilityLabel={`${forum.name} cover image`}
@@ -72,10 +60,10 @@ export function ForumsScreen() {
                   source={forum.coverImageUrl}
                 />
               ) : null}
-              <CardHeader>
+              <CardHeader className="pt-3">
                 <CardTitle>{forum.name}</CardTitle>
               </CardHeader>
-              <CardContent className="gap-2">
+              <CardContent className="gap-2 pb-3">
                 <Text variant="muted">
                   {forum.description?.trim() || "A public discussion forum."}
                 </Text>

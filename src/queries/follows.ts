@@ -107,7 +107,7 @@ export function useFollowToggle(followerId: string, followingId: string) {
           queryKey: queryKeys.follows.following(followerId),
         }),
         queryClient.invalidateQueries({
-          queryKey: queryKeys.feed.home,
+          queryKey: queryKeys.feed.all,
         }),
       ]);
     },

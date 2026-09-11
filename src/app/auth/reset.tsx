@@ -21,18 +21,27 @@ export default function ResetPasswordScreen() {
       return;
     }
     setLoading(true);
-    const { error: requestError } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: Linking.createURL("auth/update-password"),
-      },
-    );
-    setLoading(false);
-    if (requestError) setError(requestError.message);
-    else
+    try {
+      const { error: requestError } = await supabase.auth.resetPasswordForEmail(
+        email,
+        { redirectTo: Linking.createURL("auth/update-password") },
+      );
+      if (requestError) {
+        setError(requestError.message);
+        return;
+      }
       setMessage(
         "If that account exists, reset instructions are on their way.",
       );
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "We couldn’t send reset instructions. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <AuthScreenLayout
@@ -43,6 +52,7 @@ export default function ResetPasswordScreen() {
         <View className="gap-2">
           <Text variant="small">Email</Text>
           <Input
+            accessibilityLabel="Email address"
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect={false}
@@ -54,7 +64,13 @@ export default function ResetPasswordScreen() {
           />
         </View>
         {error ? (
-          <Text className="text-sm text-destructive">{error}</Text>
+          <Text
+            accessibilityLiveRegion="polite"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {error}
+          </Text>
         ) : null}
         {message ? (
           <Text className="text-sm text-muted-foreground">{message}</Text>

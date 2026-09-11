@@ -18,18 +18,18 @@ export function PostEngagementActions({ postId }: { postId: string }) {
   const commentCount = comments.data ?? 0;
 
   return (
-    <View className="flex-1 flex-row items-center gap-4">
-      <View className="flex flex-row gap-2">
+    <View className="flex-1 flex-row items-center gap-3">
+      <View className="flex-row items-center gap-1.5">
         <Icon
           as={Star}
           className={
             rating.isLoading || rating.isError
-              ? "size-5 text-muted-foreground"
-              : "size-5 text-rating"
+              ? "size-4 text-muted-foreground"
+              : "size-4 text-rating"
           }
           fill={averageScore === null ? "none" : theme.rating}
         />
-        <Text className="text-md font-semibold">
+        <Text className="text-[13px] font-medium">
           {rating.isLoading || rating.isError
             ? "—"
             : (averageScore?.toFixed(1) ?? "0.0")}
@@ -42,11 +42,11 @@ export function PostEngagementActions({ postId }: { postId: string }) {
               ? "Comments unavailable"
               : `View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`
           }
-          className="rounded-full py-0 px-2"
+          className="h-8 gap-1.5 px-1.5"
           variant="ghost"
         >
-          <Icon as={MessageCircle} className="size-5 text-foreground" />
-          <Text className="text-md font-semibold">
+          <Icon as={MessageCircle} className="size-4 text-muted-foreground" />
+          <Text className="text-[13px] font-medium text-muted-foreground">
             {comments.isLoading || comments.isError ? "—" : commentCount}
           </Text>
         </Button>
