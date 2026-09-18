@@ -398,7 +398,8 @@ function CommentItem({
         <Link href={routes.user(comment.author.username)} asChild>
           <Button
             variant="ghost"
-            className="min-h-11 h-auto min-w-0 flex-1 justify-start gap-3 px-0 py-0"
+            className="min-w-0 flex-1 gap-3"
+            size="content"
           >
             <Avatar
               alt={`${comment.author.display_name}'s avatar`}

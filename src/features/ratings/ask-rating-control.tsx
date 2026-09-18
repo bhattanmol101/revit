@@ -1,8 +1,9 @@
-import { Star, X } from "lucide-react-native";
+import { ChevronUp, Star } from "lucide-react-native";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/hooks/use-theme";
 import { selectionFeedback } from "@/lib/feedback";
@@ -11,7 +12,12 @@ import { useMyAskRating, useSetMyAskRating } from "@/queries/ratings";
 
 const SCORES = [1, 2, 3, 4, 5] as const;
 
-export function AskRatingControl({ postId }: { postId: string }) {
+type AskRatingControlProps = {
+  postId: string;
+  onClose?: () => void;
+};
+
+export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
   const { user } = useAuth();
   const theme = useTheme();
   const raterId = user?.id ?? "";
@@ -23,72 +29,125 @@ export function AskRatingControl({ postId }: { postId: string }) {
 
   if (rating.error) {
     return (
-      <View className="flex-1 flex-row flex-wrap items-center justify-end gap-2">
-        <Text className="text-xs" variant="muted">
-          Your rating could not be loaded.
-        </Text>
-        <Button
-          onPress={() => void rating.refetch()}
-          className="h-7 px-1.5"
-          variant="link"
-        >
-          <Text className="text-xs">Try again</Text>
-        </Button>
+      <View className="gap-2 border-t border-border bg-elevated px-5 py-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm font-semibold">Your rating</Text>
+          {onClose ? (
+            <Button
+              accessibilityLabel="Collapse rating options"
+              onPress={onClose}
+              size="icon"
+              variant="ghost"
+            >
+              <Icon as={ChevronUp} className="size-4 text-muted-foreground" />
+            </Button>
+          ) : null}
+        </View>
+        <View className="flex-row flex-wrap items-center gap-2">
+          <Text className="text-sm" variant="muted">
+            Your rating could not be loaded.
+          </Text>
+          <Button
+            onPress={() => void rating.refetch()}
+            size="xs"
+            variant="link"
+          >
+            <Text className="text-sm">Try again</Text>
+          </Button>
+        </View>
       </View>
     );
   }
 
   return (
-    <View className="min-w-0 flex-1 items-end justify-center gap-0.5">
-      <View className="flex-row items-center gap-0.5">
-        {SCORES.map((score) => {
-          const isSelected = currentScore === score;
-          const isActive = currentScore !== null && score <= currentScore;
-
-          return (
-            <Button
-              key={score}
-              accessibilityLabel={`Rate ${score} out of 5`}
-              accessibilityState={{ selected: isSelected }}
-              disabled={rating.isLoading || setRating.isPending}
-              hitSlop={8}
-              onPress={() => {
-                selectionFeedback();
-                setRating.mutate(score);
-              }}
-              className="size-6 px-0"
-              variant="ghost"
-            >
-              <Icon
-                as={Star}
-                className={
-                  isActive
-                    ? "size-[18px] text-rating"
-                    : "size-[18px] text-muted-foreground/60"
-                }
-                fill={isActive ? theme.rating : "none"}
-                strokeWidth={isActive ? 2.3 : 1.8}
-              />
-            </Button>
-          );
-        })}
-        {currentScore !== null ? (
+    <View className="gap-2 border-t border-border bg-elevated px-5 py-3">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-sm font-semibold">Your rating</Text>
+        {onClose ? (
           <Button
-            accessibilityLabel="Remove your rating"
-            disabled={setRating.isPending}
-            hitSlop={8}
-            onPress={() => setRating.mutate(null)}
-            className="ml-1 size-6 p-0"
+            accessibilityLabel="Collapse rating options"
+            onPress={onClose}
+            size="icon"
             variant="ghost"
           >
-            <Icon as={X} className="size-4 text-muted-foreground" />
+            <Icon as={ChevronUp} className="size-4 text-muted-foreground" />
           </Button>
         ) : null}
       </View>
 
-      <Text className="text-[11px]" variant="muted">
-        Your rating
-      </Text>
+      <View className="flex-row items-center gap-2">
+        {rating.isLoading ? (
+          <View className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-0.5">
+              {SCORES.map((score) => (
+                <Skeleton
+                  key={score}
+                  className="size-5 rounded-sm bg-secondary"
+                />
+              ))}
+            </View>
+            <Skeleton className="h-4 w-11 rounded-sm bg-secondary" />
+          </View>
+        ) : (
+          <>
+            <View className="min-w-0 flex-row items-center gap-2">
+              <View className="flex-row items-center gap-0.5">
+                {SCORES.map((score) => {
+                  const isSelected = currentScore === score;
+                  const isActive =
+                    currentScore !== null && score <= currentScore;
+
+                  return (
+                    <Button
+                      key={score}
+                      accessibilityLabel={`Rate ${score} out of 5`}
+                      accessibilityState={{ selected: isSelected }}
+                      disabled={setRating.isPending}
+                      hitSlop={8}
+                      onPress={() => {
+                        selectionFeedback();
+                        setRating.mutate(score);
+                      }}
+                      size="rating"
+                      variant="ghost"
+                    >
+                      <Icon
+                        as={Star}
+                        className={
+                          isActive
+                            ? "size-5 text-rating"
+                            : "size-5 text-muted-foreground/60"
+                        }
+                        fill={isActive ? theme.rating : "none"}
+                        strokeWidth={isActive ? 2.3 : 1.8}
+                      />
+                    </Button>
+                  );
+                })}
+              </View>
+              <Text className="text-sm font-medium" variant="muted">
+                {currentScore === null ? "Not rated" : `${currentScore}/5`}
+              </Text>
+            </View>
+
+            {currentScore !== null ? (
+              <Button
+                accessibilityLabel="Clear your rating"
+                disabled={setRating.isPending}
+                onPress={() => {
+                  selectionFeedback();
+                  setRating.mutate(null);
+                }}
+                className="ml-auto"
+                size="xs"
+                variant="link"
+              >
+                <Text className="text-xs text-primary">Clear rating</Text>
+              </Button>
+            ) : null}
+          </>
+        )}
+      </View>
 
       {setRating.error ? (
         <Text className="text-xs text-destructive">

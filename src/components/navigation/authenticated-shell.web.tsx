@@ -87,12 +87,12 @@ export function AuthenticatedShell({
                 className="flex-1 items-center justify-center gap-1"
               >
                 <Icon
-                  className={active ? "text-primary" : "text-muted-foreground"}
+                  className={active ? "text-primary dark:text-foreground" : "text-muted-foreground"}
                   size={18}
                   strokeWidth={2.2}
                 />
                 <Text
-                  className={`text-[10px] ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}
+                    className={`text-[10px] ${active ? "font-semibold text-primary dark:text-foreground" : "text-muted-foreground"}`}
                 >
                   {title}
                 </Text>
@@ -124,12 +124,12 @@ function NavigationItem({
         className={`mb-1 h-10 flex-row items-center gap-3 rounded-md px-3 active:bg-selected ${active ? "bg-selected" : ""}`}
       >
         <Icon
-          className={active ? "text-primary" : "text-muted-foreground"}
+          className={active ? "text-primary dark:text-foreground" : "text-muted-foreground"}
           size={16}
           strokeWidth={2}
         />
         <Text
-          className={`text-sm ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}
+          className={`text-sm ${active ? "font-semibold text-primary dark:text-foreground" : "text-muted-foreground"}`}
         >
           {title}
         </Text>

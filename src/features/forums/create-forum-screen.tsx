@@ -1,15 +1,15 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import { ImagePlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
-
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
-import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
@@ -54,99 +54,137 @@ export function CreateForumScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={[]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6">
-        <View className="gap-1">
-          <Text variant="h1" className="text-left text-2xl">
-            Create forum
-          </Text>
-          <Text variant="muted">You become the owner and first member.</Text>
-        </View>
-        <Input
-          accessibilityLabel="Forum name"
-          editable={!createForum.isPending}
-          maxLength={100}
-          placeholder="Forum name"
-          value={name}
-          onChangeText={setName}
-        />
-        <View className="gap-2">
-          <Text variant="small">Cover image (optional)</Text>
-          <Button
-            className="self-start"
-            variant="outline"
-            onPress={() =>
-              void (async () => {
-                if (Platform.OS !== "web") {
-                  const permission =
-                    await ImagePicker.requestMediaLibraryPermissionsAsync();
-                  if (!permission.granted) return;
-                }
-                const result = await ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ["images"],
-                  quality: 0.85,
-                });
-                if (!result.canceled) setCover(result.assets[0]);
-              })()
-            }
-          >
-            <Icon as={ImagePlus} />
-            <Text>{cover ? "Change cover image" : "Add cover image"}</Text>
-          </Button>
-          {cover ? (
-            <View className="relative">
-              <Image
-                accessibilityLabel="Selected forum cover"
-                className="h-36 w-full rounded-lg bg-muted"
-                contentFit="cover"
-                source={cover.uri}
-              />
-              <Button
-                accessibilityLabel="Remove cover image"
-                className="absolute right-2 top-2 bg-background/90"
-                size="icon"
-                variant="outline"
-                onPress={() => setCover(null)}
-              >
-                <Icon as={X} />
-              </Button>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              leading="close"
+              onLeadingPress={() => router.replace(routes.forums)}
+              title="Forums"
+              titleAlign="center"
+              trailing={
+                <Button
+                  disabled={!canSubmit}
+                  size="sm"
+                  onPress={() => void submit()}
+                >
+                  <Text>{createForum.isPending ? "Creating…" : "Create"}</Text>
+                </Button>
+              }
+            />
+          ),
+        }}
+      />
+      <ScrollView contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6">
+        <Card className="gap-6 border-border bg-card p-6 shadow-none">
+          <View className="gap-2 py-1">
+            <Text variant="h1" className="text-left">
+              Create forum
+            </Text>
+            <Text variant="muted" className="leading-5">
+              You become the owner and first member.
+            </Text>
+          </View>
+
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Forum name</Text>
+              <Text variant="muted">{name.length}/100</Text>
             </View>
+            <Input
+              accessibilityLabel="Forum name"
+              editable={!createForum.isPending}
+              maxLength={100}
+              placeholder="Give your forum a clear name"
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
+          <View className="gap-3">
+            <Text variant="small">Cover image (optional)</Text>
+            <Button
+              className="self-start"
+              disabled={createForum.isPending}
+              variant="outline"
+              onPress={() =>
+                void (async () => {
+                  if (Platform.OS !== "web") {
+                    const permission =
+                      await ImagePicker.requestMediaLibraryPermissionsAsync();
+                    if (!permission.granted) return;
+                  }
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ["images"],
+                    quality: 0.85,
+                  });
+                  if (!result.canceled) setCover(result.assets[0]);
+                })()
+              }
+            >
+              <Icon as={ImagePlus} />
+              <Text>{cover ? "Change cover image" : "Add cover image"}</Text>
+            </Button>
+            {cover ? (
+              <View className="relative">
+                <Image
+                  accessibilityLabel="Selected forum cover"
+                  className="h-36 w-full rounded-md bg-muted"
+                  contentFit="cover"
+                  source={cover.uri}
+                />
+                <Button
+                  accessibilityLabel="Remove cover image"
+                  className="absolute right-2 top-2 rounded-md bg-background/90"
+                  disabled={createForum.isPending}
+                  size="icon"
+                  variant="outline"
+                  onPress={() => setCover(null)}
+                >
+                  <Icon as={X} />
+                </Button>
+              </View>
+            ) : null}
+          </View>
+
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Details (optional)</Text>
+              <Text variant="muted">{description.length}/1000</Text>
+            </View>
+            <Textarea
+              accessibilityLabel="Forum description"
+              editable={!createForum.isPending}
+              maxLength={1000}
+              placeholder="What is this forum for?"
+              value={description}
+              onChangeText={setDescription}
+            />
+          </View>
+
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Rules (optional)</Text>
+              <Text variant="muted">{rules.length}/2000</Text>
+            </View>
+            <Textarea
+              accessibilityLabel="Forum rules"
+              editable={!createForum.isPending}
+              maxLength={2000}
+              placeholder="Add rules for members."
+              value={rules}
+              onChangeText={setRules}
+            />
+          </View>
+
+          {createForum.isError ? (
+            <Text className="text-destructive" variant="small">
+              {createForum.error.message}
+            </Text>
           ) : null}
-        </View>
-        <Textarea
-          accessibilityLabel="Forum description"
-          editable={!createForum.isPending}
-          maxLength={1000}
-          placeholder="What is this forum for? (optional)"
-          value={description}
-          onChangeText={setDescription}
-        />
-        <Textarea
-          accessibilityLabel="Forum rules"
-          editable={!createForum.isPending}
-          maxLength={2000}
-          placeholder="Rules (optional)"
-          value={rules}
-          onChangeText={setRules}
-        />
-        {createForum.isError ? (
-          <Text className="text-destructive" variant="small">
-            {createForum.error.message}
-          </Text>
-        ) : null}
+        </Card>
       </ScrollView>
-      <StickyActionFooter>
-        <Button
-          disabled={createForum.isPending}
-          variant="secondary"
-          onPress={() => router.back()}
-        >
-          <Text>Cancel</Text>
-        </Button>
-        <Button disabled={!canSubmit} onPress={() => void submit()}>
-          <Text>{createForum.isPending ? "Creating…" : "Create forum"}</Text>
-        </Button>
-      </StickyActionFooter>
     </SafeAreaView>
   );
 }

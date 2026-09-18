@@ -1,10 +1,12 @@
+import { NavigationBar } from "expo-navigation-bar";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Uniwind } from "uniwind";
+import { Uniwind, useUniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
@@ -23,8 +25,8 @@ SplashScreen.preventAutoHideAsync();
 Uniwind.setTheme("system");
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
   const navigationTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -39,6 +41,10 @@ export default function TabLayout() {
     },
   };
 
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(colors.background);
+  }, [colors.background]);
+
   return (
     <>
       <SafeAreaProvider>
@@ -52,6 +58,7 @@ export default function TabLayout() {
       </SafeAreaProvider>
 
       <StatusBar style={isDark ? "light" : "dark"} />
+      <NavigationBar style={isDark ? "light" : "dark"} />
       <PortalHost />
     </>
   );
@@ -94,46 +101,37 @@ function RootNavigator() {
       <Stack>
         <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="activity" options={{ title: "Activity" }} />
-          <Stack.Screen name="create/ask" options={{ title: "New Ask" }} />
-          <Stack.Screen
-            name="create/share"
-            options={{ title: "Rate a restaurant" }}
-          />
-          <Stack.Screen name="posts/[id]" options={{ title: "Post" }} />
+          <Stack.Screen name="activity" options={{ headerShown: true }} />
+          <Stack.Screen name="create/ask" options={{ headerShown: true }} />
+          <Stack.Screen name="create/share" options={{ headerShown: true }} />
+          <Stack.Screen name="posts/[id]" options={{ headerShown: true }} />
           <Stack.Screen
             name="restaurants/[id]"
-            options={{ title: "Restaurant" }}
+            options={{ headerShown: true }}
           />
           <Stack.Screen
             name="restaurants/search"
-            options={{ title: "Find a restaurant" }}
+            options={{ headerShown: true }}
           />
-          <Stack.Screen name="forums/[id]" options={{ title: "Forum" }} />
-          <Stack.Screen
-            name="forums/create"
-            options={{ title: "Create forum" }}
-          />
+          <Stack.Screen name="forums/[id]" options={{ headerShown: true }} />
+          <Stack.Screen name="forums/create" options={{ headerShown: true }} />
           <Stack.Screen
             name="forums/[id]/create"
-            options={{ title: "New forum post" }}
+            options={{ headerShown: true }}
           />
-          <Stack.Screen
-            name="picks/create"
-            options={{ title: "Create Pick" }}
-          />
-          <Stack.Screen name="picks/[id]" options={{ title: "Pick" }} />
+          <Stack.Screen name="picks/create" options={{ headerShown: true }} />
+          <Stack.Screen name="picks/[id]" options={{ headerShown: true }} />
           <Stack.Screen
             name="users/[username]/index"
-            options={{ title: "Profile" }}
+            options={{ headerShown: true }}
           />
           <Stack.Screen
             name="users/[username]/followers"
-            options={{ title: "Followers" }}
+            options={{ headerShown: true }}
           />
           <Stack.Screen
             name="users/[username]/following"
-            options={{ title: "Following" }}
+            options={{ headerShown: true }}
           />
         </Stack.Protected>
 

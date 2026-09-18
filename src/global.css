@@ -38,45 +38,46 @@
 }
 
 :root {
-    --background: 220 23% 97%;
-    --foreground: 218 18% 9%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
     --card: 0 0% 100%;
     --card-foreground: 218 18% 9%;
     --popover: 0 0% 100%;
     --popover-foreground: 218 18% 9%;
-    --primary: 221 83% 53%;
+    --primary: 225 58% 46%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 216 100% 96%;
-    --secondary-foreground: 218 18% 9%;
-    --muted: 216 22% 95%;
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 220 20% 96%;
     --muted-foreground: 220 9% 42%;
-    --accent: 216 100% 96%;
-    --accent-foreground: 221 83% 53%;
+    --accent: 220 20% 96%;
+    --accent-foreground: 225 58% 46%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 17% 87%;
-    --input: 220 17% 87%;
-    --ring: 221 83% 53%;
-    --rating: 43 100% 43%;
-    --rating-foreground: 218 18% 9%;
+    --border: 220 14% 86%;
+    --input: 220 14% 86%;
+    --ring: 225 58% 46%;
+    --rating: 225 58% 46%;
+    --rating-foreground: 0 0% 100%;
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
     --warning: 32 95% 44%;
     --warning-foreground: 218 18% 9%;
     --disabled: 219 9% 64%;
-    --selected: 216 100% 96%;
-    --elevated: 216 22% 95%;
-    --scrim: 218 18% 9%;
+    --selected: 220 20% 96%;
+    --elevated: 220 20% 96%;
+    --scrim: 0 0% 5%;
 }
 
-.dark:root {
+:root {
+  &:where(.dark) {
     --background: 225 18% 4%;
     --foreground: 216 33% 97%;
     --card: 223 17% 8%;
     --card-foreground: 216 33% 97%;
     --popover: 223 18% 11%;
     --popover-foreground: 216 33% 97%;
-    --primary: 217 91% 60%;
+    --primary: 225 58% 46%;
     --primary-foreground: 0 0% 100%;
     --secondary: 215 33% 16%;
     --secondary-foreground: 216 33% 97%;
@@ -88,8 +89,8 @@
     --destructive-foreground: 0 0% 98%;
     --border: 222 14% 19%;
     --input: 222 14% 19%;
-    --ring: 217 91% 60%;
-    --rating: 44 99% 48%;
+    --ring: 225 66% 64%;
+    --rating: 225 66% 64%;
     --rating-foreground: 225 18% 4%;
     --success: 142 71% 45%;
     --success-foreground: 225 18% 4%;
@@ -99,4 +100,5 @@
     --selected: 215 33% 16%;
     --elevated: 223 18% 11%;
     --scrim: 0 0% 0%;
+  }
 }

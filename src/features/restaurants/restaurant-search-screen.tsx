@@ -3,6 +3,7 @@ import { useDeferredValue, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import type { Restaurant } from "@/api/restaurants";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
@@ -25,15 +26,34 @@ export function RestaurantSearchScreen() {
   const restaurants = search.data ?? [];
   const [isAddingRestaurant, setIsAddingRestaurant] = useState(false);
 
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(returnToShare ? routes.createShare : routes.create);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <Stack.Screen options={{ title: "Find a restaurant" }} />
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title={returnToShare ? "Create" : "Restaurants"}
+              onBack={goBack}
+            />
+          ),
+        }}
+      />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-4 px-3 py-4 sm:px-6"
+        contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
       >
         <View className="gap-1">
-          <Text variant="h1" className="text-left text-2xl">
+          <Text variant="h1" className="text-left">
             Find a restaurant
           </Text>
           <Text className="text-sm" variant="muted">
@@ -175,7 +195,7 @@ function AddRestaurantForm({
 
       <Input
         accessibilityLabel="Restaurant name"
-        className="h-11 rounded-md"
+        size="compact"
         editable={!createRestaurant.isPending}
         placeholder="Restaurant name"
         value={name}
@@ -183,7 +203,7 @@ function AddRestaurantForm({
       />
       <Input
         accessibilityLabel="Address line 1"
-        className="h-11 rounded-md"
+        size="compact"
         editable={!createRestaurant.isPending}
         placeholder="Street address"
         value={addressLine1}
@@ -191,7 +211,7 @@ function AddRestaurantForm({
       />
       <Input
         accessibilityLabel="Address line 2"
-        className="h-11 rounded-md"
+        size="compact"
         editable={!createRestaurant.isPending}
         placeholder="Suite, floor, or landmark (optional)"
         value={addressLine2}
@@ -200,7 +220,8 @@ function AddRestaurantForm({
       <View className="gap-2 sm:flex-row">
         <Input
           accessibilityLabel="Locality"
-          className="h-11 flex-1 rounded-md"
+          className="flex-1"
+          size="compact"
           editable={!createRestaurant.isPending}
           placeholder="City or locality"
           value={locality}
@@ -208,7 +229,8 @@ function AddRestaurantForm({
         />
         <Input
           accessibilityLabel="State or region"
-          className="h-11 flex-1 rounded-md"
+          className="flex-1"
+          size="compact"
           editable={!createRestaurant.isPending}
           placeholder="State or region (optional)"
           value={administrativeArea}
@@ -219,7 +241,8 @@ function AddRestaurantForm({
         <Input
           accessibilityLabel="Country code"
           autoCapitalize="characters"
-          className="h-11 flex-1 rounded-md"
+          className="flex-1"
+          size="compact"
           editable={!createRestaurant.isPending}
           maxLength={2}
           placeholder="Country code"
@@ -228,7 +251,8 @@ function AddRestaurantForm({
         />
         <Input
           accessibilityLabel="Postal code"
-          className="h-11 flex-1 rounded-md"
+          className="flex-1"
+          size="compact"
           editable={!createRestaurant.isPending}
           placeholder="Postal code (optional)"
           value={postalCode}
@@ -271,7 +295,8 @@ function RestaurantResult({
   if (returnToShare) {
     return (
       <Button
-        className="min-h-12 h-auto w-full items-start justify-start border border-border bg-card px-3 py-2"
+        className="w-full items-start border border-border bg-card"
+        size="content"
         variant="ghost"
         onPress={() =>
           router.replace({
@@ -293,7 +318,8 @@ function RestaurantResult({
   return (
     <Link href={routes.restaurant(restaurant.id)} asChild>
       <Button
-        className="min-h-12 h-auto w-full items-start justify-start border border-border bg-card px-3 py-2"
+        className="w-full items-start border border-border bg-card"
+        size="content"
         variant="ghost"
       >
         <View className="min-w-0 flex-1 items-start gap-0.5">

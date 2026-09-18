@@ -3,6 +3,7 @@ import { useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,7 +41,7 @@ export function PostDetailScreen() {
 
   if (post.isError) {
     return (
-      <ProfileMessageScreen
+      <PostDetailMessage
         title="Post unavailable"
         description="We couldn’t load this post. Check your connection and try again."
         action={() => void post.refetch()}
@@ -50,7 +51,7 @@ export function PostDetailScreen() {
 
   if (!post.data) {
     return (
-      <ProfileMessageScreen
+      <PostDetailMessage
         title="Post not found"
         description="This post may have been removed or is no longer available."
       />
@@ -74,34 +75,51 @@ export function PostDetailScreen() {
 
 function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
   const restaurant = useRestaurant(post.entity_id ?? "");
+  const ratingScore = useShareRatingScore(post.id);
   const comments = useTopLevelComments(post.id);
 
-  if (restaurant.isLoading) return <PostDetailLoading />;
-  if (restaurant.isError || !restaurant.data) {
+  if (restaurant.isLoading || ratingScore.isLoading)
+    return <PostDetailLoading />;
+  if (restaurant.isError || ratingScore.isError || !restaurant.data) {
     return (
-      <ProfileMessageScreen
+      <PostDetailMessage
         title="Share post unavailable"
         description="We couldn’t load this restaurant."
-        action={() => void restaurant.refetch()}
+        action={() =>
+          void Promise.all([restaurant.refetch(), ratingScore.refetch()])
+        }
+      />
+    );
+  }
+
+  if (ratingScore.data === null || ratingScore.data === undefined) {
+    return (
+      <PostDetailMessage
+        title="Share post unavailable"
+        description="This restaurant rating may have been removed or is no longer available."
       />
     );
   }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <Stack.Screen options={{ title: "Forum share" }} />
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6">
-        <View className="gap-2 rounded-lg border border-border bg-card p-3">
-          <Text variant="small" className="text-primary">
-            FORUM SHARE
-          </Text>
-          <Text variant="h2">{restaurant.data.name}</Text>
-          <Text variant="muted">{restaurant.data.locality}</Text>
-          {post.body ? <Text>{post.body}</Text> : null}
-          <Text variant="muted" className="text-xs">
-            This post does not affect the restaurant’s global rating.
-          </Text>
-        </View>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Post"
+              onBack={goBackFromPost}
+            />
+          ),
+        }}
+      />
+      <ScrollView contentContainerClassName="w-full gap-4 md:mx-auto md:max-w-3xl md:gap-6 md:px-6 md:py-6">
+        <SharePostCard
+          isDetail
+          post={{ ...post, ratingScore: ratingScore.data }}
+          restaurant={restaurant.data}
+        />
         <CommentSection comments={comments} postId={post.id} />
       </ScrollView>
     </SafeAreaView>
@@ -119,7 +137,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
 
   if (restaurant.isError || ratingScore.isError) {
     return (
-      <ProfileMessageScreen
+      <PostDetailMessage
         title="Share post unavailable"
         description="We couldn’t load this restaurant rating. Check your connection and try again."
         action={() =>
@@ -131,7 +149,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
 
   if (!restaurant.data || score === null || score === undefined) {
     return (
-      <ProfileMessageScreen
+      <PostDetailMessage
         title="Share post unavailable"
         description="This restaurant rating may have been removed or is no longer available."
       />
@@ -140,9 +158,19 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <Stack.Screen options={{ title: "Restaurant rating" }} />
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Post"
+              onBack={goBackFromPost}
+            />
+          ),
+        }}
+      />
       <ScrollView
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6"
+        contentContainerClassName="w-full gap-4 md:mx-auto md:max-w-3xl md:gap-6 md:px-6 md:py-6"
         refreshControl={
           <RefreshControl
             refreshing={false}
@@ -157,6 +185,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
         }
       >
         <SharePostCard
+          isDetail
           post={{ ...post, ratingScore: score }}
           restaurant={restaurant.data}
         />
@@ -181,9 +210,19 @@ function AskPostDetail({
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <Stack.Screen options={{ title: "Ask" }} />
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Post"
+              onBack={goBackFromPost}
+            />
+          ),
+        }}
+      />
       <ScrollView
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-5 px-3 py-4 sm:px-6"
+        contentContainerClassName="w-full gap-4 md:mx-auto md:max-w-3xl md:gap-6 md:px-6 md:py-6"
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
@@ -348,11 +387,62 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 function PostDetailLoading() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <View className="mx-auto w-full max-w-3xl gap-5 px-5 py-6 sm:px-8">
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Post"
+              onBack={goBackFromPost}
+            />
+          ),
+        }}
+      />
+      <View className="w-full gap-5 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6">
         <Skeleton className="h-14 w-full" />
         <Skeleton className="h-8 w-4/5" />
         <Skeleton className="h-52 w-full" />
       </View>
     </SafeAreaView>
   );
+}
+
+function PostDetailMessage({
+  action,
+  description,
+  title,
+}: {
+  action?: () => void;
+  description: string;
+  title: string;
+}) {
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Post"
+              onBack={goBackFromPost}
+            />
+          ),
+        }}
+      />
+      <ProfileMessageScreen
+        action={action}
+        description={description}
+        title={title}
+      />
+    </SafeAreaView>
+  );
+}
+
+function goBackFromPost() {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+
+  router.replace(routes.home);
 }

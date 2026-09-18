@@ -41,18 +41,21 @@ const buttonVariants = cva(
       },
       size: {
         default: cn(
-          "h-11 px-4 py-2.5",
+          "min-h-12 px-4 py-2.5",
           Platform.select({ web: "has-[>svg]:px-4" }),
         ),
         sm: cn(
-          "h-11 gap-1.5 rounded-md px-3",
-          Platform.select({ web: "h-9 has-[>svg]:px-2.5" }),
+          "min-h-11 gap-1.5 rounded-md px-3 py-2",
+          Platform.select({ web: "has-[>svg]:px-2.5" }),
         ),
+        xs: "min-h-11 gap-1.5 rounded-md px-2 py-1.5",
         lg: cn(
-          "h-12 rounded-lg px-5",
+          "min-h-12 rounded-lg px-5 py-2.5",
           Platform.select({ web: "has-[>svg]:px-5" }),
         ),
-        icon: "size-11",
+        icon: "min-h-11 min-w-11 p-2.5",
+        rating: "min-h-11 min-w-8 px-1 py-2",
+        content: "min-h-12 h-auto justify-start px-3 py-2",
       },
     },
     defaultVariants: {
@@ -72,11 +75,11 @@ const buttonTextVariants = cva(
       variant: {
         default: "text-primary-foreground",
         destructive: "text-white",
-        outline: "text-primary",
+        outline: "text-primary dark:text-foreground",
         secondary: "text-foreground",
-        ghost: "text-primary",
+        ghost: "text-primary dark:text-foreground",
         link: cn(
-          "text-primary group-active:underline",
+          "text-primary dark:text-foreground group-active:underline",
           Platform.select({
             web: "underline-offset-4 hover:underline group-hover:underline",
           }),
@@ -85,8 +88,11 @@ const buttonTextVariants = cva(
       size: {
         default: "",
         sm: "",
+        xs: "text-xs leading-4",
         lg: "",
         icon: "",
+        rating: "",
+        content: "",
       },
     },
     defaultVariants: {

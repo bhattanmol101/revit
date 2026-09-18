@@ -44,6 +44,7 @@ export function getCommentCount(postId: string): Promise<number> {
 export function getTopLevelComments(
   postId: string,
   offset = 0,
+  pageSize = COMMENT_PAGE_SIZE,
 ): Promise<CommentPage> {
   return runApiRequest(
     async (signal) => {
@@ -53,9 +54,9 @@ export function getTopLevelComments(
           .select(COMMENT_SELECT)
           .eq("post_id", postId)
           .is("parent_id", null)
-          .order("created_at", { ascending: true })
-          .order("id", { ascending: true })
-          .range(offset, offset + COMMENT_PAGE_SIZE)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: false })
+          .range(offset, offset + pageSize)
           .abortSignal(signal),
         supabase
           .from("comments")
@@ -78,8 +79,8 @@ export function getTopLevelComments(
         );
       }
 
-      const hasNextPage = topLevelResult.data.length > COMMENT_PAGE_SIZE;
-      const topLevelComments = topLevelResult.data.slice(0, COMMENT_PAGE_SIZE);
+      const hasNextPage = topLevelResult.data.length > pageSize;
+      const topLevelComments = topLevelResult.data.slice(0, pageSize);
       const parentIds = topLevelComments.map((comment) => comment.id);
       let replies: CommentWithAuthor[] = [];
 
@@ -88,8 +89,8 @@ export function getTopLevelComments(
           .from("comments")
           .select(COMMENT_SELECT)
           .in("parent_id", parentIds)
-          .order("created_at", { ascending: true })
-          .order("id", { ascending: true })
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: false })
           .abortSignal(signal);
 
         if (error) {
@@ -104,7 +105,7 @@ export function getTopLevelComments(
           ...comment,
           replies: replies.filter((reply) => reply.parent_id === comment.id),
         })),
-        nextOffset: hasNextPage ? offset + COMMENT_PAGE_SIZE : undefined,
+        nextOffset: hasNextPage ? offset + pageSize : undefined,
         totalCount: countResult.count ?? 0,
       };
     },

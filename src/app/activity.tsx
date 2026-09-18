@@ -1,9 +1,12 @@
-import { Link } from "expo-router";
+import { Link, router, Stack } from "expo-router";
 import { useEffect } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { View } from "react-native";
 
 import type { ActivityNotification } from "@/api/notifications";
+import { AppHeader } from "@/components/navigation/app-header";
+import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -27,11 +30,27 @@ export default function ActivityScreen() {
     if (hasUnread && !markReadPending) markReadNow();
   }, [hasUnread, markReadNow, markReadPending]);
 
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(routes.home);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-3 py-4 sm:px-6">
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader showAccountActions title="Activity" onBack={goBack} />
+          ),
+        }}
+      />
+      <PageScrollView contentContainerClassName="gap-5" contentWidth="narrow">
         <View className="gap-1 pb-1">
-          <Text variant="h1" className="text-left text-2xl">
+          <Text variant="h1" className="text-left">
             Activity
           </Text>
           <Text variant="muted">Your latest social activity.</Text>
@@ -51,7 +70,7 @@ export default function ActivityScreen() {
         {notifications.data?.map((notification) => (
           <ActivityItem key={notification.id} notification={notification} />
         ))}
-      </ScrollView>
+      </PageScrollView>
     </SafeAreaView>
   );
 }
@@ -78,7 +97,11 @@ function ActivityItem({
 
   return (
     <Link href={destination} asChild>
-      <Pressable className="min-h-12 flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 active:bg-selected">
+      <Button
+        className="w-full items-center gap-3 border border-border bg-card"
+        size="content"
+        variant="ghost"
+      >
         <View className="size-8 items-center justify-center rounded-full bg-selected">
           <Text className="font-bold text-primary">
             {notification.actor.display_name.slice(0, 1).toUpperCase()}
@@ -98,7 +121,7 @@ function ActivityItem({
         {notification.read_at === null ? (
           <View className="mt-2 size-2 rounded-full bg-primary" />
         ) : null}
-      </Pressable>
+      </Button>
     </Link>
   );
 }

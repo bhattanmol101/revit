@@ -1,17 +1,18 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ImagePlus, X } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 import type { Post } from "@/api/posts";
 import type { Restaurant } from "@/api/restaurants";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
-import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
@@ -121,160 +122,194 @@ export function ForumPostComposerScreen() {
     } catch {}
   };
 
+  const closeComposer = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(routes.forum(id));
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={[]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              leading="close"
+              onLeadingPress={closeComposer}
+              title="Forums"
+              titleAlign="center"
+              trailing={
+                <Button
+                  disabled={!canPublish}
+                  size="sm"
+                  onPress={() => void publish()}
+                >
+                  <Text>{isSaving ? "Publishing…" : "Publish"}</Text>
+                </Button>
+              }
+            />
+          ),
+        }}
+      />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6"
+        contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
       >
-        <View className="gap-1">
-          <Text variant="h1" className="text-left text-2xl">
-            New forum post
-          </Text>
-          <Text variant="muted">
-            Posts stay inside this forum and never enter Home.
-          </Text>
-        </View>
-        <View className="flex-row gap-2">
-          <Button
-            className="flex-1"
-            variant={type === "ASK" ? "default" : "outline"}
-            onPress={() => setType("ASK")}
-          >
-            <Text>Ask</Text>
-          </Button>
-          <Button
-            className="flex-1"
-            variant={type === "SHARE" ? "default" : "outline"}
-            onPress={() => setType("SHARE")}
-          >
-            <Text>Share</Text>
-          </Button>
-        </View>
-        {type === "ASK" ? (
-          <Input
-            accessibilityLabel="Ask title"
-            editable={!isSaving}
-            maxLength={120}
-            placeholder="What would you like people to rate?"
-            value={title}
-            onChangeText={setTitle}
-          />
-        ) : (
-          <View className="gap-2">
-            {restaurant ? (
-              <Button variant="outline" onPress={() => setRestaurant(null)}>
-                <Text>{restaurant.name} · Change</Text>
-              </Button>
-            ) : (
-              <>
-                <SearchInput
-                  accessibilityLabel="Search restaurants"
-                  placeholder="Search restaurant"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-                {results.data?.map((item) => (
-                  <Button
-                    key={item.id}
-                    className="min-h-12 h-auto justify-start border border-border bg-card px-3 py-2"
-                    variant="outline"
-                    onPress={() => {
-                      setRestaurant(item);
-                      setSearch("");
-                    }}
-                  >
-                    <Text>
-                      {item.name} · {item.locality}
-                    </Text>
-                  </Button>
-                ))}
-              </>
-            )}
+        <Card className="gap-6 border-border bg-card p-6 shadow-none">
+          <View className="gap-2 py-1">
+            <Text variant="h1" className="text-left">
+              New forum post
+            </Text>
+            <Text variant="muted">
+              Posts stay inside this forum and never enter Home.
+            </Text>
           </View>
-        )}
-        <Textarea
-          accessibilityLabel="Post details"
-          editable={!isSaving}
-          maxLength={2000}
-          placeholder="Add context (optional)"
-          value={body}
-          onChangeText={setBody}
-        />
-        <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-          <View className="flex-row items-center justify-between">
-            <Text variant="small">Images (optional)</Text>
-            <Text variant="muted">{images.length}/3</Text>
+          <View className="flex-row gap-2">
+            <Button
+              className="flex-1"
+              variant={type === "ASK" ? "default" : "outline"}
+              onPress={() => setType("ASK")}
+            >
+              <Text>Ask</Text>
+            </Button>
+            <Button
+              className="flex-1"
+              variant={type === "SHARE" ? "default" : "outline"}
+              onPress={() => setType("SHARE")}
+            >
+              <Text>Share</Text>
+            </Button>
           </View>
-          {images.length > 0 ? (
-            <View className="gap-3 sm:flex-row">
-              {images.map((image, index) => (
-                <View key={image.uri} className="relative flex-1">
-                  <Image
-                    accessibilityLabel={`Selected image ${index + 1}`}
-                    className="h-32 w-full rounded-md bg-muted sm:h-36"
-                    contentFit="cover"
-                    source={image.uri}
-                  />
-                  <Button
-                    accessibilityLabel={`Remove image ${index + 1}`}
-                    className="absolute right-2 top-2 rounded-md bg-background/90"
-                    disabled={isSaving}
-                    size="icon"
-                    variant="outline"
-                    onPress={() =>
-                      setImages((current) =>
-                        current.filter(
-                          (candidate) => candidate.uri !== image.uri,
-                        ),
-                      )
-                    }
-                  >
-                    <Icon as={X} />
-                  </Button>
-                </View>
-              ))}
+          {type === "ASK" ? (
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text variant="small">Title</Text>
+                <Text variant="muted">{title.length}/120</Text>
+              </View>
+              <Input
+                accessibilityLabel="Ask title"
+                editable={!isSaving}
+                maxLength={120}
+                placeholder="What would you like people to rate?"
+                value={title}
+                onChangeText={setTitle}
+              />
             </View>
-          ) : null}
-          <Button
-            className="self-start"
-            disabled={images.length >= 3 || isSaving || isPicking}
-            variant="outline"
-            onPress={() => void pickImages()}
-          >
-            <Icon as={ImagePlus} />
-            <Text>{isPicking ? "Opening library…" : "Add images"}</Text>
-          </Button>
-          {pickerError ? (
-            <Text className="text-destructive" variant="small">
-              {pickerError}
+          ) : (
+            <View className="gap-2">
+              <Text variant="small">Restaurant</Text>
+              {restaurant ? (
+                <Button variant="outline" onPress={() => setRestaurant(null)}>
+                  <Text>{restaurant.name} · Change</Text>
+                </Button>
+              ) : (
+                <>
+                  <SearchInput
+                    accessibilityLabel="Search restaurants"
+                    placeholder="Search restaurant"
+                    value={search}
+                    onChangeText={setSearch}
+                  />
+                  {results.data?.map((item) => (
+                    <Button
+                      key={item.id}
+                      className="border border-border bg-card"
+                      size="content"
+                      variant="outline"
+                      onPress={() => {
+                        setRestaurant(item);
+                        setSearch("");
+                      }}
+                    >
+                      <Text>
+                        {item.name} · {item.locality}
+                      </Text>
+                    </Button>
+                  ))}
+                </>
+              )}
+            </View>
+          )}
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Details (optional)</Text>
+              <Text variant="muted">{body.length}/2000</Text>
+            </View>
+            <Textarea
+              accessibilityLabel="Post details"
+              editable={!isSaving}
+              maxLength={2000}
+              placeholder="Add context that will help people respond."
+              value={body}
+              onChangeText={setBody}
+            />
+          </View>
+          <View className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Images (optional)</Text>
+              <Text variant="muted">{images.length}/3</Text>
+            </View>
+            {images.length > 0 ? (
+              <View className="gap-3 sm:flex-row">
+                {images.map((image, index) => (
+                  <View key={image.uri} className="relative flex-1">
+                    <Image
+                      accessibilityLabel={`Selected image ${index + 1}`}
+                      className="h-32 w-full rounded-md bg-muted sm:h-36"
+                      contentFit="cover"
+                      source={image.uri}
+                    />
+                    <Button
+                      accessibilityLabel={`Remove image ${index + 1}`}
+                      className="absolute right-2 top-2 rounded-md bg-background/90"
+                      disabled={isSaving}
+                      size="icon"
+                      variant="outline"
+                      onPress={() =>
+                        setImages((current) =>
+                          current.filter(
+                            (candidate) => candidate.uri !== image.uri,
+                          ),
+                        )
+                      }
+                    >
+                      <Icon as={X} />
+                    </Button>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            <Button
+              className="self-start"
+              disabled={images.length >= 3 || isSaving || isPicking}
+              variant="outline"
+              onPress={() => void pickImages()}
+            >
+              <Icon as={ImagePlus} />
+              <Text>{isPicking ? "Opening library…" : "Add images"}</Text>
+            </Button>
+            {pickerError ? (
+              <Text className="text-destructive" variant="small">
+                {pickerError}
+              </Text>
+            ) : null}
+          </View>
+          {type === "SHARE" ? (
+            <Text variant="muted" className="text-xs">
+              Forum Shares are discussion posts only; they do not change the
+              restaurant’s global rating.
             </Text>
           ) : null}
-        </View>
-        {type === "SHARE" ? (
-          <Text variant="muted" className="text-xs">
-            Forum Shares are discussion posts only; they do not change the
-            restaurant’s global rating.
-          </Text>
-        ) : null}
-        {error ? (
-          <Text className="text-destructive" variant="small">
-            {error.message}
-          </Text>
-        ) : null}
+          {error ? (
+            <Text className="text-destructive" variant="small">
+              {error.message}
+            </Text>
+          ) : null}
+        </Card>
       </ScrollView>
-      <StickyActionFooter>
-        <Button
-          disabled={isSaving}
-          variant="secondary"
-          onPress={() => router.back()}
-        >
-          <Text>Cancel</Text>
-        </Button>
-        <Button disabled={!canPublish} onPress={() => void publish()}>
-          <Text>{isSaving ? "Publishing…" : "Publish"}</Text>
-        </Button>
-      </StickyActionFooter>
     </SafeAreaView>
   );
 }

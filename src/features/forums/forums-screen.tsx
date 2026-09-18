@@ -1,12 +1,13 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
+import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -16,11 +17,11 @@ export function ForumsScreen() {
   const forums = useForums();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-3xl gap-4 px-3 py-4 sm:px-6">
+    <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
+      <PageScrollView contentContainerClassName="gap-6">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1 gap-1">
-            <Text variant="h1" className="text-left text-2xl">
+            <Text variant="h1" className="text-left">
               Forums
             </Text>
             <Text variant="muted">
@@ -45,6 +46,7 @@ export function ForumsScreen() {
         ) : null}
         {!forums.isLoading && !forums.isError && forums.data?.length === 0 ? (
           <FeedbackState
+            className="min-h-0 self-stretch px-5 py-3"
             description="Public forums will appear here as they are opened."
             title="No forums yet"
           />
@@ -78,7 +80,7 @@ export function ForumsScreen() {
             </Card>
           </Link>
         ))}
-      </ScrollView>
+      </PageScrollView>
     </SafeAreaView>
   );
 }

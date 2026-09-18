@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
+import { InlineCommentDrawer } from "@/features/comments/inline-comment-drawer";
 import { AskRatingControl } from "@/features/ratings/ask-rating-control";
 import { routes } from "@/lib/routes";
 
@@ -19,13 +21,19 @@ type AskPostCardProps = {
 };
 
 export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
+  const [expandedDrawer, setExpandedDrawer] = useState<
+    "comments" | "rating" | null
+  >(null);
+  const isRatingExpanded = expandedDrawer === "rating";
+  const isCommentsExpanded = expandedDrawer === "comments";
+
   return (
-    <Card className="gap-0 overflow-hidden pb-0 pt-0">
-      <CardHeader className="gap-3 px-3 pb-3 pt-3">
+    <Card className="gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
+      <CardHeader className="gap-4 px-5 pb-4 pt-5">
         <View className="flex-row items-start justify-between gap-3">
           <Avatar
             alt={`${post.author.display_name}'s avatar`}
-            className="size-8"
+            className="size-9"
           >
             {post.author.avatar_url ? (
               <AvatarImage
@@ -58,14 +66,16 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
             </Link>
           </View>
 
-          <Badge className="px-2 py-0.5" variant="outline">
-            <Text className="text-[11px] font-medium">ASK</Text>
+          <Badge className="rounded-full px-2.5 py-1" variant="default">
+            <Text className="text-[11px] font-semibold">ASK</Text>
           </Badge>
         </View>
 
-        <CardTitle className="text-lg leading-6">{post.title}</CardTitle>
+        <CardTitle className="text-lg leading-6">
+          {post.title}
+        </CardTitle>
         {post.body ? (
-          <Text className="text-[13px] leading-5" variant="muted">
+          <Text className="text-sm leading-5" variant="muted">
             {post.body}
           </Text>
         ) : null}
@@ -74,11 +84,35 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
       <CardContent className="gap-0 px-0">
         <PostMediaGallery isDetail={isDetail} media={post.media} />
         <Separator />
-        <View className="min-h-14 flex-row items-stretch px-3 py-2">
-          <PostEngagementActions postId={post.id} />
-          <Separator className="mx-3 h-10 self-center" orientation="vertical" />
-          <AskRatingControl postId={post.id} />
+        <View className="min-h-14 flex-row items-center px-5 py-2">
+          <PostEngagementActions
+            commentsExpanded={!isDetail && isCommentsExpanded}
+            onCommentPress={
+              isDetail
+                ? undefined
+                : () =>
+                    setExpandedDrawer((drawer) =>
+                      drawer === "comments" ? null : "comments",
+                    )
+            }
+            onRatingPress={() =>
+              setExpandedDrawer((drawer) =>
+                drawer === "rating" ? null : "rating",
+              )
+            }
+            postId={post.id}
+            ratingExpanded={isRatingExpanded}
+          />
         </View>
+        {isRatingExpanded ? (
+          <AskRatingControl
+            onClose={() => setExpandedDrawer(null)}
+            postId={post.id}
+          />
+        ) : null}
+        {!isDetail && isCommentsExpanded ? (
+          <InlineCommentDrawer postId={post.id} />
+        ) : null}
       </CardContent>
     </Card>
   );

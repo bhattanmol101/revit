@@ -1,6 +1,5 @@
-import { Link, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import {
-  Bell,
   Bookmark,
   Compass,
   House,
@@ -9,18 +8,17 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react-native";
-import { type ColorValue, Pressable, View } from "react-native";
+import { type ColorValue, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUniwind } from "uniwind";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Text } from "@/components/ui/text";
+import { AppHeader } from "@/components/navigation/app-header";
 import { useTheme } from "@/hooks/use-theme";
-import { routes } from "@/lib/routes";
-import { useAuth } from "@/providers/auth-provider";
-import { useUnreadNotificationCount } from "@/queries/notifications";
 
 export default function MainTabs() {
   const theme = useTheme();
+  const { theme: themeName } = useUniwind();
+  const isDark = themeName === "dark";
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 8);
 
@@ -28,15 +26,9 @@ export default function MainTabs() {
     <Tabs
       screenOptions={{
         headerShown: true,
-        headerRight: HeaderActions,
+        header: () => <AppHeader showAccountActions title="Revit" />,
         headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: theme.backgroundElement,
-        },
-        headerTintColor: theme.text,
-        headerTitle: "Revit",
-        headerTitleStyle: { fontSize: 20, fontWeight: "700" },
-        tabBarActiveTintColor: theme.primary,
+        tabBarActiveTintColor: isDark ? theme.text : theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginTop: 2 },
         tabBarStyle: {
@@ -84,49 +76,6 @@ export default function MainTabs() {
         }}
       />
     </Tabs>
-  );
-}
-
-function HeaderActions() {
-  const theme = useTheme();
-  const { profile, user } = useAuth();
-  const unread = useUnreadNotificationCount(user?.id);
-  const initials = (profile?.display_name ?? "You")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
-  return (
-    <View className="mr-3 flex-row items-center gap-2">
-      <Link href={routes.activity} asChild>
-        <Pressable
-          accessibilityLabel="Open activity"
-          className="relative size-11 items-center justify-center rounded-md border border-border bg-card active:bg-selected"
-        >
-          <Bell color={theme.text} size={16} strokeWidth={2} />
-          {(unread.data ?? 0) > 0 ? (
-            <View className="absolute right-1 top-1 size-1.5 rounded-full bg-primary" />
-          ) : null}
-        </Pressable>
-      </Link>
-      <Link href={routes.profile} asChild>
-        <Pressable
-          accessibilityLabel="Open profile"
-          className="size-11 items-center justify-center"
-        >
-          <Avatar alt="Your profile" className="size-8 border border-border">
-            {profile?.avatar_url ? (
-              <AvatarImage source={{ uri: profile.avatar_url }} />
-            ) : null}
-            <AvatarFallback>
-              <Text className="text-[11px] font-semibold">{initials}</Text>
-            </AvatarFallback>
-          </Avatar>
-        </Pressable>
-      </Link>
-    </View>
   );
 }
 

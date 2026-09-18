@@ -44,7 +44,7 @@ const badgeTextVariants = cva("text-xs font-medium", {
       default: "text-primary-foreground",
       secondary: "text-secondary-foreground",
       destructive: "text-white",
-      outline: "text-primary",
+      outline: "text-primary dark:text-foreground",
     },
   },
   defaultVariants: {

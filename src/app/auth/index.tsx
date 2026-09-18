@@ -102,6 +102,13 @@ export default function AuthScreen() {
         {message ? (
           <Text className="text-sm text-muted-foreground">{message}</Text>
         ) : null}
+        {mode === "signIn" ? (
+          <Link href={"/auth/reset" as Href} asChild>
+            <Button className="self-end" size="xs" variant="link">
+              <Text className="text-xs">Forgot password?</Text>
+            </Button>
+          </Link>
+        ) : null}
         <Button disabled={loading} onPress={submit}>
           <Text>
             {loading
@@ -111,13 +118,6 @@ export default function AuthScreen() {
                 : "Create account"}
           </Text>
         </Button>
-        {mode === "signIn" ? (
-          <Link href={"/auth/reset" as Href} asChild>
-            <Button variant="link">
-              <Text>Forgot password?</Text>
-            </Button>
-          </Link>
-        ) : null}
         <Button
           disabled={loading}
           onPress={() => {

@@ -16,11 +16,11 @@ const textVariants = cva(
       variant: {
         default: "",
         h1: cn(
-          "text-[28px] font-bold leading-9 tracking-[-0.02em]",
+          "text-[24px] font-bold leading-[30px] tracking-[-0.02em]",
           Platform.select({ web: "scroll-m-20 text-balance" }),
         ),
         h2: cn(
-          "text-2xl font-semibold leading-8 tracking-[-0.02em]",
+          "text-[18px] font-semibold leading-6 tracking-[-0.02em]",
           Platform.select({ web: "scroll-m-20 first:mt-0" }),
         ),
         h3: cn(

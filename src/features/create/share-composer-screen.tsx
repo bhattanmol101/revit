@@ -1,16 +1,16 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { ImagePlus, MapPin, Star, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 
 import type { Restaurant } from "@/api/restaurants";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
-import { StickyActionFooter } from "@/components/ui/sticky-action-footer";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/hooks/use-theme";
@@ -80,6 +80,15 @@ export function ShareComposerScreen() {
   const clearRestaurant = () => {
     setRestaurant(null);
     router.setParams({ restaurantId: undefined });
+  };
+
+  const closeComposer = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(routes.create);
   };
 
   const pickImages = async () => {
@@ -166,17 +175,40 @@ export function ShareComposerScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={[]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              leading="close"
+              onLeadingPress={closeComposer}
+              title="Create post"
+              titleAlign="center"
+              trailing={
+                <Button
+                  disabled={!canPublish || existingRating.isLoading}
+                  size="sm"
+                  onPress={() => void publish()}
+                >
+                  <Text>
+                    {isSaving ? "Saving…" : isUpdating ? "Update" : "Publish"}
+                  </Text>
+                </Button>
+              }
+            />
+          ),
+        }}
+      />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.select({ ios: "padding", default: undefined })}
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6"
+          contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
           <View className="gap-2 py-1">
-            <Text variant="h1" className="text-left text-2xl">
+            <Text variant="h1" className="text-left">
               Rate a restaurant
             </Text>
             <Text variant="muted" className="leading-5">
@@ -188,9 +220,10 @@ export function ShareComposerScreen() {
           <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
             <Text variant="small">Restaurant</Text>
             {restaurant ? (
-              <View className="flex-row items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3">
-                <View className="min-w-0 flex-1 gap-1">
-                  <Text className="truncate font-medium">
+              <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
+                <Icon as={MapPin} className="size-5 text-primary" />
+                <View className="min-w-0 flex-1 gap-0.5">
+                  <Text className="truncate text-base font-semibold">
                     {restaurant.name}
                   </Text>
                   <Text variant="muted" className="truncate text-xs">
@@ -199,11 +232,12 @@ export function ShareComposerScreen() {
                 </View>
                 <Button
                   disabled={isSaving}
-                  size="sm"
+                  className="shrink-0"
+                  size="xs"
                   variant="ghost"
                   onPress={clearRestaurant}
                 >
-                  <Text>Change</Text>
+                  <Text className="text-sm text-primary">Change</Text>
                 </Button>
               </View>
             ) : (
@@ -226,7 +260,8 @@ export function ShareComposerScreen() {
                 {results.data?.map((item) => (
                   <Button
                     key={item.id}
-                    className="min-h-12 h-auto justify-start border border-border bg-card px-3 py-2"
+                    className="border border-border bg-card"
+                    size="content"
                     variant="ghost"
                     onPress={() => selectRestaurant(item)}
                   >
@@ -275,33 +310,54 @@ export function ShareComposerScreen() {
                     <Text variant="muted">Loading…</Text>
                   ) : null}
                 </View>
-                <View className="flex-row items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((value) => {
-                    const selected = score !== null && value <= score;
-                    return (
-                      <Button
-                        key={value}
-                        accessibilityLabel={`${value} star${value === 1 ? "" : "s"}`}
-                        className="size-10 rounded-md"
-                        disabled={isSaving || existingRating.isLoading}
-                        size="icon"
-                        variant="ghost"
-                        onPress={() => {
-                          selectionFeedback();
-                          setScore(value);
-                        }}
-                      >
-                        <Star
-                          color={selected ? theme.rating : theme.textSecondary}
-                          fill={selected ? theme.rating : "transparent"}
-                          size={25}
-                          strokeWidth={2}
-                        />
-                      </Button>
-                    );
-                  })}
-                  {score ? (
-                    <Text className="ml-2 font-medium">{score}.0</Text>
+                <View className="flex-row items-center justify-between gap-3">
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-row items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((value) => {
+                        const selected = score !== null && value <= score;
+                        return (
+                          <Button
+                            key={value}
+                            accessibilityLabel={`Rate ${value} out of 5`}
+                            accessibilityState={{ selected: score === value }}
+                            disabled={isSaving || existingRating.isLoading}
+                            size="rating"
+                            variant="ghost"
+                            onPress={() => {
+                              selectionFeedback();
+                              setScore(value);
+                            }}
+                          >
+                            <Star
+                              color={
+                                selected ? theme.rating : theme.textSecondary
+                              }
+                              fill={selected ? theme.rating : "transparent"}
+                              size={25}
+                              strokeWidth={2}
+                            />
+                          </Button>
+                        );
+                      })}
+                    </View>
+                    <Text className="text-sm font-medium" variant="muted">
+                      {score === null ? "Not rated" : `${score} of 5`}
+                    </Text>
+                  </View>
+                  {score !== null ? (
+                    <Button
+                      accessibilityLabel="Clear your restaurant rating"
+                      className="shrink-0"
+                      size="xs"
+                      disabled={isSaving || existingRating.isLoading}
+                      variant="link"
+                      onPress={() => {
+                        selectionFeedback();
+                        setScore(null);
+                      }}
+                    >
+                      <Text className="text-sm text-primary">Clear rating</Text>
+                    </Button>
                   ) : null}
                 </View>
               </View>
@@ -389,27 +445,6 @@ export function ShareComposerScreen() {
             </Text>
           ) : null}
         </ScrollView>
-        <StickyActionFooter>
-          <Button
-            disabled={isSaving}
-            variant="secondary"
-            onPress={() => router.back()}
-          >
-            <Text>Cancel</Text>
-          </Button>
-          <Button
-            disabled={!canPublish || existingRating.isLoading}
-            onPress={() => void publish()}
-          >
-            <Text>
-              {isSaving
-                ? "Saving…"
-                : isUpdating
-                  ? "Update rating"
-                  : "Publish rating"}
-            </Text>
-          </Button>
-        </StickyActionFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

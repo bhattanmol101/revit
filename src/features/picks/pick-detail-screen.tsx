@@ -1,8 +1,8 @@
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Edit3, MapPin, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
-
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -26,20 +26,37 @@ export function PickDetailScreen() {
   const pick = usePersonalPick(id);
   const deletePick = useDeletePersonalPick(id, user?.id ?? "");
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
 
-  if (pick.isLoading) return <PickLoadingState />;
+    router.replace(routes.picks);
+  };
+
+  if (pick.isLoading) return <PickLoadingState onBack={goBack} />;
   const personalPick = pick.data;
   if (pick.isError || !personalPick)
-    return <PickMissingState description={pick.error?.message} />;
+    return (
+      <PickMissingState description={pick.error?.message} onBack={goBack} />
+    );
 
   const isOwner = personalPick.author_id === user?.id;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6">
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader showAccountActions title="Picks" onBack={goBack} />
+          ),
+        }}
+      />
+      <ScrollView contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
         <View className="gap-2">
           <View className="flex-row items-start justify-between gap-3">
-            <Text variant="h1" className="min-w-0 flex-1 text-left text-2xl">
+            <Text variant="h1" className="min-w-0 flex-1 text-left">
               {personalPick.title}
             </Text>
             {isOwner ? (
@@ -133,31 +150,49 @@ export function PickDetailScreen() {
   );
 }
 
-function PickLoadingState() {
+function PickLoadingState({ onBack }: { onBack: () => void }) {
   return (
-    <SafeAreaView
-      className="flex-1 items-center justify-center gap-2 bg-background"
-      edges={["bottom"]}
-    >
-      <ActivityIndicator />
-      <Text variant="muted">Loading Pick…</Text>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader showAccountActions title="Picks" onBack={onBack} />
+          ),
+        }}
+      />
+      <View className="flex-1 items-center justify-center gap-2">
+        <ActivityIndicator />
+        <Text variant="muted">Loading Pick…</Text>
+      </View>
     </SafeAreaView>
   );
 }
 
-function PickMissingState({ description }: { description?: string }) {
+function PickMissingState({
+  description,
+  onBack,
+}: {
+  description?: string;
+  onBack: () => void;
+}) {
   return (
-    <SafeAreaView
-      className="flex-1 items-center justify-center gap-2 bg-background px-6"
-      edges={["bottom"]}
-    >
-      <Text variant="h2">Pick unavailable</Text>
-      <Text variant="muted" className="text-center">
-        {description ?? "This Pick may have been deleted."}
-      </Text>
-      <Button variant="outline" onPress={() => router.back()}>
-        <Text>Go back</Text>
-      </Button>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader showAccountActions title="Picks" onBack={onBack} />
+          ),
+        }}
+      />
+      <View className="flex-1 items-center justify-center gap-2 px-6">
+        <Text variant="h2">Pick unavailable</Text>
+        <Text variant="muted" className="text-center">
+          {description ?? "This Pick may have been deleted."}
+        </Text>
+        <Button variant="outline" onPress={onBack}>
+          <Text>Go back</Text>
+        </Button>
+      </View>
     </SafeAreaView>
   );
 }

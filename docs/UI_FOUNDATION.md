@@ -6,10 +6,10 @@ The product uses a confident social-editorial visual system. New work must exten
 
 - `background` is the cool page canvas.
 - `card` is the primary elevated content surface.
-- `primary` is the cobalt-blue brand/action color.
-- `secondary` is the soft blue supporting surface for prompts and social actions.
-- `accent` is the lavender supporting surface for discovery and positive context.
-- `rating` is reserved for scores and stars.
+- `primary` is the softened royal-blue brand/action color (`#3158B8`).
+- `secondary` is a neutral supporting surface for prompts and social actions.
+- `accent` is a restrained blue supporting surface for discovery and positive context.
+- `rating` uses the blue rating token and always includes a numeric/text alternative.
 - `success` and `destructive` communicate outcomes, not decoration.
 - Light and dark themes must provide equivalent hierarchy and contrast.
 
@@ -20,8 +20,8 @@ The product uses a confident social-editorial visual system. New work must exten
   for avatars, status dots, and compact count badges only.
 - Use cards for meaningful grouped content, not every section.
 - Keep primary reading columns narrow while allowing expressive hero areas to be wider.
-- Default to 12px mobile gutters, 12px surface padding, 8px section gaps, and
-  16px only where content groups need separation.
+- Default to 24px mobile gutters, 12px surface padding, 8px label/control gaps,
+  and 24px between major sections.
 - Mobile touch targets must be at least 44 points tall.
 
 ## Implementation rules
@@ -34,12 +34,13 @@ The product uses a confident social-editorial visual system. New work must exten
 - Motion must be brief, respect reduced-motion settings, and never delay interaction.
 - Haptics are limited to meaningful native actions and must not be required for understanding an interaction.
 - New screens must be reviewed on mobile and desktop web in system light and dark modes.
-- Ask post presentation is the reference implementation for density and must not
-  be changed while applying this foundation to other screens.
+- Ask, Share, and forum creation screens use the approved compact editorial
+  layouts as density references. Keep headings restrained and leave deliberate
+  breathing room around form sections and sticky actions.
 
 ## Social content rules
 
 - Author identity, content, and actions must have a clear reading order.
-- Ratings use the amber `rating` token and always include a numeric/text alternative.
+- Ratings use the blue `rating` token and always include a numeric/text alternative.
 - Replies are visually subordinate to their parent without becoming nested cards inside cards.
 - Destructive actions require confirmation and remain visually distinct from primary actions.

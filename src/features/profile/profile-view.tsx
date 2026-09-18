@@ -62,7 +62,7 @@ export function ProfileView({
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-4xl gap-5 px-3 py-4 sm:px-6"
+        contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
         refreshControl={
           <RefreshControl
             refreshing={
@@ -92,7 +92,7 @@ export function ProfileView({
 
           <View className="min-w-0 flex-1 gap-2">
             <View className="gap-1">
-              <Text variant="h1" className="text-left text-2xl">
+              <Text variant="h1" className="text-left">
                 {profile.display_name}
               </Text>
               <Text variant="muted" className="text-sm">
@@ -299,7 +299,8 @@ function FollowCounts({
       <Link href={routes.followers(username)} asChild>
         <Button
           variant="secondary"
-          className="h-auto min-w-28 items-start rounded-md px-3 py-2.5"
+          className="min-w-28 items-start"
+          size="content"
         >
           <Count label="Followers" value={followers} isLoading={isLoading} />
         </Button>
@@ -307,7 +308,8 @@ function FollowCounts({
       <Link href={routes.following(username)} asChild>
         <Button
           variant="secondary"
-          className="h-auto min-w-28 items-start rounded-md px-3 py-2.5"
+          className="min-w-28 items-start"
+          size="content"
         >
           <Count label="Following" value={following} isLoading={isLoading} />
         </Button>

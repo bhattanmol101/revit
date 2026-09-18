@@ -17,10 +17,10 @@ import { routes } from "@/lib/routes";
 
 export function CreateChoiceScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-4xl gap-5 px-3 py-4 sm:px-6">
+    <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
+      <ScrollView contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-3xl md:px-6 md:pb-12 md:pt-6">
         <View className="gap-2 py-1">
-          <Text variant="h1" className="text-left text-2xl">
+          <Text variant="h1" className="text-left">
             Share your taste
           </Text>
           <Text variant="muted" className="text-base leading-6">
@@ -28,18 +28,18 @@ export function CreateChoiceScreen() {
           </Text>
         </View>
 
-        <View className="gap-3 sm:flex-row">
-          <Card className="flex-1 gap-3 py-3">
-            <CardHeader className="gap-3 px-3">
+        <View className="items-stretch gap-4 sm:flex-row">
+          <Card className="min-h-56 flex-1 justify-between gap-5 p-5">
+            <CardHeader className="gap-3 px-0">
               <View className="size-9 items-center justify-center rounded-md bg-selected">
                 <Icon as={MessageCircleQuestion} className="text-primary" />
               </View>
               <CardTitle className="text-lg">Ask for ratings</CardTitle>
-              <CardDescription className="leading-5">
+              <CardDescription className="min-h-10 leading-5">
                 Post a question and let people respond with a 1–5 rating.
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-3">
+            <CardContent className="px-0">
               <Link href={routes.createAsk} asChild>
                 <Button className="w-full">
                   <Text>Start an Ask</Text>
@@ -49,17 +49,17 @@ export function CreateChoiceScreen() {
             </CardContent>
           </Card>
 
-          <Card className="flex-1 gap-3 py-3">
-            <CardHeader className="gap-3 px-3">
+          <Card className="min-h-56 flex-1 justify-between gap-5 p-5">
+            <CardHeader className="gap-3 px-0">
               <View className="size-9 items-center justify-center rounded-md bg-elevated">
                 <Icon as={Star} className="text-rating" />
               </View>
-              <CardTitle>Share a restaurant rating</CardTitle>
-              <CardDescription className="leading-5">
+              <CardTitle className="text-lg">Share a restaurant rating</CardTitle>
+              <CardDescription className="min-h-10 leading-5">
                 Rate a restaurant and add an optional review or photos.
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-3">
+            <CardContent className="px-0">
               <Link href={routes.createShare} asChild>
                 <Button variant="outline" className="w-full">
                   <Text>Rate a restaurant</Text>

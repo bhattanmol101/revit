@@ -40,9 +40,9 @@ export function HomeScreen() {
     queryClient.resetQueries({ queryKey: queryKeys.feed.home(feedMode) });
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList
-        contentContainerClassName="gap-3 px-3 py-4 sm:px-6 sm:py-6"
+        contentContainerClassName="gap-4 md:gap-6 md:px-6 md:py-6"
         data={posts}
         keyExtractor={(post) => post.id}
         ListEmptyComponent={<FeedEmpty feed={feed} feedMode={feedMode} />}

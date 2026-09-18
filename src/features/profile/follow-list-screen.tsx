@@ -1,7 +1,8 @@
-import { Link, Stack, useLocalSearchParams } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
 import type { FollowProfile } from "@/api/follows";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -24,14 +25,28 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
   const list = useFollowList(profile.data?.id ?? "", kind);
   const title = kind === "followers" ? "Followers" : "Following";
   const items = list.data?.pages.flatMap((page) => page.items) ?? [];
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(routes.user(username));
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <Stack.Screen options={{ title }} />
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader showAccountActions title={title} onBack={goBack} />
+          ),
+        }}
+      />
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="mx-auto w-full max-w-4xl grow px-3 py-3 sm:px-6"
+        contentContainerClassName="w-full grow px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
           <FollowListState
@@ -69,7 +84,8 @@ function FollowProfileRow({ profile }: { profile: FollowProfile }) {
     <Link href={routes.user(profile.username)} asChild>
       <Button
         variant="ghost"
-        className="min-h-12 h-auto w-full justify-start gap-3 border border-border bg-card px-3 py-2"
+        className="w-full gap-3 border border-border bg-card"
+        size="content"
       >
         <Avatar alt={`${profile.display_name}'s avatar`} className="size-8">
           {profile.avatar_url ? (

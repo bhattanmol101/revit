@@ -1,7 +1,6 @@
-import { Link, usePathname } from "expo-router";
+import { usePathname } from "expo-router";
 import { TabList, TabSlot, Tabs, TabTrigger } from "expo-router/ui";
 import {
-  Bell,
   Bookmark,
   Compass,
   House,
@@ -9,13 +8,9 @@ import {
   UsersRound,
 } from "lucide-react-native";
 import { Pressable, View } from "react-native";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Text } from "@/components/ui/text";
-import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
-import { useAuth } from "@/providers/auth-provider";
-import { useUnreadNotificationCount } from "@/queries/notifications";
 
 const mainItems = [
   { href: routes.home, Icon: House, name: "index", title: "Home" },
@@ -34,9 +29,8 @@ export default function MainTabs() {
     <Tabs className="flex-1 bg-background">
       <TabSlot style={{ flex: 1, marginTop: 56 }} />
 
-      <View className="absolute left-0 right-0 top-0 h-14 flex-row items-center justify-between border-b border-border bg-card px-5">
-        <Text className="text-xl font-semibold">{title}</Text>
-        <HeaderActions />
+      <View className="absolute left-0 right-0 top-0">
+        <AppHeader showAccountActions title={title} />
       </View>
 
       <TabList
@@ -64,7 +58,9 @@ export default function MainTabs() {
               >
                 <Icon
                   className={
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    isActive
+                      ? "text-primary dark:text-foreground"
+                      : "text-muted-foreground"
                   }
                   size={16}
                   strokeWidth={2}
@@ -72,7 +68,7 @@ export default function MainTabs() {
                 <Text
                   className={`text-sm ${
                     isActive
-                      ? "font-semibold text-primary"
+                      ? "font-semibold text-primary dark:text-foreground"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -125,7 +121,9 @@ export default function MainTabs() {
               >
                 <Icon
                   className={
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    isActive
+                      ? "text-primary dark:text-foreground"
+                      : "text-muted-foreground"
                   }
                   size={16}
                   strokeWidth={2}
@@ -133,7 +131,7 @@ export default function MainTabs() {
                 <Text
                   className={`text-sm ${
                     isActive
-                      ? "font-semibold text-primary"
+                      ? "font-semibold text-primary dark:text-foreground"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -151,48 +149,5 @@ export default function MainTabs() {
         </TabTrigger>
       </TabList>
     </Tabs>
-  );
-}
-
-function HeaderActions() {
-  const theme = useTheme();
-  const { profile, user } = useAuth();
-  const unread = useUnreadNotificationCount(user?.id);
-  const initials = (profile?.display_name ?? "You")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
-  return (
-    <View className="flex-row items-center gap-2">
-      <Link href={routes.activity} asChild>
-        <Pressable
-          accessibilityLabel="Open activity"
-          className="relative size-11 items-center justify-center rounded-md border border-border bg-card active:bg-selected"
-        >
-          <Bell color={theme.text} size={16} strokeWidth={2} />
-          {(unread.data ?? 0) > 0 ? (
-            <View className="absolute right-1 top-1 size-1.5 rounded-full bg-primary" />
-          ) : null}
-        </Pressable>
-      </Link>
-      <Link href={routes.profile} asChild>
-        <Pressable
-          accessibilityLabel="Open profile"
-          className="size-11 items-center justify-center"
-        >
-          <Avatar alt="Your profile" className="size-8 border border-border">
-            {profile?.avatar_url ? (
-              <AvatarImage source={{ uri: profile.avatar_url }} />
-            ) : null}
-            <AvatarFallback>
-              <Text className="text-[11px] font-semibold">{initials}</Text>
-            </AvatarFallback>
-          </Avatar>
-        </Pressable>
-      </Link>
-    </View>
   );
 }

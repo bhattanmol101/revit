@@ -25,13 +25,22 @@ export function useCommentCount(postId: string) {
   });
 }
 
-export function useTopLevelComments(postId: string) {
+type TopLevelCommentsOptions = {
+  pageSize?: number;
+};
+
+export function useTopLevelComments(
+  postId: string,
+  { pageSize }: TopLevelCommentsOptions = {},
+) {
   return useInfiniteQuery({
     enabled: postId.length > 0,
     getNextPageParam: (lastPage: CommentPage) => lastPage.nextOffset,
     initialPageParam: 0,
-    queryFn: ({ pageParam }) => getTopLevelComments(postId, pageParam),
-    queryKey: queryKeys.comments.byPost(postId),
+    queryFn: ({ pageParam }) => getTopLevelComments(postId, pageParam, pageSize),
+    queryKey: pageSize
+      ? queryKeys.comments.inlineByPost(postId)
+      : queryKeys.comments.byPost(postId),
   });
 }
 
@@ -42,9 +51,14 @@ export function useCreateTopLevelComment(postId: string, authorId: string) {
     mutationFn: (body: string) =>
       createTopLevelComment({ authorId, body, postId }),
     onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byPost(postId),
-      }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.byPost(postId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.count(postId),
+        }),
+      ]),
   });
 }
 
@@ -55,9 +69,14 @@ export function useCreateReply(postId: string, authorId: string) {
     mutationFn: ({ body, parentId }: { body: string; parentId: string }) =>
       createReply({ authorId, body, parentId, postId }),
     onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byPost(postId),
-      }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.byPost(postId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.count(postId),
+        }),
+      ]),
   });
 }
 
@@ -80,8 +99,13 @@ export function useDeleteComment(postId: string) {
   return useMutation({
     mutationFn: deleteComment,
     onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byPost(postId),
-      }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.byPost(postId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.comments.count(postId),
+        }),
+      ]),
   });
 }

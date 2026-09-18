@@ -1,9 +1,11 @@
 import { Image } from "expo-image";
-import { Link, router, useLocalSearchParams } from "expo-router";
-import { MessageSquare, Users } from "lucide-react-native";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import { MoreHorizontal, Users } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
+import type { PostWithDetails } from "@/api/posts";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,7 +19,10 @@ import {
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { AskPostCard } from "@/features/posts/ask-post-card";
+import { SharePostCard } from "@/features/posts/share-post-card";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import {
@@ -26,6 +31,8 @@ import {
   useForumMembership,
   useForumPosts,
 } from "@/queries/forums";
+import { useRestaurant } from "@/queries/restaurants";
+import { useShareRatingScore } from "@/queries/shares";
 
 export function ForumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,7 +55,27 @@ export function ForumDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-2xl gap-4 px-3 py-4 sm:px-6">
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              leading="back"
+              onLeadingPress={() => router.replace(routes.forums)}
+              title="Forums"
+              trailing={
+                <Button
+                  accessibilityLabel="Forum options"
+                  size="icon"
+                  variant="ghost"
+                >
+                  <Icon as={MoreHorizontal} className="size-5" />
+                </Button>
+              }
+            />
+          ),
+        }}
+      />
+      <ScrollView contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
         <View className="gap-2 rounded-lg border border-border bg-card p-3 shadow-none">
           {forumData.coverImageUrl ? (
             <Image
@@ -60,7 +87,7 @@ export function ForumDetailScreen() {
           ) : null}
           <View className="flex-row items-start justify-between gap-3">
             <View className="min-w-0 flex-1 gap-1">
-              <Text variant="h1" className="text-left text-2xl">
+              <Text variant="h1" className="text-left">
                 {forumData.name}
               </Text>
               <Text variant="muted">/{forumData.slug}</Text>
@@ -146,26 +173,7 @@ export function ForumDetailScreen() {
             <FeedbackState title="No forum posts yet" />
           ) : null}
           {postItems.map((post) => (
-            <Link key={post.id} href={routes.post(post.id)} asChild>
-              <Card className="gap-2 py-3 shadow-none">
-                <CardContent className="gap-1">
-                  <View className="flex-row items-center gap-1">
-                    <Icon as={MessageSquare} className="size-4 text-primary" />
-                    <Text className="text-xs font-semibold text-primary">
-                      {post.post_type}
-                    </Text>
-                  </View>
-                  <Text className="font-semibold">
-                    {post.title || post.author.display_name}
-                  </Text>
-                  {post.body ? (
-                    <Text variant="muted" numberOfLines={3}>
-                      {post.body}
-                    </Text>
-                  ) : null}
-                </CardContent>
-              </Card>
-            </Link>
+            <ForumPostCard key={post.id} post={post} />
           ))}
         </View>
       </ScrollView>
@@ -202,12 +210,69 @@ export function ForumDetailScreen() {
   );
 }
 
+function ForumPostCard({ post }: { post: PostWithDetails }) {
+  if (post.post_type === "ASK") return <AskPostCard post={post} />;
+
+  return <ForumSharePostCard post={post} />;
+}
+
+function ForumSharePostCard({ post }: { post: PostWithDetails }) {
+  const restaurant = useRestaurant(post.entity_id ?? "");
+  const ratingScore = useShareRatingScore(post.id);
+
+  if (restaurant.isLoading || ratingScore.isLoading) {
+    return (
+      <Card className="gap-3 rounded-lg p-5 shadow-none">
+        <CardContent className="gap-3 px-0">
+          <Skeleton className="h-9 w-44" />
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (
+    restaurant.isError ||
+    ratingScore.isError ||
+    !restaurant.data ||
+    ratingScore.data === null ||
+    ratingScore.data === undefined
+  ) {
+    return (
+      <FeedbackState
+        description="This restaurant rating is unavailable."
+        title="Share post unavailable"
+        variant="error"
+      />
+    );
+  }
+
+  return (
+    <SharePostCard
+      post={{ ...post, ratingScore: ratingScore.data }}
+      restaurant={restaurant.data}
+    />
+  );
+}
+
 function LoadingState() {
   return (
     <SafeAreaView
       className="flex-1 items-center justify-center gap-2 bg-background"
       edges={["bottom"]}
     >
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Forums"
+              onBack={() => router.replace(routes.forums)}
+            />
+          ),
+        }}
+      />
       <ActivityIndicator />
       <Text variant="muted">Loading forum…</Text>
     </SafeAreaView>
@@ -229,6 +294,17 @@ function MissingState({ description }: { description?: string }) {
       className="flex-1 items-center justify-center gap-2 bg-background px-6"
       edges={["bottom"]}
     >
+      <Stack.Screen
+        options={{
+          header: () => (
+            <AppHeader
+              showAccountActions
+              title="Forums"
+              onBack={() => router.replace(routes.forums)}
+            />
+          ),
+        }}
+      />
       <Text variant="h2">Forum unavailable</Text>
       <Text variant="muted" className="text-center">
         {description ?? "This forum may have been deleted."}

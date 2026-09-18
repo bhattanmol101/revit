@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
-import { MapPin, UserRound } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 import type {
   DiscoverResults,
@@ -13,11 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
+import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useDiscover } from "@/queries/discover";
+
+type ResultFilter = "people" | "posts" | "restaurants";
 
 export function DiscoverScreen() {
   const [query, setQuery] = useState("");
@@ -26,13 +29,13 @@ export function DiscoverScreen() {
   const hasSearchTerm = query.trim().length >= 2;
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <ScrollView
+    <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
+      <PageScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-4 px-3 py-4 sm:px-6"
+        contentContainerClassName="gap-6"
       >
         <View className="gap-1">
-          <Text variant="h1" className="text-left text-2xl">
+          <Text variant="h1" className="text-left">
             Discover
           </Text>
           <Text variant="muted">Find people, posts, and restaurants.</Text>
@@ -73,7 +76,7 @@ export function DiscoverScreen() {
         {hasSearchTerm && !results.isLoading && !results.isError ? (
           <DiscoverResultsView results={results.data} />
         ) : null}
-      </ScrollView>
+      </PageScrollView>
     </SafeAreaView>
   );
 }
@@ -83,6 +86,7 @@ function DiscoverResultsView({
 }: {
   results: DiscoverResults | undefined;
 }) {
+  const [filter, setFilter] = useState<ResultFilter>("people");
   const profiles = results?.profiles ?? [];
   const posts = results?.posts ?? [];
   const restaurants = results?.restaurants ?? [];
@@ -100,9 +104,25 @@ function DiscoverResultsView({
 
   return (
     <View className="gap-5">
-      {profiles.length > 0 ? <ProfileResults profiles={profiles} /> : null}
-      {posts.length > 0 ? <PostResults posts={posts} /> : null}
-      {restaurants.length > 0 ? (
+      <View className="flex-row flex-wrap gap-2">
+        {(["people", "posts", "restaurants"] as const).map((item) => (
+          <Button
+            key={item}
+            size="sm"
+            variant={filter === item ? "default" : "outline"}
+            onPress={() => setFilter(item)}
+          >
+            <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+          </Button>
+        ))}
+      </View>
+      {filter === "people" && profiles.length > 0 ? (
+        <ProfileResults profiles={profiles} />
+      ) : null}
+      {filter === "posts" && posts.length > 0 ? (
+        <PostResults posts={posts} />
+      ) : null}
+      {filter === "restaurants" && restaurants.length > 0 ? (
         <RestaurantResults restaurants={restaurants} />
       ) : null}
     </View>
@@ -111,7 +131,7 @@ function DiscoverResultsView({
 
 function ProfileResults({ profiles }: { profiles: DiscoveryProfile[] }) {
   return (
-    <ResultSection title="People">
+    <ResultSection>
       {profiles.map((profile) => (
         <Link
           key={profile.username}
@@ -119,7 +139,8 @@ function ProfileResults({ profiles }: { profiles: DiscoveryProfile[] }) {
           asChild
         >
           <Button
-            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
+            className="gap-3 border border-border bg-card"
+            size="content"
             variant="ghost"
           >
             <Avatar alt={`${profile.displayName}'s avatar`} className="size-9">
@@ -147,11 +168,12 @@ function ProfileResults({ profiles }: { profiles: DiscoveryProfile[] }) {
 
 function PostResults({ posts }: { posts: DiscoveryPost[] }) {
   return (
-    <ResultSection title="Posts">
+    <ResultSection>
       {posts.map((post) => (
         <Link key={post.id} href={routes.post(post.id)} asChild>
           <Button
-            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
+            className="gap-3 border border-border bg-card"
+            size="content"
             variant="ghost"
           >
             <View className="size-9 items-center justify-center rounded-md bg-accent">
@@ -176,7 +198,7 @@ function PostResults({ posts }: { posts: DiscoveryPost[] }) {
 
 function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
   return (
-    <ResultSection title="Restaurants">
+    <ResultSection>
       {restaurants.map((restaurant) => (
         <Link
           key={restaurant.id}
@@ -184,7 +206,8 @@ function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
           asChild
         >
           <Button
-            className="min-h-12 h-auto justify-start gap-3 border border-border bg-card px-3 py-2"
+            className="gap-3 border border-border bg-card"
+            size="content"
             variant="ghost"
           >
             <View className="size-9 items-center justify-center rounded-md bg-accent">
@@ -205,19 +228,9 @@ function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
   );
 }
 
-function ResultSection({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
+function ResultSection({ children }: { children: React.ReactNode }) {
   return (
     <View className="gap-2">
-      <View className="flex-row items-center gap-2">
-        <Icon as={UserRound} className="size-4 text-muted-foreground" />
-        <Text className="text-base font-semibold">{title}</Text>
-      </View>
       <View className="gap-2">{children}</View>
     </View>
   );
@@ -230,7 +243,13 @@ function SearchState({
   description: string;
   title: string;
 }) {
-  return <FeedbackState description={description} title={title} />;
+  return (
+    <FeedbackState
+      className="min-h-0 w-full self-stretch px-5 py-3"
+      description={description}
+      title={title}
+    />
+  );
 }
 
 function getInitials(displayName: string) {
