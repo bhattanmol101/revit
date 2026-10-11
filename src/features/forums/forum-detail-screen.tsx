@@ -1,13 +1,14 @@
 import { Image } from "expo-image";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { MoreHorizontal, Users } from "lucide-react-native";
+import { Users } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import {
   Dialog,
   DialogContent,
@@ -62,20 +63,11 @@ export function ForumDetailScreen() {
               leading="back"
               onLeadingPress={() => router.replace(routes.forums)}
               title="Forums"
-              trailing={
-                <Button
-                  accessibilityLabel="Forum options"
-                  size="icon"
-                  variant="ghost"
-                >
-                  <Icon as={MoreHorizontal} className="size-5" />
-                </Button>
-              }
             />
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
+      <ScrollView contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
         <View className="gap-2 rounded-lg border border-border bg-card p-3 shadow-none">
           {forumData.coverImageUrl ? (
             <Image
@@ -172,9 +164,13 @@ export function ForumDetailScreen() {
           {!posts.isLoading && !posts.isError && postItems.length === 0 ? (
             <FeedbackState title="No forum posts yet" />
           ) : null}
-          {postItems.map((post) => (
-            <ForumPostCard key={post.id} post={post} />
-          ))}
+          {postItems.length > 0 ? (
+            <View className="-mx-6 gap-4 md:mx-0 md:gap-6">
+              {postItems.map((post) => (
+                <ForumPostCard key={post.id} post={post} />
+              ))}
+            </View>
+          ) : null}
         </View>
       </ScrollView>
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -258,10 +254,7 @@ function ForumSharePostCard({ post }: { post: PostWithDetails }) {
 
 function LoadingState() {
   return (
-    <SafeAreaView
-      className="flex-1 items-center justify-center gap-2 bg-background"
-      edges={["bottom"]}
-    >
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen
         options={{
           header: () => (
@@ -273,19 +266,15 @@ function LoadingState() {
           ),
         }}
       />
-      <ActivityIndicator />
-      <Text variant="muted">Loading forum…</Text>
+      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
+        <ContentSkeleton rows={3} />
+      </View>
     </SafeAreaView>
   );
 }
 
 function PostsLoadingState() {
-  return (
-    <View className="flex-row items-center gap-2 py-3">
-      <ActivityIndicator />
-      <Text variant="muted">Loading forum posts…</Text>
-    </View>
-  );
+  return <ContentSkeleton rows={2} />;
 }
 
 function MissingState({ description }: { description?: string }) {

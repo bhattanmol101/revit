@@ -1,10 +1,12 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import type { ReactNode } from "react";
 import { useDeferredValue, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import type { Restaurant } from "@/api/restaurants";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -50,7 +52,7 @@ export function RestaurantSearchScreen() {
       />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
+        contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
       >
         <View className="gap-1">
           <Text variant="h1" className="text-left">
@@ -77,10 +79,7 @@ export function RestaurantSearchScreen() {
         ) : null}
 
         {hasSearchTerm && search.isLoading ? (
-          <View className="flex-row items-center gap-2 py-3">
-            <ActivityIndicator />
-            <Text variant="muted">Searching restaurants…</Text>
-          </View>
+          <ContentSkeleton rows={2} />
         ) : null}
 
         {hasSearchTerm && search.isError ? (
@@ -193,71 +192,85 @@ function AddRestaurantForm({
         </Text>
       </View>
 
-      <Input
-        accessibilityLabel="Restaurant name"
-        size="compact"
-        editable={!createRestaurant.isPending}
-        placeholder="Restaurant name"
-        value={name}
-        onChangeText={setName}
-      />
-      <Input
-        accessibilityLabel="Address line 1"
-        size="compact"
-        editable={!createRestaurant.isPending}
-        placeholder="Street address"
-        value={addressLine1}
-        onChangeText={setAddressLine1}
-      />
-      <Input
-        accessibilityLabel="Address line 2"
-        size="compact"
-        editable={!createRestaurant.isPending}
-        placeholder="Suite, floor, or landmark (optional)"
-        value={addressLine2}
-        onChangeText={setAddressLine2}
-      />
+      <LabeledField label="Restaurant name">
+        <Input
+          accessibilityLabel="Restaurant name"
+          size="compact"
+          editable={!createRestaurant.isPending}
+          placeholder="Restaurant name"
+          value={name}
+          onChangeText={setName}
+        />
+      </LabeledField>
+      <LabeledField label="Street address">
+        <Input
+          accessibilityLabel="Address line 1"
+          size="compact"
+          editable={!createRestaurant.isPending}
+          placeholder="Street address"
+          value={addressLine1}
+          onChangeText={setAddressLine1}
+        />
+      </LabeledField>
+      <LabeledField label="Address details (optional)">
+        <Input
+          accessibilityLabel="Address line 2"
+          size="compact"
+          editable={!createRestaurant.isPending}
+          placeholder="Suite, floor, or landmark (optional)"
+          value={addressLine2}
+          onChangeText={setAddressLine2}
+        />
+      </LabeledField>
       <View className="gap-2 sm:flex-row">
-        <Input
-          accessibilityLabel="Locality"
-          className="flex-1"
-          size="compact"
-          editable={!createRestaurant.isPending}
-          placeholder="City or locality"
-          value={locality}
-          onChangeText={setLocality}
-        />
-        <Input
-          accessibilityLabel="State or region"
-          className="flex-1"
-          size="compact"
-          editable={!createRestaurant.isPending}
-          placeholder="State or region (optional)"
-          value={administrativeArea}
-          onChangeText={setAdministrativeArea}
-        />
+        <LabeledField className="flex-1" label="City or locality">
+          <Input
+            accessibilityLabel="Locality"
+            className="flex-1"
+            size="compact"
+            editable={!createRestaurant.isPending}
+            placeholder="City or locality"
+            value={locality}
+            onChangeText={setLocality}
+          />
+        </LabeledField>
+        <LabeledField className="flex-1" label="State or region (optional)">
+          <Input
+            accessibilityLabel="State or region"
+            className="flex-1"
+            size="compact"
+            editable={!createRestaurant.isPending}
+            placeholder="State or region (optional)"
+            value={administrativeArea}
+            onChangeText={setAdministrativeArea}
+          />
+        </LabeledField>
       </View>
       <View className="gap-2 sm:flex-row">
-        <Input
-          accessibilityLabel="Country code"
-          autoCapitalize="characters"
-          className="flex-1"
-          size="compact"
-          editable={!createRestaurant.isPending}
-          maxLength={2}
-          placeholder="Country code"
-          value={countryCode}
-          onChangeText={setCountryCode}
-        />
-        <Input
-          accessibilityLabel="Postal code"
-          className="flex-1"
-          size="compact"
-          editable={!createRestaurant.isPending}
-          placeholder="Postal code (optional)"
-          value={postalCode}
-          onChangeText={setPostalCode}
-        />
+        <LabeledField className="flex-1" label="Country code">
+          <Input
+            accessibilityLabel="Country code"
+            autoCapitalize="characters"
+            className="flex-1"
+            size="compact"
+            editable={!createRestaurant.isPending}
+            maxLength={2}
+            placeholder="Country code"
+            value={countryCode}
+            onChangeText={setCountryCode}
+          />
+        </LabeledField>
+        <LabeledField className="flex-1" label="Postal code (optional)">
+          <Input
+            accessibilityLabel="Postal code"
+            className="flex-1"
+            size="compact"
+            editable={!createRestaurant.isPending}
+            placeholder="Postal code (optional)"
+            value={postalCode}
+            onChangeText={setPostalCode}
+          />
+        </LabeledField>
       </View>
 
       {createRestaurant.isError ? (
@@ -281,6 +294,23 @@ function AddRestaurantForm({
           </Text>
         </Button>
       </View>
+    </View>
+  );
+}
+
+function LabeledField({
+  children,
+  className,
+  label,
+}: {
+  children: ReactNode;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <View className={`gap-2 ${className ?? ""}`}>
+      <Text variant="small">{label}</Text>
+      {children}
     </View>
   );
 }

@@ -1,10 +1,11 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Edit3, MapPin, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +54,7 @@ export function PickDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
+      <ScrollView contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
         <View className="gap-2">
           <View className="flex-row items-start justify-between gap-3">
             <Text variant="h1" className="min-w-0 flex-1 text-left">
@@ -160,9 +161,8 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
           ),
         }}
       />
-      <View className="flex-1 items-center justify-center gap-2">
-        <ActivityIndicator />
-        <Text variant="muted">Loading Pick…</Text>
+      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
+        <ContentSkeleton rows={3} />
       </View>
     </SafeAreaView>
   );

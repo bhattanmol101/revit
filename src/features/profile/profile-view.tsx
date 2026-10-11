@@ -1,6 +1,7 @@
 import { Link } from "expo-router";
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -28,13 +29,6 @@ type ProfileViewProps = {
   profile: Profile;
 };
 
-const PROFILE_SECTIONS = [
-  {
-    description: "Forum memberships and activity will appear here.",
-    title: "Forums",
-  },
-] as const;
-
 export function ProfileView({
   isOwnProfile = false,
   profile,
@@ -58,11 +52,11 @@ export function ProfileView({
   return (
     <SafeAreaView
       className="flex-1 bg-background"
-      edges={isOwnProfile ? ["top", "bottom"] : ["bottom"]}
+      edges={isOwnProfile ? ["left", "right"] : ["bottom"]}
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
+        contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
         refreshControl={
           <RefreshControl
             refreshing={
@@ -162,22 +156,6 @@ export function ProfileView({
         />
 
         <ProfilePicks profileId={profile.id} />
-
-        <View className="gap-3 sm:flex-row">
-          {PROFILE_SECTIONS.map((section) => (
-            <Card
-              key={section.title}
-              className="flex-1 gap-2 rounded-lg border-0 bg-accent py-3 shadow-none"
-            >
-              <CardHeader>
-                <CardTitle>{section.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Text variant="muted">{section.description}</Text>
-              </CardContent>
-            </Card>
-          ))}
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -205,16 +183,21 @@ function ProfilePicks({ profileId }: { profileId: string }) {
       ) : null}
       {picks.data?.map((pick) => (
         <Link key={pick.id} href={routes.pick(pick.id)} asChild>
-          <Card className="gap-1 py-3 shadow-none">
-            <CardHeader>
-              <CardTitle>{pick.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Text variant="muted">
-                {pick.description?.trim() || "Restaurant collection"}
-              </Text>
-            </CardContent>
-          </Card>
+          <Pressable
+            accessibilityRole="link"
+            className="rounded-lg active:opacity-90"
+          >
+            <Card className="gap-1 py-3 shadow-none">
+              <CardHeader>
+                <CardTitle>{pick.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Text variant="muted">
+                  {pick.description?.trim() || "Restaurant collection"}
+                </Text>
+              </CardContent>
+            </Card>
+          </Pressable>
         </Link>
       ))}
     </View>

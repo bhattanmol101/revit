@@ -5,6 +5,7 @@ import { View } from "react-native";
 import type { ActivityNotification } from "@/api/notifications";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -49,15 +50,8 @@ export default function ActivityScreen() {
         }}
       />
       <PageScrollView contentContainerClassName="gap-5" contentWidth="narrow">
-        <View className="gap-1 pb-1">
-          <Text variant="h1" className="text-left">
-            Activity
-          </Text>
-          <Text variant="muted">Your latest social activity.</Text>
-        </View>
-        {notifications.isLoading ? (
-          <Text variant="muted">Loading activity…</Text>
-        ) : null}
+        <Text variant="muted">Your latest social activity.</Text>
+        {notifications.isLoading ? <ContentSkeleton /> : null}
         {notifications.isError ? (
           <FeedbackState
             actionLabel="Retry"

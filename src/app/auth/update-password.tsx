@@ -4,7 +4,7 @@ import { View } from "react-native";
 
 import { AuthScreenLayout } from "@/components/auth/auth-screen-layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { supabase } from "@/lib/supabase/client";
@@ -60,25 +60,23 @@ export default function UpdatePasswordScreen() {
       <View className="gap-4">
         <View className="gap-2">
           <Text variant="small">New password</Text>
-          <Input
+          <PasswordInput
             accessibilityLabel="New password"
             autoComplete="new-password"
             editable={!loading}
             onChangeText={setPassword}
             placeholder="At least 8 characters"
-            secureTextEntry
             value={password}
           />
         </View>
         <View className="gap-2">
           <Text variant="small">Confirm new password</Text>
-          <Input
+          <PasswordInput
             accessibilityLabel="Confirm new password"
             autoComplete="new-password"
             editable={!loading}
             onChangeText={setConfirmation}
             placeholder="Repeat your new password"
-            secureTextEntry
             value={confirmation}
           />
         </View>

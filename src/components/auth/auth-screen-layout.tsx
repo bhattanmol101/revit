@@ -19,7 +19,7 @@ export function AuthScreenLayout({
         behavior={Platform.select({ ios: "padding", default: undefined })}
       >
         <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-8 sm:px-6">
-          <View className="w-full max-w-md gap-6 rounded-lg border border-border bg-card p-6 shadow-none">
+          <View className="w-full max-w-md gap-6">
             <View className="gap-1">
               <Text className="font-serif text-2xl font-bold tracking-tight">
                 Revit

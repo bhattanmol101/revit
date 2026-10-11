@@ -9,6 +9,7 @@ import type { Restaurant } from "@/api/restaurants";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -24,6 +25,9 @@ import {
   useCreateForumSharePost,
 } from "@/queries/posts";
 import { useRestaurantSearch } from "@/queries/restaurants";
+
+const MIN_POST_ASPECT_RATIO = 4 / 5;
+const MAX_POST_ASPECT_RATIO = 16 / 9;
 
 export function ForumPostComposerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -155,8 +159,9 @@ export function ForumPostComposerScreen() {
         }}
       />
       <ScrollView
+        automaticallyAdjustKeyboardInsets
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+        contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
         <Card className="gap-6 border-border bg-card p-6 shadow-none">
           <View className="gap-2 py-1">
@@ -213,6 +218,14 @@ export function ForumPostComposerScreen() {
                     value={search}
                     onChangeText={setSearch}
                   />
+                  {search.trim().length >= 2 && results.isLoading ? (
+                    <ContentSkeleton rows={1} />
+                  ) : null}
+                  {results.isError ? (
+                    <Text className="text-destructive" variant="small">
+                      {results.error.message}
+                    </Text>
+                  ) : null}
                   {results.data?.map((item) => (
                     <Button
                       key={item.id}
@@ -229,6 +242,12 @@ export function ForumPostComposerScreen() {
                       </Text>
                     </Button>
                   ))}
+                  {search.trim().length >= 2 &&
+                  !results.isLoading &&
+                  !results.isError &&
+                  results.data?.length === 0 ? (
+                    <Text variant="muted">No restaurants found.</Text>
+                  ) : null}
                 </>
               )}
             </View>
@@ -258,9 +277,13 @@ export function ForumPostComposerScreen() {
                   <View key={image.uri} className="relative flex-1">
                     <Image
                       accessibilityLabel={`Selected image ${index + 1}`}
-                      className="h-32 w-full rounded-md bg-muted sm:h-36"
-                      contentFit="cover"
+                      className="w-full rounded-md bg-muted"
+                      contentFit="contain"
                       source={image.uri}
+                      style={{
+                        aspectRatio: getPostPreviewAspectRatio(image),
+                        width: "100%",
+                      }}
                     />
                     <Button
                       accessibilityLabel={`Remove image ${index + 1}`}
@@ -322,4 +345,13 @@ function toLocalImage(image: ImagePicker.ImagePickerAsset): LocalImage {
     mimeType: image.mimeType,
     uri: image.uri,
   };
+}
+
+function getPostPreviewAspectRatio(image: ImagePicker.ImagePickerAsset) {
+  const naturalRatio =
+    image.width && image.height ? image.width / image.height : 1;
+  return Math.min(
+    MAX_POST_ASPECT_RATIO,
+    Math.max(MIN_POST_ASPECT_RATIO, naturalRatio),
+  );
 }

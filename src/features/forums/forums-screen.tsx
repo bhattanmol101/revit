@@ -1,10 +1,11 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
-import { ActivityIndicator, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
@@ -35,7 +36,7 @@ export function ForumsScreen() {
           </Link>
         </View>
 
-        {forums.isLoading ? <LoadingState /> : null}
+        {forums.isLoading ? <ContentSkeleton /> : null}
         {forums.isError ? (
           <FeedbackState
             actionLabel="Retry"
@@ -46,50 +47,81 @@ export function ForumsScreen() {
         ) : null}
         {!forums.isLoading && !forums.isError && forums.data?.length === 0 ? (
           <FeedbackState
-            className="min-h-0 self-stretch px-5 py-3"
             description="Public forums will appear here as they are opened."
             title="No forums yet"
           />
         ) : null}
-        {forums.data?.map((forum) => (
-          <Link key={forum.id} href={routes.forum(forum.id)} asChild>
-            <Card className="gap-0 overflow-hidden py-0">
-              {forum.coverImageUrl ? (
-                <Image
-                  accessibilityLabel={`${forum.name} cover image`}
-                  className="h-36 w-full bg-muted"
-                  contentFit="cover"
-                  source={forum.coverImageUrl}
-                />
-              ) : null}
-              <CardHeader className="pt-3">
-                <CardTitle>{forum.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="gap-2 pb-3">
-                <Text variant="muted">
-                  {forum.description?.trim() || "A public discussion forum."}
-                </Text>
-                <View className="flex-row items-center gap-1">
-                  <Icon as={Users} className="size-4 text-muted-foreground" />
-                  <Text variant="muted" className="text-xs">
-                    {forum.memberCount}{" "}
-                    {forum.memberCount === 1 ? "member" : "members"}
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        {forums.data?.length ? (
+          <View className="gap-4">
+            {forums.data.map((forum) => (
+              <Link key={forum.id} href={routes.forum(forum.id)} asChild>
+                <Pressable
+                  accessibilityLabel={`Open ${forum.name} forum`}
+                  accessibilityRole="link"
+                  className="w-full rounded-lg active:opacity-90"
+                >
+                  <Card className="w-full gap-0 overflow-hidden py-0">
+                    {forum.coverImageUrl ? (
+                      <Image
+                        accessibilityLabel={`${forum.name} cover image`}
+                        className="h-28 w-full bg-muted"
+                        contentFit="cover"
+                        source={forum.coverImageUrl}
+                      />
+                    ) : (
+                      <ForumCoverFallback />
+                    )}
+
+                    <View className="min-h-28 gap-2 p-4">
+                      <Text className="text-lg font-semibold leading-6">
+                        {forum.name}
+                      </Text>
+                      <Text
+                        className="text-sm leading-5"
+                        numberOfLines={2}
+                        variant="muted"
+                      >
+                        {forum.description?.trim() ||
+                          "A public discussion forum."}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center justify-between border-t border-border px-4 py-3">
+                      <View className="flex-row items-center gap-1.5">
+                        <Icon
+                          as={Users}
+                          className="size-4 text-muted-foreground"
+                        />
+                        <Text variant="muted" className="text-xs">
+                          {forum.memberCount}{" "}
+                          {forum.memberCount === 1 ? "member" : "members"}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center gap-1.5">
+                        <View className="size-1.5 rounded-full bg-muted-foreground" />
+                        <Text variant="muted" className="text-xs">
+                          Public
+                        </Text>
+                      </View>
+                    </View>
+                  </Card>
+                </Pressable>
+              </Link>
+            ))}
+          </View>
+        ) : null}
       </PageScrollView>
     </SafeAreaView>
   );
 }
 
-function LoadingState() {
+function ForumCoverFallback() {
   return (
-    <View className="items-center gap-2 py-10">
-      <ActivityIndicator />
-      <Text variant="muted">Loading forums…</Text>
+    <View className="h-28 overflow-hidden bg-selected">
+      <View className="absolute -left-10 -top-14 size-32 rounded-full bg-primary/15" />
+      <View className="absolute left-1/4 top-5 h-24 w-24 rotate-45 rounded-lg bg-primary/10" />
+      <View className="absolute bottom-4 right-1/4 size-14 rounded-full bg-primary/15" />
+      <View className="absolute -right-8 -top-8 size-28 rotate-12 rounded-lg bg-primary/10" />
     </View>
   );
 }

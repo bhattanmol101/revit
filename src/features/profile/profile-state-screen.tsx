@@ -10,7 +10,7 @@ import { Text } from "@/components/ui/text";
 export function ProfileLoadingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <View className="w-full gap-6 px-4 md:mx-auto md:max-w-4xl md:px-6 md:py-6">
+      <View className="w-full gap-6 px-6 md:mx-auto md:max-w-4xl md:py-6">
         <View className="flex-row items-center gap-3">
           <Skeleton className="size-24 rounded-full" />
           <View className="flex-1 gap-3">

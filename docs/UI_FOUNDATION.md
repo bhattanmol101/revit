@@ -22,6 +22,9 @@ The product uses a confident social-editorial visual system. New work must exten
 - Keep primary reading columns narrow while allowing expressive hero areas to be wider.
 - Default to 24px mobile gutters, 12px surface padding, 8px label/control gaps,
   and 24px between major sections.
+- Home and post-detail social cards may run edge to edge on mobile. Page headers,
+  forms, discovery, lists, profiles, and other secondary screens retain the 24px
+  mobile gutter.
 - Mobile touch targets must be at least 44 points tall.
 
 ## Implementation rules

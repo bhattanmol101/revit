@@ -8,6 +8,8 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import type { Restaurant } from "@/api/restaurants";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
@@ -26,6 +28,8 @@ import {
 
 const MAX_IMAGES = 3;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MIN_POST_ASPECT_RATIO = 4 / 5;
+const MAX_POST_ASPECT_RATIO = 16 / 9;
 
 export function ShareComposerScreen() {
   const { user } = useAuth();
@@ -205,247 +209,263 @@ export function ShareComposerScreen() {
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+          contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
-          <View className="gap-2 py-1">
-            <Text variant="h1" className="text-left">
-              Rate a restaurant
-            </Text>
-            <Text variant="muted" className="leading-5">
-              Your rating becomes one public restaurant post. You can update it
-              later.
-            </Text>
-          </View>
+          <Card className="gap-6 border-border bg-card p-6 shadow-none">
+            <View className="gap-2 py-1">
+              <Text variant="h1" className="text-left">
+                Rate a restaurant
+              </Text>
+              <Text variant="muted" className="leading-5">
+                Your rating becomes one public restaurant post. You can update
+                it later.
+              </Text>
+            </View>
 
-          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-            <Text variant="small">Restaurant</Text>
-            {restaurant ? (
-              <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
-                <Icon as={MapPin} className="size-5 text-primary" />
-                <View className="min-w-0 flex-1 gap-0.5">
-                  <Text className="truncate text-base font-semibold">
-                    {restaurant.name}
-                  </Text>
-                  <Text variant="muted" className="truncate text-xs">
-                    {restaurant.address_line_1}, {restaurant.locality}
-                  </Text>
-                </View>
-                <Button
-                  disabled={isSaving}
-                  className="shrink-0"
-                  size="xs"
-                  variant="ghost"
-                  onPress={clearRestaurant}
-                >
-                  <Text className="text-sm text-primary">Change</Text>
-                </Button>
-              </View>
-            ) : (
-              <>
-                <SearchInput
-                  accessibilityLabel="Search restaurants"
-                  autoFocus
-                  placeholder="Search by name or location"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-                {results.isLoading ? (
-                  <Text variant="muted">Searching…</Text>
-                ) : null}
-                {results.isError ? (
-                  <Text variant="small" className="text-destructive">
-                    {results.error.message}
-                  </Text>
-                ) : null}
-                {results.data?.map((item) => (
+            <View className="gap-3">
+              <Text variant="small">Restaurant</Text>
+              {restaurant ? (
+                <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
+                  <Icon as={MapPin} className="size-5 text-primary" />
+                  <View className="min-w-0 flex-1 gap-0.5">
+                    <Text className="truncate text-base font-semibold">
+                      {restaurant.name}
+                    </Text>
+                    <Text variant="muted" className="truncate text-xs">
+                      {restaurant.address_line_1}, {restaurant.locality}
+                    </Text>
+                  </View>
                   <Button
-                    key={item.id}
-                    className="border border-border bg-card"
-                    size="content"
+                    disabled={isSaving}
+                    className="shrink-0"
+                    size="xs"
                     variant="ghost"
-                    onPress={() => selectRestaurant(item)}
+                    onPress={clearRestaurant}
                   >
-                    <Icon as={MapPin} className="text-primary" />
-                    <View className="min-w-0 flex-1 gap-0.5">
-                      <Text className="truncate text-left font-medium">
-                        {item.name}
+                    <Text className="text-sm text-primary">Change</Text>
+                  </Button>
+                </View>
+              ) : (
+                <>
+                  <SearchInput
+                    accessibilityLabel="Search restaurants"
+                    autoFocus
+                    placeholder="Search by name or location"
+                    value={search}
+                    onChangeText={setSearch}
+                  />
+                  {results.isLoading ? <ContentSkeleton rows={1} /> : null}
+                  {results.isError ? (
+                    <Text variant="small" className="text-destructive">
+                      {results.error.message}
+                    </Text>
+                  ) : null}
+                  {results.data?.map((item) => (
+                    <Button
+                      key={item.id}
+                      className="border border-border bg-card"
+                      size="content"
+                      variant="ghost"
+                      onPress={() => selectRestaurant(item)}
+                    >
+                      <Icon as={MapPin} className="text-primary" />
+                      <View className="min-w-0 flex-1 gap-0.5">
+                        <Text className="truncate text-left font-medium">
+                          {item.name}
+                        </Text>
+                        <Text
+                          variant="muted"
+                          className="truncate text-left text-xs"
+                        >
+                          {item.address_line_1}, {item.locality}
+                        </Text>
+                      </View>
+                    </Button>
+                  ))}
+                  {search.trim().length >= 2 &&
+                  !results.isLoading &&
+                  results.data?.length === 0 ? (
+                    <View className="gap-2 border-t border-border pt-3">
+                      <Text variant="muted" className="text-sm">
+                        Can’t find it?
                       </Text>
-                      <Text
-                        variant="muted"
-                        className="truncate text-left text-xs"
-                      >
-                        {item.address_line_1}, {item.locality}
+                      <Link href={routes.restaurantSearchForShare} asChild>
+                        <Button
+                          className="self-start"
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Text>Add a restaurant</Text>
+                        </Button>
+                      </Link>
+                    </View>
+                  ) : null}
+                </>
+              )}
+            </View>
+
+            {restaurant ? (
+              <>
+                <View className="gap-3 border-t border-border pt-6">
+                  <View className="flex-row items-center justify-between">
+                    <Text variant="small">Your rating</Text>
+                    {existingRating.isLoading ? (
+                      <Text variant="muted">Checking your rating…</Text>
+                    ) : null}
+                  </View>
+                  <View className="flex-row items-center justify-between gap-3">
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-row items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((value) => {
+                          const selected = score !== null && value <= score;
+                          return (
+                            <Button
+                              key={value}
+                              accessibilityLabel={`Rate ${value} out of 5`}
+                              accessibilityState={{ selected: score === value }}
+                              disabled={isSaving || existingRating.isLoading}
+                              size="rating"
+                              variant="ghost"
+                              onPress={() => {
+                                selectionFeedback();
+                                setScore(value);
+                              }}
+                            >
+                              <Star
+                                color={
+                                  selected ? theme.rating : theme.textSecondary
+                                }
+                                fill={selected ? theme.rating : "transparent"}
+                                size={25}
+                                strokeWidth={2}
+                              />
+                            </Button>
+                          );
+                        })}
+                      </View>
+                      <Text className="text-sm font-medium" variant="muted">
+                        {score === null ? "Not rated" : `${score} of 5`}
                       </Text>
                     </View>
-                  </Button>
-                ))}
-                {search.trim().length >= 2 &&
-                !results.isLoading &&
-                results.data?.length === 0 ? (
-                  <View className="gap-2 border-t border-border pt-3">
-                    <Text variant="muted" className="text-sm">
-                      Can’t find it?
-                    </Text>
-                    <Link href={routes.restaurantSearchForShare} asChild>
+                    {score !== null ? (
                       <Button
-                        className="self-start"
-                        size="sm"
-                        variant="outline"
+                        accessibilityLabel="Clear your restaurant rating"
+                        className="shrink-0"
+                        size="xs"
+                        disabled={isSaving || existingRating.isLoading}
+                        variant="link"
+                        onPress={() => {
+                          selectionFeedback();
+                          setScore(null);
+                        }}
                       >
-                        <Text>Add a restaurant</Text>
+                        <Text className="text-sm text-primary">
+                          Clear rating
+                        </Text>
                       </Button>
-                    </Link>
+                    ) : null}
+                  </View>
+                </View>
+
+                <View className="gap-3 border-t border-border pt-6">
+                  <View className="flex-row items-center justify-between">
+                    <Text variant="small">Review (optional)</Text>
+                    <Text variant="muted">{body.length}/2000</Text>
+                  </View>
+                  <Textarea
+                    accessibilityLabel="Restaurant review"
+                    editable={!isSaving}
+                    maxLength={2000}
+                    placeholder="What did you like, or what should people know?"
+                    value={body}
+                    onChangeText={setBody}
+                  />
+                </View>
+
+                {!isUpdating ? (
+                  <View className="gap-3 border-t border-border pt-6">
+                    <View className="flex-row items-center justify-between">
+                      <Text variant="small">Photos (optional)</Text>
+                      <Text variant="muted">{images.length}/3</Text>
+                    </View>
+                    {images.length > 0 ? (
+                      <View className="gap-3 sm:flex-row">
+                        {images.map((image, index) => (
+                          <View key={image.uri} className="relative flex-1">
+                            <Image
+                              accessibilityLabel={`Selected photo ${index + 1}`}
+                              className="w-full rounded-md bg-muted"
+                              contentFit="contain"
+                              source={image.uri}
+                              style={{
+                                aspectRatio: getPostPreviewAspectRatio(image),
+                                width: "100%",
+                              }}
+                            />
+                            <Button
+                              accessibilityLabel={`Remove image ${index + 1}`}
+                              className="absolute right-2 top-2 rounded-md bg-background/90"
+                              disabled={isSaving}
+                              size="icon"
+                              variant="outline"
+                              onPress={() =>
+                                setImages((current) =>
+                                  current.filter(
+                                    (candidate) => candidate.uri !== image.uri,
+                                  ),
+                                )
+                              }
+                            >
+                              <Icon as={X} />
+                            </Button>
+                          </View>
+                        ))}
+                      </View>
+                    ) : null}
+                    <Button
+                      className="self-start"
+                      disabled={
+                        images.length >= MAX_IMAGES || isSaving || isPicking
+                      }
+                      variant="outline"
+                      onPress={() => void pickImages()}
+                    >
+                      <Icon as={ImagePlus} />
+                      <Text>
+                        {isPicking
+                          ? "Opening…"
+                          : images.length
+                            ? "Add more photos"
+                            : "Add photos"}
+                      </Text>
+                    </Button>
+                    {pickerError ? (
+                      <Text variant="small" className="text-destructive">
+                        {pickerError}
+                      </Text>
+                    ) : null}
                   </View>
                 ) : null}
               </>
-            )}
-          </View>
+            ) : null}
 
-          {restaurant ? (
-            <>
-              <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-                <View className="flex-row items-center justify-between">
-                  <Text variant="small">Your rating</Text>
-                  {existingRating.isLoading ? (
-                    <Text variant="muted">Loading…</Text>
-                  ) : null}
-                </View>
-                <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-row items-center gap-3">
-                    <View className="flex-row items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((value) => {
-                        const selected = score !== null && value <= score;
-                        return (
-                          <Button
-                            key={value}
-                            accessibilityLabel={`Rate ${value} out of 5`}
-                            accessibilityState={{ selected: score === value }}
-                            disabled={isSaving || existingRating.isLoading}
-                            size="rating"
-                            variant="ghost"
-                            onPress={() => {
-                              selectionFeedback();
-                              setScore(value);
-                            }}
-                          >
-                            <Star
-                              color={
-                                selected ? theme.rating : theme.textSecondary
-                              }
-                              fill={selected ? theme.rating : "transparent"}
-                              size={25}
-                              strokeWidth={2}
-                            />
-                          </Button>
-                        );
-                      })}
-                    </View>
-                    <Text className="text-sm font-medium" variant="muted">
-                      {score === null ? "Not rated" : `${score} of 5`}
-                    </Text>
-                  </View>
-                  {score !== null ? (
-                    <Button
-                      accessibilityLabel="Clear your restaurant rating"
-                      className="shrink-0"
-                      size="xs"
-                      disabled={isSaving || existingRating.isLoading}
-                      variant="link"
-                      onPress={() => {
-                        selectionFeedback();
-                        setScore(null);
-                      }}
-                    >
-                      <Text className="text-sm text-primary">Clear rating</Text>
-                    </Button>
-                  ) : null}
-                </View>
-              </View>
-
-              <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-                <View className="flex-row items-center justify-between">
-                  <Text variant="small">Review (optional)</Text>
-                  <Text variant="muted">{body.length}/2000</Text>
-                </View>
-                <Textarea
-                  accessibilityLabel="Restaurant review"
-                  editable={!isSaving}
-                  maxLength={2000}
-                  placeholder="What did you like, or what should people know?"
-                  value={body}
-                  onChangeText={setBody}
-                />
-              </View>
-
-              {!isUpdating ? (
-                <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-                  <View className="flex-row items-center justify-between">
-                    <Text variant="small">Photos (optional)</Text>
-                    <Text variant="muted">{images.length}/3</Text>
-                  </View>
-                  {images.length > 0 ? (
-                    <View className="gap-3 sm:flex-row">
-                      {images.map((image, index) => (
-                        <View key={image.uri} className="relative flex-1">
-                          <Image
-                            className="h-32 w-full rounded-md bg-muted sm:h-36"
-                            contentFit="cover"
-                            source={image.uri}
-                          />
-                          <Button
-                            accessibilityLabel={`Remove image ${index + 1}`}
-                            className="absolute right-2 top-2 rounded-md bg-background/90"
-                            disabled={isSaving}
-                            size="icon"
-                            variant="outline"
-                            onPress={() =>
-                              setImages((current) =>
-                                current.filter(
-                                  (candidate) => candidate.uri !== image.uri,
-                                ),
-                              )
-                            }
-                          >
-                            <Icon as={X} />
-                          </Button>
-                        </View>
-                      ))}
-                    </View>
-                  ) : null}
-                  <Button
-                    className="self-start"
-                    disabled={
-                      images.length >= MAX_IMAGES || isSaving || isPicking
-                    }
-                    variant="outline"
-                    onPress={() => void pickImages()}
-                  >
-                    <Icon as={ImagePlus} />
-                    <Text>
-                      {isPicking
-                        ? "Opening…"
-                        : images.length
-                          ? "Add more photos"
-                          : "Add photos"}
-                    </Text>
-                  </Button>
-                  {pickerError ? (
-                    <Text variant="small" className="text-destructive">
-                      {pickerError}
-                    </Text>
-                  ) : null}
-                </View>
-              ) : null}
-            </>
-          ) : null}
-
-          {mutationError ? (
-            <Text variant="small" className="text-destructive">
-              {mutationError.message}
-            </Text>
-          ) : null}
+            {mutationError ? (
+              <Text variant="small" className="text-destructive">
+                {mutationError.message}
+              </Text>
+            ) : null}
+          </Card>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+function getPostPreviewAspectRatio(image: ImagePicker.ImagePickerAsset) {
+  const naturalRatio =
+    image.width && image.height ? image.width / image.height : 1;
+  return Math.min(
+    MAX_POST_ASPECT_RATIO,
+    Math.max(MIN_POST_ASPECT_RATIO, naturalRatio),
   );
 }

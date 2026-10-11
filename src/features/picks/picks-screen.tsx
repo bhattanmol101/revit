@@ -1,9 +1,10 @@
 import { Link } from "expo-router";
-import { Plus } from "lucide-react-native";
-import { ActivityIndicator, View } from "react-native";
+import { Bookmark, Plus } from "lucide-react-native";
+import { Pressable, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
@@ -38,12 +39,7 @@ export function PicksScreen() {
           </Link>
         </View>
 
-        {picks.isLoading ? (
-          <View className="items-center gap-2 py-10">
-            <ActivityIndicator />
-            <Text variant="muted">Loading Picks…</Text>
-          </View>
-        ) : null}
+        {picks.isLoading ? <ContentSkeleton /> : null}
         {picks.isError ? (
           <FeedbackState
             actionLabel="Retry"
@@ -54,26 +50,109 @@ export function PicksScreen() {
         ) : null}
         {!picks.isLoading && !picks.isError && items.length === 0 ? (
           <FeedbackState
-            className="min-h-0 self-stretch px-5 py-3"
             description="Create your first ordered restaurant list."
             title="No Picks yet"
           />
         ) : null}
         {items.map((pick) => (
           <Link key={pick.id} href={routes.pick(pick.id)} asChild>
-            <Card className="gap-1 py-3 shadow-none">
-              <CardHeader>
-                <CardTitle>{pick.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Text variant="muted">
-                  {pick.description?.trim() || "Restaurant collection"}
-                </Text>
-              </CardContent>
-            </Card>
+            <Pressable
+              accessibilityRole="link"
+              className="w-full rounded-lg active:opacity-90"
+            >
+              <Card className="w-full flex-row gap-0 overflow-hidden py-0 shadow-none">
+                <PickOrderRail />
+
+                <View className="min-w-0 flex-1">
+                  <View className="min-h-16 flex-1 justify-center gap-1 px-3 py-2 md:px-4">
+                    <Text className="text-base font-semibold leading-5">
+                      {pick.title}
+                    </Text>
+                    <Text
+                      className="text-[13px] leading-[18px]"
+                      numberOfLines={2}
+                      variant="muted"
+                    >
+                      {pick.description?.trim() || "Restaurant collection"}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center justify-between gap-3 border-t border-border px-3 py-1.5 md:px-4">
+                    <View className="min-w-0 flex-row items-center gap-2">
+                      <Icon
+                        as={Bookmark}
+                        className="size-4 text-muted-foreground"
+                      />
+                      <Text variant="muted" className="text-xs">
+                        Personal Pick
+                      </Text>
+                    </View>
+                    <Text
+                      variant="muted"
+                      className="shrink-0 text-xs"
+                      numberOfLines={1}
+                    >
+                      {formatUpdatedAt(pick.updated_at)}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            </Pressable>
           </Link>
         ))}
       </PageScrollView>
     </SafeAreaView>
   );
+}
+
+function PickOrderRail() {
+  return (
+    <View className="w-14 items-center justify-center bg-primary py-2 md:w-16">
+      {Array.from({ length: 3 }, (_, index) => {
+        const position = index + 1;
+
+        return (
+          <View key={position} className="items-center">
+            <View className="size-6 items-center justify-center rounded-full border-2 border-primary-foreground/40 bg-background/10">
+              <Text className="text-[11px] font-semibold leading-none text-primary-foreground">
+                {position}
+              </Text>
+            </View>
+            {position < 3 ? (
+              <View className="h-2 w-0.5 bg-primary-foreground/40" />
+            ) : null}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function formatUpdatedAt(value: string) {
+  const timestamp = new Date(value).getTime();
+  const elapsedMs = Date.now() - timestamp;
+
+  if (!Number.isFinite(timestamp) || elapsedMs < 0) return "Updated recently";
+
+  const minutes = Math.floor(elapsedMs / 60_000);
+  if (minutes < 1) return "Updated just now";
+  if (minutes < 60) return `Updated ${minutes}m ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Updated ${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `Updated ${days}d ago`;
+
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `Updated ${weeks}w ago`;
+
+  return `Updated ${new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short",
+    year:
+      new Date(value).getFullYear() === new Date().getFullYear()
+        ? undefined
+        : "numeric",
+  }).format(new Date(value))}`;
 }

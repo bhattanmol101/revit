@@ -50,14 +50,16 @@ export function AppHeader({
       <View className="h-14 flex-row items-center border-b border-border bg-card px-3">
         {titleAlign === "center" ? (
           <>
-            <View className="w-24 items-start">{leadingControl}</View>
+            <View className="min-w-12 flex-1 items-start">
+              {leadingControl}
+            </View>
             <Text
-              className="min-w-0 flex-1 truncate text-center text-xl font-semibold"
+              className="shrink text-center text-xl font-semibold"
               numberOfLines={1}
             >
               {title}
             </Text>
-            <View className="w-24 items-end">{trailingContent}</View>
+            <View className="min-w-12 flex-1 items-end">{trailingContent}</View>
           </>
         ) : (
           <>

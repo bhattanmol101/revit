@@ -25,6 +25,7 @@ export function CreateForumScreen() {
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
   const [cover, setCover] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
   const slug = slugFromName(name);
   const canSubmit = Boolean(
     user && name.trim() && slug.trim().length >= 3 && !createForum.isPending,
@@ -76,9 +77,13 @@ export function CreateForumScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6">
-        <Card className="gap-6 border-border bg-card p-6 shadow-none">
-          <View className="gap-2 py-1">
+      <ScrollView
+        automaticallyAdjustKeyboardInsets
+        keyboardShouldPersistTaps="handled"
+        contentContainerClassName="w-full gap-5 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
+      >
+        <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
+          <View className="gap-1.5 border-b border-border pb-4">
             <Text variant="h1" className="text-left">
               Create forum
             </Text>
@@ -102,18 +107,29 @@ export function CreateForumScreen() {
             />
           </View>
 
-          <View className="gap-3">
-            <Text variant="small">Cover image (optional)</Text>
+          <View className="gap-2.5">
+            <View className="gap-0.5">
+              <Text variant="small">Cover image (optional)</Text>
+              <Text variant="muted">
+                Give your forum a recognizable visual identity.
+              </Text>
+            </View>
             <Button
               className="self-start"
               disabled={createForum.isPending}
               variant="outline"
               onPress={() =>
                 void (async () => {
+                  setCoverError(null);
                   if (Platform.OS !== "web") {
                     const permission =
                       await ImagePicker.requestMediaLibraryPermissionsAsync();
-                    if (!permission.granted) return;
+                    if (!permission.granted) {
+                      setCoverError(
+                        "Photo access is needed to add a cover image.",
+                      );
+                      return;
+                    }
                   }
                   const result = await ImagePicker.launchImageLibraryAsync({
                     mediaTypes: ["images"],
@@ -130,7 +146,7 @@ export function CreateForumScreen() {
               <View className="relative">
                 <Image
                   accessibilityLabel="Selected forum cover"
-                  className="h-36 w-full rounded-md bg-muted"
+                  className="h-40 w-full rounded-lg bg-muted"
                   contentFit="cover"
                   source={cover.uri}
                 />
@@ -145,6 +161,11 @@ export function CreateForumScreen() {
                   <Icon as={X} />
                 </Button>
               </View>
+            ) : null}
+            {coverError ? (
+              <Text className="text-destructive" variant="small">
+                {coverError}
+              </Text>
             ) : null}
           </View>
 

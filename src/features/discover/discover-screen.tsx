@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { MapPin } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 
 import type {
   DiscoverResults,
@@ -11,6 +11,7 @@ import type {
 import type { Restaurant } from "@/api/restaurants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
@@ -58,10 +59,7 @@ export function DiscoverScreen() {
         ) : null}
 
         {hasSearchTerm && results.isLoading ? (
-          <View className="flex-row items-center gap-2 py-3">
-            <ActivityIndicator />
-            <Text variant="muted">Searching…</Text>
-          </View>
+          <ContentSkeleton rows={2} />
         ) : null}
 
         {hasSearchTerm && results.isError ? (
@@ -243,13 +241,7 @@ function SearchState({
   description: string;
   title: string;
 }) {
-  return (
-    <FeedbackState
-      className="min-h-0 w-full self-stretch px-5 py-3"
-      description={description}
-      title={title}
-    />
-  );
+  return <FeedbackState description={description} title={title} />;
 }
 
 function getInitials(displayName: string) {

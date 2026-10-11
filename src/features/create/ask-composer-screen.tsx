@@ -161,7 +161,7 @@ export function AskComposerScreen() {
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+          contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
           <Card className="gap-6 border-border bg-card p-6 shadow-none">
             <View className="gap-2 py-1">

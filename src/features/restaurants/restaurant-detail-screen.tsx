@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { MapPin, Star } from "lucide-react-native";
+import { MapPin, Star, StarHalf } from "lucide-react-native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
 
   return (
     <ScrollView
-      contentContainerClassName="w-full gap-6 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
+      contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
       refreshControl={
         <RefreshControl
           refreshing={
@@ -107,8 +107,22 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
           </View>
         </View>
 
-        <View className="flex-row items-end gap-2 border-t border-border pt-3">
-          <Icon as={Star} className="size-6 text-rating" fill={theme.rating} />
+        <View className="flex-row flex-wrap items-center gap-2 border-t border-border pt-3">
+          <View className="flex-row items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((value) => {
+              const average = summary.data?.averageScore ?? 0;
+              const filled = average >= value;
+              const halfFilled = !filled && average >= value - 0.5;
+              return (
+                <Icon
+                  key={value}
+                  as={halfFilled ? StarHalf : Star}
+                  className="size-5 text-rating"
+                  fill={filled ? theme.rating : "transparent"}
+                />
+              );
+            })}
+          </View>
           <Text className="text-2xl font-semibold">
             {summary.isLoading || summary.isError
               ? "—"
@@ -170,7 +184,7 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
 
 function RestaurantDetailLoading() {
   return (
-    <View className="w-full gap-6 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6">
+    <View className="w-full gap-6 px-6 md:mx-auto md:max-w-3xl md:py-6">
       <Skeleton className="h-32 w-full" />
       <Skeleton className="h-6 w-24" />
       <Skeleton className="h-60 w-full" />

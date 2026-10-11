@@ -5,6 +5,7 @@ import type { FollowProfile } from "@/api/follows";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
@@ -46,7 +47,7 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="w-full grow px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
+        contentContainerClassName="w-full grow px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
           <FollowListState
@@ -135,9 +136,8 @@ function FollowListState({
 }) {
   if (profileLoading || listLoading) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 py-16">
-        <ActivityIndicator />
-        <Text variant="muted">Loading {kind}…</Text>
+      <View className="py-4">
+        <ContentSkeleton />
       </View>
     );
   }

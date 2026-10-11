@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { AuthScreenLayout } from "@/components/auth/auth-screen-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Text } from "@/components/ui/text";
 import { supabase } from "@/lib/supabase/client";
 
@@ -79,14 +80,13 @@ export default function AuthScreen() {
         </View>
         <View className="gap-2">
           <Text variant="small">Password</Text>
-          <Input
+          <PasswordInput
             accessibilityLabel="Password"
             autoComplete={
               mode === "signIn" ? "current-password" : "new-password"
             }
             onChangeText={setPassword}
             placeholder="At least 8 characters"
-            secureTextEntry
             value={password}
           />
         </View>

@@ -7,6 +7,7 @@ import type { Restaurant } from "@/api/restaurants";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -171,11 +172,12 @@ export function PickEditorScreen() {
         }}
       />
       <ScrollView
+        automaticallyAdjustKeyboardInsets
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+        contentContainerClassName="w-full gap-5 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
-        <Card className="gap-6 border-border bg-card p-6 shadow-none">
-          <View className="gap-2 py-1">
+        <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
+          <View className="gap-1.5 border-b border-border pb-4">
             <Text variant="h1" className="text-left">
               {isEditing ? "Edit Pick" : "Create a Pick"}
             </Text>
@@ -213,8 +215,13 @@ export function PickEditorScreen() {
             />
           </View>
 
-          <View className="gap-3">
-            <Text variant="small">Restaurants</Text>
+          <View className="gap-2.5">
+            <View className="gap-0.5">
+              <Text variant="small">Find restaurants</Text>
+              <Text variant="muted">
+                Add places, then arrange them in the order you recommend.
+              </Text>
+            </View>
             <SearchInput
               accessibilityLabel="Find a restaurant for this Pick"
               editable={!isSaving}
@@ -267,8 +274,15 @@ export function PickEditorScreen() {
             })}
           </View>
 
-          <View className="gap-3">
-            <Text variant="small">Your order</Text>
+          <View className="gap-2.5">
+            <View className="flex-row items-center justify-between gap-3">
+              <Text variant="small">Your order</Text>
+              {items.length > 0 ? (
+                <Text variant="muted" className="text-xs">
+                  {items.length} {items.length === 1 ? "place" : "places"}
+                </Text>
+              ) : null}
+            </View>
             {items.length === 0 ? (
               <FeedbackState
                 description="Search above and add at least one restaurant to continue."
@@ -278,7 +292,7 @@ export function PickEditorScreen() {
             {items.map((item, index) => (
               <View
                 key={item.restaurant.id}
-                className="gap-2 border-t border-border pt-3"
+                className="gap-2 rounded-lg border border-border bg-background p-3"
               >
                 <View className="flex-row items-start gap-2">
                   <Text className="pt-0.5 text-sm font-semibold text-primary">
@@ -325,6 +339,7 @@ export function PickEditorScreen() {
                   editable={!isSaving}
                   maxLength={500}
                   placeholder="Why it belongs here (optional)"
+                  size="compact"
                   value={item.note}
                   onChangeText={(note) => updateNote(index, note)}
                 />
@@ -357,9 +372,8 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="flex-1 items-center justify-center gap-2">
-        <ActivityIndicator />
-        <Text variant="muted">Loading Pick…</Text>
+      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
+        <ContentSkeleton rows={3} />
       </View>
     </SafeAreaView>
   );

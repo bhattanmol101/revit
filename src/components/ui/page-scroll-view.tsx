@@ -30,7 +30,7 @@ export function PageScrollView({
     <ScrollView
       {...props}
       contentContainerClassName={cn(
-        "w-full px-4 md:mx-auto md:px-6 md:py-6",
+        "w-full px-6 md:mx-auto md:py-6",
         contentWidths[contentWidth],
         contentContainerClassName,
       )}

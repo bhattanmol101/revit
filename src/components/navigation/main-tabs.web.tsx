@@ -27,11 +27,8 @@ export default function MainTabs() {
 
   return (
     <Tabs className="flex-1 bg-background">
-      <TabSlot style={{ flex: 1, marginTop: 56 }} />
-
-      <View className="absolute left-0 right-0 top-0">
-        <AppHeader showAccountActions title={title} />
-      </View>
+      <AppHeader showAccountActions title={title} />
+      <TabSlot style={{ flex: 1 }} />
 
       <TabList
         className="hidden"

@@ -18,7 +18,7 @@ import { routes } from "@/lib/routes";
 export function CreateChoiceScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <ScrollView contentContainerClassName="w-full gap-6 px-4 pb-8 pt-4 md:mx-auto md:max-w-3xl md:px-6 md:pb-12 md:pt-6">
+      <ScrollView contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-3xl md:px-6 md:pb-12 md:pt-6">
         <View className="gap-2 py-1">
           <Text variant="h1" className="text-left">
             Share your taste
@@ -29,13 +29,13 @@ export function CreateChoiceScreen() {
         </View>
 
         <View className="items-stretch gap-4 sm:flex-row">
-          <Card className="min-h-56 flex-1 justify-between gap-5 p-5">
+          <Card className="flex-1 justify-between gap-4 p-4">
             <CardHeader className="gap-3 px-0">
               <View className="size-9 items-center justify-center rounded-md bg-selected">
                 <Icon as={MessageCircleQuestion} className="text-primary" />
               </View>
               <CardTitle className="text-lg">Ask for ratings</CardTitle>
-              <CardDescription className="min-h-10 leading-5">
+              <CardDescription className="leading-5">
                 Post a question and let people respond with a 1–5 rating.
               </CardDescription>
             </CardHeader>
@@ -49,13 +49,15 @@ export function CreateChoiceScreen() {
             </CardContent>
           </Card>
 
-          <Card className="min-h-56 flex-1 justify-between gap-5 p-5">
+          <Card className="flex-1 justify-between gap-4 p-4">
             <CardHeader className="gap-3 px-0">
               <View className="size-9 items-center justify-center rounded-md bg-elevated">
                 <Icon as={Star} className="text-rating" />
               </View>
-              <CardTitle className="text-lg">Share a restaurant rating</CardTitle>
-              <CardDescription className="min-h-10 leading-5">
+              <CardTitle className="text-lg">
+                Share a restaurant rating
+              </CardTitle>
+              <CardDescription className="leading-5">
                 Rate a restaurant and add an optional review or photos.
               </CardDescription>
             </CardHeader>
