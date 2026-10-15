@@ -27,7 +27,7 @@ export type PostPage = {
   nextOffset?: number;
 };
 
-export type UpdateAskPostInput = Pick<TablesUpdate<"posts">, "body" | "title">;
+export type UpdateAskPostInput = Pick<TablesUpdate<"posts">, "body">;
 
 type RawPostWithDetails = Post & {
   author: PostAuthor;
@@ -35,7 +35,7 @@ type RawPostWithDetails = Post & {
 };
 
 const POST_DETAILS_SELECT =
-  "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url), media:post_media(id, post_id, storage_path, position, alt_text, created_at)";
+  "id, author_id, post_type, entity_id, forum_id, body, created_at, updated_at, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url), media:post_media(id, post_id, storage_path, position, alt_text, created_at)";
 
 export type AskImageUpload = {
   contentType:
@@ -52,7 +52,6 @@ export type CreateAskPostInput = {
   authorId: string;
   body?: string;
   images: AskImageUpload[];
-  title: string;
 };
 
 export type CreateForumAskPostInput = CreateAskPostInput & {
@@ -77,7 +76,6 @@ export function createForumAskPost(
     forumId: input.forumId,
     images: input.images,
     postType: "ASK",
-    title: input.title,
   });
 }
 
@@ -112,7 +110,6 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
           p_body: input.body?.trim() || undefined,
           p_media_paths: uploadedPaths,
           p_post_id: postId,
-          p_title: input.title.trim(),
         })
         .abortSignal(signal)
         .single();
@@ -124,19 +121,18 @@ export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
       return data;
     });
   } catch (error) {
-    await removePostImages(uploadedPaths);
+    await tryRemovePostImages(uploadedPaths);
     throw error;
   }
 }
 
-function createForumPost({
+async function createForumPost({
   authorId,
   body,
   entityId,
   forumId,
   images,
   postType,
-  title,
 }: {
   authorId: string;
   body?: string;
@@ -144,42 +140,37 @@ function createForumPost({
   forumId: string;
   images: AskImageUpload[];
   postType: "ASK" | "SHARE";
-  title?: string;
 }): Promise<Post> {
-  return runApiRequest(async (signal) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .insert({
-        author_id: authorId,
-        body: body?.trim() || null,
-        entity_id: entityId ?? null,
-        forum_id: forumId,
-        post_type: postType,
-        title: title?.trim() || null,
-      })
-      .select(
-        "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
-      )
-      .abortSignal(signal)
-      .single();
+  validateForumPost({ authorId, body, entityId, postType });
 
-    if (error) {
-      throw normalizeApiError(error, "We could not publish this forum post.");
-    }
+  const postId = crypto.randomUUID();
+  await reservePostImageCleanup(authorId, postId, images);
+  const uploadedPaths = await uploadPostImages({ authorId, images, postId });
 
-    try {
-      await attachPostImages({
-        authorId,
-        images,
-        postId: data.id,
-        signal,
-      });
+  try {
+    return await runApiRequest(async (signal) => {
+      const { data, error } = await supabase
+        .rpc("create_forum_post_with_media", {
+          p_body: body?.trim() || undefined,
+          p_entity_id: entityId,
+          p_forum_id: forumId,
+          p_media_paths: uploadedPaths,
+          p_post_id: postId,
+          p_post_type: postType,
+        })
+        .abortSignal(signal)
+        .single();
+
+      if (error) {
+        throw normalizeApiError(error, "We could not publish this forum post.");
+      }
+
       return data;
-    } catch (error) {
-      await cleanUpFailedPost(data.id, []);
-      throw error;
-    }
-  });
+    });
+  } catch (error) {
+    await tryRemovePostImages(uploadedPaths);
+    throw error;
+  }
 }
 
 export async function attachPostImages({
@@ -221,7 +212,7 @@ export async function attachPostImages({
       );
     }
   } catch (error) {
-    await removePostImages(uploadedPaths);
+    await tryRemovePostImages(uploadedPaths);
     throw error;
   }
 }
@@ -259,7 +250,7 @@ export async function uploadPostImages({
 
     return uploadedPaths;
   } catch (error) {
-    await removePostImages(uploadedPaths);
+    await tryRemovePostImages(uploadedPaths);
     throw error;
   }
 }
@@ -291,7 +282,10 @@ export async function removePostImages(storagePaths: string[]) {
   }
 }
 
-export function getPost(postId: string): Promise<PostWithDetails | null> {
+export function getPost(
+  postId: string,
+  requestSignal?: AbortSignal,
+): Promise<PostWithDetails | null> {
   return runApiRequest(
     async (signal) => {
       const { data, error } = await supabase
@@ -310,7 +304,7 @@ export function getPost(postId: string): Promise<PostWithDetails | null> {
       const [post] = await signPostMedia([data]);
       return post;
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 }
 
@@ -345,6 +339,7 @@ export function getPostsByIds(postIds: string[]): Promise<PostWithDetails[]> {
 export function getAskPostsByAuthor(
   authorId: string,
   offset = 0,
+  requestSignal?: AbortSignal,
 ): Promise<PostPage> {
   return runApiRequest(
     async (signal) => {
@@ -370,11 +365,15 @@ export function getAskPostsByAuthor(
         nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
       };
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 }
 
-export function getForumPosts(forumId: string, offset = 0): Promise<PostPage> {
+export function getForumPosts(
+  forumId: string,
+  offset = 0,
+  requestSignal?: AbortSignal,
+): Promise<PostPage> {
   return runApiRequest(
     async (signal) => {
       const { data, error } = await supabase
@@ -398,13 +397,14 @@ export function getForumPosts(forumId: string, offset = 0): Promise<PostPage> {
         nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
       };
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 }
 
 export function getSharePostsByEntity(
   entityId: string,
   offset = 0,
+  requestSignal?: AbortSignal,
 ): Promise<PostPage> {
   return runApiRequest(
     async (signal) => {
@@ -430,7 +430,7 @@ export function getSharePostsByEntity(
         nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
       };
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 }
 
@@ -438,25 +438,23 @@ export function updateAskPost(
   postId: string,
   input: UpdateAskPostInput,
 ): Promise<Post> {
-  const title = input.title?.trim() ?? "";
   const body = input.body?.trim() || null;
-
-  if (title.length < 1 || title.length > 120) {
-    throw new Error("The title must be between 1 and 120 characters.");
-  }
 
   if ((body?.length ?? 0) > 2000) {
     throw new Error("The description must be 2,000 characters or fewer.");
+  }
+  if (!body) {
+    throw new Error("Add your question before saving.");
   }
 
   return runApiRequest(async (signal) => {
     const { data, error } = await supabase
       .from("posts")
-      .update({ body, title })
+      .update({ body })
       .eq("id", postId)
       .eq("post_type", "ASK")
       .select(
-        "id, author_id, post_type, entity_id, forum_id, title, body, created_at, updated_at",
+        "id, author_id, post_type, entity_id, forum_id, body, created_at, updated_at",
       )
       .abortSignal(signal)
       .single();
@@ -493,17 +491,14 @@ export function deletePost(postId: string): Promise<void> {
   });
 }
 
-export async function cleanUpPendingPostImages(ownerId: string) {
-  const { data, error } = await supabase
-    .from("post_image_cleanup")
-    .select("storage_path")
-    .eq("owner_id", ownerId);
+export async function cleanUpPendingPostImages() {
+  const { data, error } = await supabase.rpc("get_stale_post_image_cleanup");
 
   if (error) {
     throw normalizeApiError(error, "We could not resume image cleanup.");
   }
 
-  const storagePaths = data.map((item) => item.storage_path);
+  const storagePaths = data;
   if (storagePaths.length === 0) return;
 
   await removePostImages(storagePaths);
@@ -562,19 +557,17 @@ async function signPostMedia(
 }
 
 function validateAskPost(input: CreateAskPostInput) {
-  const titleLength = input.title.trim().length;
   const bodyLength = input.body?.trim().length ?? 0;
 
   if (!input.authorId) {
     throw new Error("You must be signed in to create a post.");
   }
 
-  if (titleLength < 1 || titleLength > 120) {
-    throw new Error("The title must be between 1 and 120 characters.");
-  }
-
   if (bodyLength > 2000) {
     throw new Error("The description must be 2,000 characters or fewer.");
+  }
+  if (bodyLength < 1) {
+    throw new Error("Add your question before publishing.");
   }
 
   if (input.images.length > 3) {
@@ -591,10 +584,39 @@ function validateAskPost(input: CreateAskPostInput) {
   }
 }
 
-async function cleanUpFailedPost(postId: string, storagePaths: string[]) {
-  if (storagePaths.length > 0) {
-    await supabase.storage.from(POST_IMAGES_BUCKET).remove(storagePaths);
+function validateForumPost({
+  authorId,
+  body,
+  entityId,
+  postType,
+}: {
+  authorId: string;
+  body?: string;
+  entityId?: string;
+  postType: "ASK" | "SHARE";
+}) {
+  if (!authorId) {
+    throw new Error("You must be signed in to publish a forum post.");
   }
+  if ((body?.trim().length ?? 0) > 2_000) {
+    throw new Error("The description must be 2,000 characters or fewer.");
+  }
+  if (postType === "ASK") {
+    if (!body?.trim()) {
+      throw new Error("Add your question before publishing.");
+    }
+    if (entityId) {
+      throw new Error("An Ask post cannot include a restaurant.");
+    }
+  } else if (!entityId) {
+    throw new Error("Choose a restaurant to share.");
+  }
+}
 
-  await supabase.from("posts").delete().eq("id", postId);
+export async function tryRemovePostImages(storagePaths: string[]) {
+  try {
+    await removePostImages(storagePaths);
+  } catch {
+    // Keep the cleanup reservations so the stale-upload worker can retry.
+  }
 }

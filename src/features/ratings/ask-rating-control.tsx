@@ -35,6 +35,8 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
           {onClose ? (
             <Button
               accessibilityLabel="Collapse rating options"
+              className="p-0"
+              hitSlop={8}
               onPress={onClose}
               size="icon"
               variant="ghost"
@@ -60,12 +62,14 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
   }
 
   return (
-    <View className="gap-2 border-t border-border bg-elevated px-5 py-3">
+    <View className="border-t border-border px-4 w-full gap-2.5 py-2 md:py-3">
       <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-semibold">Your rating</Text>
+        <Text className="text-sm">Your Rating</Text>
         {onClose ? (
           <Button
             accessibilityLabel="Collapse rating options"
+            className="p-0 pr-2"
+            hitSlop={8}
             onPress={onClose}
             size="icon"
             variant="ghost"
@@ -75,7 +79,7 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
         ) : null}
       </View>
 
-      <View className="flex-row items-center gap-2">
+      <View className="flex-row items-center justify-between">
         {rating.isLoading ? (
           <View className="flex-row items-center gap-3">
             <View className="flex-row items-center gap-0.5">
@@ -90,8 +94,8 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
           </View>
         ) : (
           <>
-            <View className="min-w-0 flex-row items-center gap-2">
-              <View className="flex-row items-center gap-0.5">
+            <View className="flex-row items-center gap-3">
+              <View className="flex-row items-center gap-2">
                 {SCORES.map((score) => {
                   const isSelected = currentScore === score;
                   const isActive =
@@ -108,25 +112,23 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
                         selectionFeedback();
                         setRating.mutate(score);
                       }}
-                      size="rating"
+                      size="icon"
                       variant="ghost"
+                      className="p-0"
                     >
                       <Icon
                         as={Star}
-                        className={
-                          isActive
-                            ? "size-5 text-rating"
-                            : "size-5 text-muted-foreground/60"
-                        }
+                        className="size-5 text-rating"
                         fill={isActive ? theme.rating : "none"}
-                        strokeWidth={isActive ? 2.3 : 1.8}
+                        stroke={theme.rating}
+                        strokeWidth={isActive ? 0 : 1.8}
                       />
                     </Button>
                   );
                 })}
               </View>
-              <Text className="text-sm font-medium" variant="muted">
-                {currentScore === null ? "Not rated" : `${currentScore}/5`}
+              <Text className="text-xs font-medium" variant="muted">
+                {currentScore === null ? "Not Rated" : `${currentScore}/5`}
               </Text>
             </View>
 
@@ -138,8 +140,8 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
                   selectionFeedback();
                   setRating.mutate(null);
                 }}
-                className="ml-auto"
-                size="xs"
+                className="ml-auto p-0"
+                size="icon"
                 variant="link"
               >
                 <Text className="text-xs text-primary">Clear rating</Text>

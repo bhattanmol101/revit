@@ -1,4 +1,6 @@
 import { Link } from "expo-router";
+import { LogOut } from "lucide-react-native";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -12,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -33,7 +36,9 @@ export function ProfileView({
   isOwnProfile = false,
   profile,
 }: ProfileViewProps) {
-  const { user } = useAuth();
+  const { signOut, user } = useAuth();
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const isOwn = isOwnProfile || user?.id === profile.id;
   const counts = useFollowCounts(profile.id);
   const posts = useAskPostsByAuthor(profile.id);
@@ -118,6 +123,37 @@ export function ProfileView({
                       : "Follow"}
                 </Text>
               </Button>
+            ) : null}
+
+            {isOwn ? (
+              <Button
+                className="mt-2 self-start"
+                disabled={isSigningOut}
+                size="sm"
+                variant="outline"
+                onPress={() => {
+                  setSignOutError(null);
+                  setIsSigningOut(true);
+                  void signOut()
+                    .catch((error: unknown) => {
+                      setSignOutError(
+                        error instanceof Error
+                          ? error.message
+                          : "We couldn’t sign you out. Please try again.",
+                      );
+                    })
+                    .finally(() => setIsSigningOut(false));
+                }}
+              >
+                <Icon as={LogOut} />
+                <Text>{isSigningOut ? "Signing out…" : "Sign out"}</Text>
+              </Button>
+            ) : null}
+
+            {signOutError ? (
+              <Text variant="small" className="text-destructive">
+                {signOutError}
+              </Text>
             ) : null}
 
             {!isOwn && (followStatus.isError || followToggle.isError) ? (

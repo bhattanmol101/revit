@@ -43,7 +43,7 @@ function FeedbackState({
   return (
     <View
       className={cn(
-        "min-h-24 justify-center gap-1 rounded-lg border border-border bg-card px-3 py-4",
+        "justify-center gap-1 rounded-lg border border-border bg-card px-3 py-4",
         className,
       )}
       {...props}

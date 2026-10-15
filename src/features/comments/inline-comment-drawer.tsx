@@ -70,10 +70,10 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
   };
 
   return (
-    <View className="gap-3 border-t border-border bg-elevated px-5 py-3">
+    <View className="gap-2 border-t border-border bg-elevated px-3 py-2 w-full">
       <View className="gap-2">
         <View className="flex-row items-center gap-2">
-          <Avatar alt={`${displayName}'s avatar`} className="size-8">
+          <Avatar alt={`${displayName}'s avatar`} className="size-10">
             {profile?.avatar_url ? (
               <AvatarImage
                 accessibilityLabel={`${displayName}'s avatar`}
@@ -145,7 +145,7 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
       {items.length > 0 ? (
         <View className="gap-2">
           {items.map((comment) => (
-            <View key={comment.id} className="gap-2">
+            <View key={comment.id} className="gap-1.5">
               <View className="flex-row gap-3 rounded-lg bg-card px-3 py-2.5">
                 <Avatar
                   alt={`${comment.author.display_name}'s avatar`}
@@ -163,8 +163,8 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
                     </Text>
                   </AvatarFallback>
                 </Avatar>
-                <View className="min-w-0 flex-1 gap-0.5">
-                  <View className="flex-row items-baseline justify-between gap-3">
+                <View className="min-w-0 flex-1 gap-1">
+                  <View className="flex-row items-baseline justify-between">
                     <Text
                       className="min-w-0 flex-1 text-xs font-semibold"
                       numberOfLines={1}
@@ -179,9 +179,9 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
                     {comment.body}
                   </Text>
                   <Button
-                    className="self-start"
+                    className="self-start p-0 pt-1"
                     onPress={() => openReply(comment)}
-                    size="xs"
+                    size="icon"
                     variant="link"
                   >
                     <Text className="text-xs text-primary">Reply</Text>
@@ -189,13 +189,13 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
                 </View>
               </View>
               {replyingTo?.id === comment.id || comment.replies.length > 0 ? (
-                <View className="ml-8 gap-2 border-l border-border pl-3">
+                <View className="ml-8 gap-1.5 border-l border-border pl-3">
                   {replyingTo?.id === comment.id ? (
                     <View className="gap-2">
                       <View className="flex-row items-center gap-2">
                         <Avatar
                           alt={`${displayName}'s avatar`}
-                          className="size-8"
+                          className="size-10"
                         >
                           {profile?.avatar_url ? (
                             <AvatarImage

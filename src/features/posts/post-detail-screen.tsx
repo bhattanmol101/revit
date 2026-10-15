@@ -13,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -243,16 +242,13 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
   const deletePost = useDeletePost(post.author_id);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [title, setTitle] = useState(post.title ?? "");
   const [body, setBody] = useState(post.body ?? "");
   const canSave =
-    title.trim().length >= 1 &&
-    title.trim().length <= 120 &&
+    body.trim().length >= 1 &&
     body.trim().length <= 2000 &&
     !updatePost.isPending;
 
   const openEditor = () => {
-    setTitle(post.title ?? "");
     setBody(post.body ?? "");
     updatePost.reset();
     setIsEditOpen(true);
@@ -262,7 +258,7 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
     if (!canSave) return;
 
     try {
-      await updatePost.mutateAsync({ body, title });
+      await updatePost.mutateAsync({ body });
       setIsEditOpen(false);
     } catch {
       // The mutation error stays visible in the editor for a retry.
@@ -295,23 +291,11 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
           <DialogHeader>
             <DialogTitle>Edit Ask</DialogTitle>
             <DialogDescription>
-              Update the title or details. Existing images keep their order.
+              Update the details. Existing images keep their order.
             </DialogDescription>
           </DialogHeader>
 
           <View className="gap-4">
-            <View className="gap-2">
-              <Text variant="small">Title</Text>
-              <Input
-                editable={!updatePost.isPending}
-                maxLength={120}
-                value={title}
-                onChangeText={setTitle}
-              />
-              <Text variant="muted" className="text-right">
-                {title.length}/120
-              </Text>
-            </View>
             <View className="gap-2">
               <Text variant="small">Details (optional)</Text>
               <Textarea

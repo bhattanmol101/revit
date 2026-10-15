@@ -8,21 +8,17 @@ create table public.posts (
   author_id uuid not null references public.profiles (id) on delete cascade,
   post_type public.post_type not null,
   entity_id uuid,
-  title text,
   body text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint posts_title_length check (
-    title is null or char_length(trim(title)) between 1 and 120
-  ),
   constraint posts_body_length check (
     body is null or char_length(trim(body)) between 1 and 2000
   ),
-  constraint posts_ask_title_required check (
-    post_type <> 'ASK' or title is not null
-  ),
   constraint posts_ask_has_no_entity check (
     post_type <> 'ASK' or entity_id is null
+  ),
+  constraint posts_ask_body_required check (
+    post_type <> 'ASK' or body is not null
   )
 );
 
@@ -40,7 +36,7 @@ alter table public.posts enable row level security;
 
 revoke all on table public.posts from anon, authenticated;
 grant select, insert, delete on table public.posts to authenticated;
-grant update (title, body) on table public.posts to authenticated;
+grant update (body) on table public.posts to authenticated;
 
 create policy "Authenticated users can view posts"
   on public.posts

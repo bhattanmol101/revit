@@ -8,7 +8,12 @@ import type { SharePostWithDetails } from "@/api/shares";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
@@ -36,8 +41,8 @@ export function SharePostCard({
 
   return (
     <Card className="gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
-      <CardHeader className="gap-4 px-5 pb-4 pt-5">
-        <View className="flex-row items-start justify-between gap-3">
+      <CardHeader className="md:pt-3 py-2">
+        <View className="flex-row items-start justify-between gap-2">
           <Avatar
             alt={`${post.author.display_name}'s avatar`}
             className="size-9"
@@ -72,24 +77,25 @@ export function SharePostCard({
               </Text>
             </Link>
           </View>
-          <Badge className="rounded-full px-2.5 py-1" variant="default">
-            <Text className="text-[11px] font-semibold">SHARE</Text>
+          <Badge className="rounded-full px-2 py-0.5" variant="default">
+            <Text className="text-[9px] font-semibold">SHARE</Text>
           </Badge>
         </View>
-
-        <Link href={routes.restaurant(restaurant.id)} asChild>
+      </CardHeader>
+      <CardContent className="gap-2 px-0">
+        <Link
+          href={routes.restaurant(restaurant.id)}
+          asChild
+          className="px-2 md:px-3 md:pt-1 py-0"
+        >
           <Button
             accessibilityLabel={`View ${restaurant.name}`}
-            className="w-full border-l-2 border-primary"
-            size="content"
+            size="icon"
             variant="ghost"
           >
             <Icon as={MapPin} className="size-5 text-primary" />
-            <View className="min-w-0 flex-1 items-start gap-0.5">
-              <Text
-                className="text-lg font-semibold leading-6"
-                numberOfLines={1}
-              >
+            <View className="flex-1 items-start gap-0.5">
+              <Text className="text-[14px] font-semibold" numberOfLines={1}>
                 {restaurant.name}
               </Text>
               <Text className="text-xs" variant="muted" numberOfLines={1}>
@@ -100,17 +106,18 @@ export function SharePostCard({
           </Button>
         </Link>
 
-        {post.body ? (
-          <Text className="text-sm leading-5" variant="muted">
-            {post.body}
-          </Text>
-        ) : null}
-      </CardHeader>
-
-      <CardContent className="gap-0 px-0">
+        <View className="px-2">
+          {post.body ? (
+            <Text className="text-sm leading-5" variant="muted">
+              {post.body}
+            </Text>
+          ) : null}
+        </View>
         <PostMediaGallery isDetail={isDetail} media={post.media} />
-        <Separator />
-        <View className="min-h-14 flex-row items-center px-5 py-2">
+      </CardContent>
+
+      <CardFooter className="flex-col items-start w-full px-0">
+        <View className="w-full flex-row items-center justify-start px-2.5 py-2">
           <View className="flex-1 flex-row items-center gap-3">
             {isDetail ? (
               <Link href={routes.post(post.id)} asChild>
@@ -135,11 +142,7 @@ export function SharePostCard({
               <Button
                 accessibilityLabel={`View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
                 accessibilityState={{ expanded: commentsExpanded }}
-                className={
-                  commentsExpanded
-                    ? "h-9 gap-1.5 border border-primary bg-selected px-2"
-                    : "h-9 gap-1.5 px-2"
-                }
+                className={`h-8 gap-1.5 border ${commentsExpanded ? "border-primary bg-selected" : "border-transparent"}`}
                 variant="ghost"
                 onPress={() => setCommentsExpanded((expanded) => !expanded)}
               >
@@ -157,7 +160,7 @@ export function SharePostCard({
         {!isDetail && commentsExpanded ? (
           <InlineCommentDrawer postId={post.id} />
         ) : null}
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }
@@ -176,17 +179,13 @@ function ShareRating({ score }: { score: number }) {
           <Icon
             key={star}
             as={isHalfFilled ? StarHalf : Star}
-            className={
-              isFilled || isHalfFilled
-                ? "size-3.5 text-rating"
-                : "size-3.5 text-muted-foreground/60"
-            }
+            className="size-4 text-rating"
             fill={isFilled || isHalfFilled ? theme.rating : "none"}
-            strokeWidth={isFilled ? 2.2 : 1.8}
+            stroke={theme.rating}
+            strokeWidth={isFilled || isHalfFilled ? 0 : 1.8}
           />
         );
       })}
-      <Text className="ml-1 text-[13px] font-medium">{score.toFixed(1)}</Text>
     </View>
   );
 }

@@ -79,7 +79,6 @@ create policy "Authors can complete their pending image cleanup"
 
 create function public.create_ask_post_with_media(
   p_post_id uuid,
-  p_title text,
   p_body text default null,
   p_media_paths text[] default array[]::text[]
 )
@@ -101,8 +100,8 @@ begin
     raise exception using errcode = '23514', message = 'A post can contain up to three images.';
   end if;
 
-  insert into public.posts (id, author_id, post_type, title, body)
-  values (p_post_id, current_user_id, 'ASK', btrim(p_title), nullif(btrim(p_body), ''))
+  insert into public.posts (id, author_id, post_type, body)
+  values (p_post_id, current_user_id, 'ASK', nullif(btrim(p_body), ''))
   returning * into created_post;
 
   foreach media_path in array p_media_paths loop
@@ -169,9 +168,9 @@ begin
 end;
 $$;
 
-revoke all on function public.create_ask_post_with_media(uuid, text, text, text[]) from public;
+revoke all on function public.create_ask_post_with_media(uuid, text, text[]) from public;
 revoke all on function public.create_share_rating_post_with_media(uuid, uuid, numeric, text, text[]) from public;
-grant execute on function public.create_ask_post_with_media(uuid, text, text, text[]) to authenticated;
+grant execute on function public.create_ask_post_with_media(uuid, text, text[]) to authenticated;
 grant execute on function public.create_share_rating_post_with_media(uuid, uuid, numeric, text, text[]) to authenticated;
 
 create function public.delete_post_with_cleanup(p_post_id uuid)

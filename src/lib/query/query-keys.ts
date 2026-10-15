@@ -14,8 +14,8 @@ export const queryKeys = {
   },
   feed: {
     all: ["feed"] as const,
-    home: (mode: "following" | "for-you") =>
-      [...queryKeys.feed.all, "home", mode] as const,
+    home: (viewerId: string, mode: "following" | "for-you") =>
+      [...queryKeys.feed.all, "home", viewerId, mode] as const,
   },
   follows: {
     all: ["follows"] as const,

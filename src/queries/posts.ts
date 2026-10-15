@@ -18,19 +18,21 @@ import {
   updateAskPost,
 } from "@/api/posts";
 import { useEffect } from "react";
-import { type LocalImage, readLocalImage } from "@/lib/media/read-local-image";
+import {
+  type LocalImage,
+  readLocalImagesSequentially,
+} from "@/lib/media/read-local-image";
 import { queryKeys } from "@/lib/query/query-keys";
 
 export type CreateAskPostMutationInput = {
   authorId: string;
   body?: string;
   images: LocalImage[];
-  title: string;
 };
 
 export function usePostImageCleanup(userId: string) {
   const cleanup = useMutation({
-    mutationFn: () => cleanUpPendingPostImages(userId),
+    mutationFn: cleanUpPendingPostImages,
     retry: 2,
   });
   const startCleanup = cleanup.mutate;
@@ -45,7 +47,7 @@ export function useCreateAskPost() {
 
   return useMutation({
     mutationFn: async (input: CreateAskPostMutationInput) => {
-      const images = await Promise.all(input.images.map(readLocalImage));
+      const images = await readLocalImagesSequentially(input.images);
 
       return createAskPost({ ...input, images });
     },
@@ -69,7 +71,7 @@ export function useCreateForumAskPost(forumId: string) {
     ) =>
       createForumAskPost({
         ...input,
-        images: await Promise.all(input.images.map(readLocalImage)),
+        images: await readLocalImagesSequentially(input.images),
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -83,14 +85,14 @@ export function useCreateForumSharePost(forumId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (
-      input: Omit<CreateAskPostMutationInput, "title"> & {
+      input: CreateAskPostMutationInput & {
         entityId: string;
         forumId: string;
       },
     ) =>
       createForumSharePost({
         ...input,
-        images: await Promise.all(input.images.map(readLocalImage)),
+        images: await readLocalImagesSequentially(input.images),
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -103,7 +105,7 @@ export function useCreateForumSharePost(forumId: string) {
 export function usePost(postId: string) {
   return useQuery({
     enabled: postId.length > 0,
-    queryFn: () => getPost(postId),
+    queryFn: ({ signal }) => getPost(postId, signal),
     queryKey: queryKeys.posts.byId(postId),
     refetchInterval: 50 * 60 * 1000,
     staleTime: 50 * 60 * 1000,
@@ -115,7 +117,8 @@ export function useAskPostsByAuthor(authorId: string) {
     enabled: authorId.length > 0,
     getNextPageParam: (lastPage: PostPage) => lastPage.nextOffset,
     initialPageParam: 0,
-    queryFn: ({ pageParam }) => getAskPostsByAuthor(authorId, pageParam),
+    queryFn: ({ pageParam, signal }) =>
+      getAskPostsByAuthor(authorId, pageParam, signal),
     queryKey: queryKeys.posts.byAuthor(authorId),
     refetchInterval: 50 * 60 * 1000,
     staleTime: 50 * 60 * 1000,

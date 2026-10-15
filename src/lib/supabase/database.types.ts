@@ -552,7 +552,6 @@ export type Database = {
           forum_id: string | null
           id: string
           post_type: Database["public"]["Enums"]["post_type"]
-          title: string | null
           updated_at: string
         }
         Insert: {
@@ -563,7 +562,6 @@ export type Database = {
           forum_id?: string | null
           id?: string
           post_type: Database["public"]["Enums"]["post_type"]
-          title?: string | null
           updated_at?: string
         }
         Update: {
@@ -574,7 +572,6 @@ export type Database = {
           forum_id?: string | null
           id?: string
           post_type?: Database["public"]["Enums"]["post_type"]
-          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -759,7 +756,17 @@ export type Database = {
           p_body?: string
           p_media_paths?: string[]
           p_post_id: string
-          p_title: string
+        }
+        Returns: Database["public"]["Tables"]["posts"]["Row"]
+      }
+      create_forum_post_with_media: {
+        Args: {
+          p_body?: string
+          p_entity_id?: string
+          p_forum_id: string
+          p_media_paths?: string[]
+          p_post_id: string
+          p_post_type: Database["public"]["Enums"]["post_type"]
         }
         Returns: Database["public"]["Tables"]["posts"]["Row"]
       }
@@ -801,6 +808,26 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_forum_summaries: {
+        Args: { p_forum_id?: string }
+        Returns: {
+          cover_image_path: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_member: boolean
+          member_count: number
+          name: string
+          owner_id: string
+          rules: string
+          slug: string
+          updated_at: string
+        }[]
+      }
+      get_stale_post_image_cleanup: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
       }
       get_restaurant_rating_summary: {
         Args: { p_entity_id: string }

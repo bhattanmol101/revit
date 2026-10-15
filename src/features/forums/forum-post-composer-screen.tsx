@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
@@ -33,7 +32,6 @@ export function ForumPostComposerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const [type, setType] = useState<"ASK" | "SHARE">("ASK");
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [search, setSearch] = useState("");
@@ -46,7 +44,7 @@ export function ForumPostComposerScreen() {
   const isSaving = createAsk.isPending || createShare.isPending;
   const error = createAsk.error ?? createShare.error;
   const canPublish = Boolean(
-    user && (type === "ASK" ? title.trim() : restaurant) && !isSaving,
+    user && (type === "SHARE" ? restaurant : body.trim()) && !isSaving,
   );
 
   const pickImages = async () => {
@@ -109,7 +107,6 @@ export function ForumPostComposerScreen() {
           body,
           forumId: id,
           images: images.map(toLocalImage),
-          title,
         });
       } else {
         if (!restaurant) return;
@@ -188,22 +185,7 @@ export function ForumPostComposerScreen() {
               <Text>Share</Text>
             </Button>
           </View>
-          {type === "ASK" ? (
-            <View className="gap-2">
-              <View className="flex-row items-center justify-between">
-                <Text variant="small">Title</Text>
-                <Text variant="muted">{title.length}/120</Text>
-              </View>
-              <Input
-                accessibilityLabel="Ask title"
-                editable={!isSaving}
-                maxLength={120}
-                placeholder="What would you like people to rate?"
-                value={title}
-                onChangeText={setTitle}
-              />
-            </View>
-          ) : (
+          {type === "SHARE" ? (
             <View className="gap-2">
               <Text variant="small">Restaurant</Text>
               {restaurant ? (
@@ -251,10 +233,12 @@ export function ForumPostComposerScreen() {
                 </>
               )}
             </View>
-          )}
+          ) : null}
           <View className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text variant="small">Details (optional)</Text>
+              <Text variant="small">
+                {type === "ASK" ? "Your question" : "Details (optional)"}
+              </Text>
               <Text variant="muted">{body.length}/2000</Text>
             </View>
             <Textarea

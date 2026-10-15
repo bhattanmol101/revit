@@ -15,7 +15,10 @@ import {
   type SharePostPage,
   updateShareRating,
 } from "@/api/shares";
-import { type LocalImage, readLocalImage } from "@/lib/media/read-local-image";
+import {
+  type LocalImage,
+  readLocalImagesSequentially,
+} from "@/lib/media/read-local-image";
 import { queryKeys } from "@/lib/query/query-keys";
 
 export type CreateShareRatingMutationInput = Omit<
@@ -57,8 +60,8 @@ export function useSharePostsByRestaurant(entityId: string) {
     enabled: entityId.length > 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     initialPageParam: 0,
-    queryFn: ({ pageParam }) =>
-      getSharePostsByRestaurant(entityId, pageParam as number),
+    queryFn: ({ pageParam, signal }) =>
+      getSharePostsByRestaurant(entityId, pageParam as number, signal),
     queryKey: queryKeys.shares.byRestaurant(entityId),
   });
 }
@@ -68,7 +71,7 @@ export function useCreateShareRating() {
 
   return useMutation({
     mutationFn: async (input: CreateShareRatingMutationInput) => {
-      const images = await Promise.all(input.images.map(readLocalImage));
+      const images = await readLocalImagesSequentially(input.images);
       return createShareRating({ ...input, images });
     },
     onSuccess: (post, input) => {

@@ -7,12 +7,13 @@ import {
 } from "@/api/feed";
 import { queryKeys } from "@/lib/query/query-keys";
 
-export function useHomeFeed(mode: HomeFeedMode) {
+export function useHomeFeed(viewerId: string, mode: HomeFeedMode) {
   return useInfiniteQuery<HomeFeedPage>({
+    enabled: viewerId.length > 0,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined as HomeFeedCursor | undefined,
     queryFn: ({ pageParam, signal }) =>
       getHomeFeed(mode, pageParam as HomeFeedCursor | undefined, signal),
-    queryKey: queryKeys.feed.home(mode),
+    queryKey: queryKeys.feed.home(viewerId, mode),
   });
 }

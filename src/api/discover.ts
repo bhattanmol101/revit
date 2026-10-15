@@ -17,7 +17,6 @@ export type DiscoveryPost = {
   body: string | null;
   id: string;
   postType: "ASK" | "SHARE";
-  title: string | null;
 };
 
 export type DiscoverResults = {
@@ -49,9 +48,9 @@ export function discover(query: string): Promise<DiscoverResults> {
           supabase
             .from("posts")
             .select(
-              "id, post_type, title, body, author:profiles!posts_author_id_fkey(display_name)",
+              "id, post_type, body, author:profiles!posts_author_id_fkey(display_name)",
             )
-            .or(`title.ilike.${pattern},body.ilike.${pattern}`)
+            .ilike("body", pattern)
             .order("created_at", { ascending: false })
             .limit(DISCOVER_RESULT_LIMIT)
             .abortSignal(signal),
@@ -96,7 +95,6 @@ export function discover(query: string): Promise<DiscoverResults> {
           body: post.body,
           id: post.id,
           postType: post.post_type,
-          title: post.title,
         })),
         profiles: profilesResult.data.map((profile) => ({
           avatarUrl: profile.avatar_url,

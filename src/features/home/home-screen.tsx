@@ -27,22 +27,26 @@ import { AskPostCard } from "@/features/posts/ask-post-card";
 import { SharePostCard } from "@/features/posts/share-post-card";
 import { queryKeys } from "@/lib/query/query-keys";
 import { routes } from "@/lib/routes";
+import { useAuth } from "@/providers/auth-provider";
 import { useHomeFeed } from "@/queries/feed";
 
 type FeedMode = "following" | "for-you";
 
 export function HomeScreen() {
+  const { user } = useAuth();
   const [feedMode, setFeedMode] = useState<FeedMode>("following");
-  const feed = useHomeFeed(feedMode);
+  const feed = useHomeFeed(user?.id ?? "", feedMode);
   const queryClient = useQueryClient();
   const posts = feed.data?.pages.flatMap((page) => page.items) ?? [];
   const refreshFeed = () =>
-    queryClient.resetQueries({ queryKey: queryKeys.feed.home(feedMode) });
+    queryClient.resetQueries({
+      queryKey: queryKeys.feed.home(user?.id ?? "", feedMode),
+    });
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList
-        contentContainerClassName="gap-4 md:gap-6 md:px-6 md:py-6"
+        contentContainerClassName="gap-1 md:gap-6 md:px-6 md:py-6 py-1"
         data={posts}
         keyExtractor={(post) => post.id}
         ListEmptyComponent={<FeedEmpty feed={feed} feedMode={feedMode} />}
@@ -84,7 +88,7 @@ function FeedHeader({
   onRefresh: () => void;
 }) {
   return (
-    <View className="mx-auto w-full max-w-3xl gap-3">
+    <View className="mx-auto w-full max-w-3xl">
       <View className="gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
         <View className="min-w-0 flex-1 flex-row items-center gap-3">
           <View className="size-10 items-center justify-center rounded-full bg-primary/10">

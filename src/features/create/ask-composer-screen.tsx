@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,17 +25,14 @@ const MAX_POST_ASPECT_RATIO = 16 / 9;
 export function AskComposerScreen() {
   const { user } = useAuth();
   const createPost = useCreateAskPost();
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [pickerError, setPickerError] = useState<string | null>(null);
   const [isPicking, setIsPicking] = useState(false);
-  const titleLength = title.trim().length;
   const bodyLength = body.length;
   const canPublish =
     Boolean(user) &&
-    titleLength >= 1 &&
-    titleLength <= 120 &&
+    body.trim().length >= 1 &&
     bodyLength <= 2000 &&
     !createPost.isPending;
 
@@ -111,7 +107,6 @@ export function AskComposerScreen() {
           mimeType: image.mimeType,
           uri: image.uri,
         })),
-        title,
       });
 
       successFeedback();
@@ -161,9 +156,9 @@ export function AskComposerScreen() {
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+          contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
-          <Card className="gap-6 border-border bg-card p-6 shadow-none">
+          <Card className="gap-6 border-border bg-card pt-4 pb-6 px-4 shadow-none">
             <View className="gap-2 py-1">
               <Text variant="h1" className="text-left">
                 Ask your circle.
@@ -194,31 +189,14 @@ export function AskComposerScreen() {
 
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Text variant="small">Title</Text>
-                <Text variant="muted">{title.length}/120</Text>
-              </View>
-              <Input
-                accessibilityLabel="Ask title"
-                autoFocus
-                editable={!createPost.isPending}
-                maxLength={120}
-                placeholder="What would you like people to rate?"
-                returnKeyType="next"
-                value={title}
-                onChangeText={setTitle}
-              />
-            </View>
-
-            <View className="gap-2">
-              <View className="flex-row items-center justify-between">
-                <Text variant="small">Details (optional)</Text>
+                <Text variant="small">Your question</Text>
                 <Text variant="muted">{bodyLength}/2000</Text>
               </View>
               <Textarea
                 accessibilityLabel="Ask details"
                 editable={!createPost.isPending}
                 maxLength={2000}
-                placeholder="Add context that will help people answer."
+                placeholder="What would you like to ask your circle?"
                 value={body}
                 onChangeText={setBody}
               />

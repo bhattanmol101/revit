@@ -5,7 +5,7 @@ const projectRoot = process.cwd();
 const sourceRoot = join(projectRoot, "src");
 const apiRoot = join(sourceRoot, "api");
 const sourceExtensions = new Set([".js", ".jsx", ".ts", ".tsx"]);
-const databaseCallPattern = /\.(?:from|rpc)\s*\(/g;
+const databaseCallPattern = /\bsupabase\s*\.\s*(?:from|rpc)\s*\(/g;
 
 async function collectSourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });

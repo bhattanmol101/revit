@@ -45,7 +45,7 @@ export function useDeleteForum() {
 export function useForum(forumId: string, userId: string) {
   return useQuery({
     enabled: forumId.length > 0,
-    queryFn: () => getForum(forumId, userId),
+    queryFn: () => getForum(forumId),
     queryKey: queryKeys.forums.byId(forumId, userId),
     staleTime: 30_000,
   });
@@ -56,7 +56,8 @@ export function useForumPosts(forumId: string) {
     enabled: forumId.length > 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     initialPageParam: 0,
-    queryFn: ({ pageParam }) => getForumPosts(forumId, pageParam as number),
+    queryFn: ({ pageParam, signal }) =>
+      getForumPosts(forumId, pageParam as number, signal),
     queryKey: queryKeys.forums.posts(forumId),
   });
 }

@@ -41,19 +41,19 @@ const buttonVariants = cva(
       },
       size: {
         default: cn(
-          "min-h-12 px-4 py-2.5",
+          "min-h-10 px-4 py-2.5",
           Platform.select({ web: "has-[>svg]:px-4" }),
         ),
         sm: cn(
-          "min-h-11 gap-1.5 rounded-md px-3 py-2",
+          "min-h-9 gap-1.5 rounded-md px-3 py-2",
           Platform.select({ web: "has-[>svg]:px-2.5" }),
         ),
-        xs: "min-h-11 gap-1.5 rounded-md px-2 py-1.5",
+        xs: "min-h-8 gap-1.5 rounded-md px-2 py-1.5",
         lg: cn(
           "min-h-12 rounded-lg px-5 py-2.5",
           Platform.select({ web: "has-[>svg]:px-5" }),
         ),
-        icon: "min-h-11 min-w-11 p-2.5",
+        icon: "p-3.5",
         rating: "min-h-11 min-w-8 px-1 py-2",
         content: "min-h-12 h-auto justify-start px-3 py-2",
       },

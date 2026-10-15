@@ -119,6 +119,8 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
                   as={halfFilled ? StarHalf : Star}
                   className="size-5 text-rating"
                   fill={filled ? theme.rating : "transparent"}
+                  stroke={theme.rating}
+                  strokeWidth={filled || halfFilled ? 0 : 1.8}
                 />
               );
             })}

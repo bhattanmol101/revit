@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Users } from "lucide-react-native";
+import { Plus, Users } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,8 @@ export function ForumsScreen() {
             </Text>
           </View>
           <Link href={routes.createForum} asChild>
-            <Button size="sm">
-              <Text>New</Text>
+            <Button size="sm" className="rounded-full">
+              <Icon as={Plus} />
             </Button>
           </Link>
         </View>

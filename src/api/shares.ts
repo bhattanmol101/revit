@@ -6,8 +6,8 @@ import type {
 } from "@/api/posts";
 import {
   getSharePostsByEntity,
-  removePostImages,
   reservePostImageCleanup,
+  tryRemovePostImages,
   uploadPostImages,
 } from "@/api/posts";
 import { supabase } from "@/lib/supabase/client";
@@ -129,8 +129,9 @@ export function getShareRatingScore(postId: string): Promise<number | null> {
 export async function getSharePostsByRestaurant(
   entityId: string,
   offset = 0,
+  requestSignal?: AbortSignal,
 ): Promise<SharePostPage> {
-  const page = await getSharePostsByEntity(entityId, offset);
+  const page = await getSharePostsByEntity(entityId, offset, requestSignal);
 
   if (page.items.length === 0) return { ...page, items: [] };
 
@@ -151,7 +152,7 @@ export async function getSharePostsByRestaurant(
 
       return new Map(data.map((rating) => [rating.post_id, rating.score]));
     },
-    { retries: 1 },
+    { retries: 1, signal: requestSignal },
   );
 
   return {
@@ -202,7 +203,7 @@ export async function createShareRating(
       return data as Post;
     });
   } catch (error) {
-    await removePostImages(uploadedPaths);
+    await tryRemovePostImages(uploadedPaths);
     throw error;
   }
 }

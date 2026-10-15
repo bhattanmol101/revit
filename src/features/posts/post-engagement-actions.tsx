@@ -32,16 +32,12 @@ export function PostEngagementActions({
   const commentCount = comments.data ?? 0;
 
   return (
-    <View className="flex-1 flex-row items-center gap-3">
+    <View className="flex-1 flex-row items-center gap-1">
       {onRatingPress ? (
         <Button
           accessibilityLabel="Rate this post"
           accessibilityState={{ expanded: ratingExpanded }}
-          className={
-            ratingExpanded
-              ? "h-9 gap-1.5 border border-primary bg-selected px-2"
-              : "h-9 gap-1.5 px-2"
-          }
+          className={`gap-1.5 border px-3 ${ratingExpanded ? "border-primary bg-selected" : "border-transparent"}`}
           onPress={onRatingPress}
           variant="ghost"
         >
@@ -53,6 +49,8 @@ export function PostEngagementActions({
                 : "size-4 text-rating"
             }
             fill={averageScore === null ? "none" : theme.rating}
+            stroke={theme.rating}
+            strokeWidth={averageScore === null ? 1.8 : 0}
           />
           <Text className="text-[13px] font-medium">
             {rating.isLoading || rating.isError
@@ -70,6 +68,8 @@ export function PostEngagementActions({
                 : "size-4 text-rating"
             }
             fill={averageScore === null ? "none" : theme.rating}
+            stroke={theme.rating}
+            strokeWidth={averageScore === null ? 1.8 : 0}
           />
           <Text className="text-[13px] font-medium">
             {rating.isLoading || rating.isError
@@ -86,11 +86,7 @@ export function PostEngagementActions({
               : `View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`
           }
           accessibilityState={{ expanded: commentsExpanded }}
-          className={
-            commentsExpanded
-              ? "h-9 gap-1.5 border border-primary bg-selected px-2"
-              : "h-9 gap-1.5 px-2"
-          }
+          className={`h-8 gap-1.5 border ${commentsExpanded ? "border-primary bg-selected" : "border-transparent"}`}
           onPress={onCommentPress}
           variant="ghost"
         >

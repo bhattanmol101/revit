@@ -39,6 +39,14 @@ export async function readLocalImage(
   return { ...details, data };
 }
 
+export async function readLocalImagesSequentially(images: LocalImage[]) {
+  const uploads: AskImageUpload[] = [];
+  for (const image of images) {
+    uploads.push(await readLocalImage(image));
+  }
+  return uploads;
+}
+
 function resolveMimeType(image: LocalImage): keyof typeof MIME_DETAILS | "" {
   const normalizedMimeType = image.mimeType?.toLowerCase();
 

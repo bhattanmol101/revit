@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import type { Profile, UpdateProfileInput } from "@/api/profiles";
+import { queryClient } from "@/lib/query/query-client";
 import { supabase } from "@/lib/supabase/client";
 import { useProfile, useUpdateProfile } from "@/queries/profiles";
 import { usePostImageCleanup } from "@/queries/posts";
@@ -24,6 +25,7 @@ type AuthContextValue = {
   profileError: Error | null;
   retryProfile: () => Promise<void>;
   session: Session | null;
+  signOut: () => Promise<void>;
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
   user: User | null;
 };
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const handledUrls = useRef(new Set<string>());
+  const previousUserId = useRef<string | null>(null);
   const userId = session?.user.id ?? "";
   const profileQuery = useProfile(userId);
   const profileMutation = useUpdateProfile(userId);
@@ -56,6 +59,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!isMounted) return;
 
+      const nextUserId = nextSession?.user.id ?? null;
+      if (
+        previousUserId.current !== null &&
+        previousUserId.current !== nextUserId
+      ) {
+        void queryClient.cancelQueries();
+        queryClient.clear();
+      }
+      previousUserId.current = nextUserId;
       setSession(nextSession);
       setIsSessionLoading(false);
       if (event === "PASSWORD_RECOVERY") setIsPasswordRecovery(true);
@@ -114,6 +126,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsPasswordRecovery(false);
   }, []);
 
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  }, []);
+
   const profile = profileQuery.data ?? null;
   const profileError =
     profileQuery.error instanceof Error ? profileQuery.error : null;
@@ -129,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileError,
       retryProfile,
       session,
+      signOut,
       updateProfile,
       user: session?.user ?? null,
     }),
@@ -140,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileError,
       retryProfile,
       session,
+      signOut,
       updateProfile,
     ],
   );

@@ -209,9 +209,9 @@ export function ShareComposerScreen() {
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+          contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
-          <Card className="gap-6 border-border bg-card p-6 shadow-none">
+          <Card className="gap-6 border-border bg-card p-4 pb-6 shadow-none">
             <View className="gap-2 py-1">
               <Text variant="h1" className="text-left">
                 Rate a restaurant
@@ -332,12 +332,11 @@ export function ShareComposerScreen() {
                               }}
                             >
                               <Star
-                                color={
-                                  selected ? theme.rating : theme.textSecondary
-                                }
+                                color={theme.rating}
                                 fill={selected ? theme.rating : "transparent"}
                                 size={25}
-                                strokeWidth={2}
+                                stroke={theme.rating}
+                                strokeWidth={selected ? 0 : 2}
                               />
                             </Button>
                           );

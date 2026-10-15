@@ -181,7 +181,7 @@ function PostResults({ posts }: { posts: DiscoveryPost[] }) {
             </View>
             <View className="min-w-0 flex-1 items-start gap-0.5">
               <Text className="truncate text-left font-semibold">
-                {post.title ?? post.body ?? "Restaurant rating"}
+                {post.body ?? "Restaurant rating"}
               </Text>
               <Text variant="muted" className="truncate text-left text-xs">
                 {post.authorName}

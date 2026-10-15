@@ -96,47 +96,24 @@ export function getForums(): Promise<ForumSummary[]> {
   return runApiRequest(
     async (signal) => {
       const { data: forums, error: forumsError } = await supabase
-        .from("forums")
-        .select(
-          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
-        )
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: true })
+        .rpc("get_forum_summaries", {})
         .abortSignal(signal);
 
       if (forumsError) {
         throw normalizeApiError(forumsError, "We could not load forums.");
       }
 
-      if (forums.length === 0) return [];
-
-      const { data: memberships, error: membershipsError } = await supabase
-        .from("forum_memberships")
-        .select("forum_id")
-        .in(
-          "forum_id",
-          forums.map((forum) => forum.id),
-        )
-        .abortSignal(signal);
-
-      if (membershipsError) {
-        throw normalizeApiError(
-          membershipsError,
-          "We could not load forum members.",
-        );
-      }
-
-      const counts = new Map<string, number>();
-      for (const membership of memberships) {
-        counts.set(
-          membership.forum_id,
-          (counts.get(membership.forum_id) ?? 0) + 1,
-        );
-      }
-
       const summaries = forums.map((forum) => ({
-        ...forum,
-        memberCount: counts.get(forum.id) ?? 0,
+        cover_image_path: forum.cover_image_path,
+        created_at: forum.created_at,
+        description: forum.description,
+        id: forum.id,
+        memberCount: forum.member_count,
+        name: forum.name,
+        owner_id: forum.owner_id,
+        rules: forum.rules,
+        slug: forum.slug,
+        updated_at: forum.updated_at,
       }));
 
       return signForumCovers(summaries);
@@ -145,18 +122,11 @@ export function getForums(): Promise<ForumSummary[]> {
   );
 }
 
-export function getForum(
-  forumId: string,
-  userId: string,
-): Promise<ForumDetail | null> {
+export function getForum(forumId: string): Promise<ForumDetail | null> {
   return runApiRequest(
     async (signal) => {
       const { data: forum, error: forumError } = await supabase
-        .from("forums")
-        .select(
-          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
-        )
-        .eq("id", forumId)
+        .rpc("get_forum_summaries", { p_forum_id: forumId })
         .abortSignal(signal)
         .maybeSingle();
 
@@ -166,26 +136,19 @@ export function getForum(
 
       if (!forum) return null;
 
-      const { data: memberships, error: membershipsError } = await supabase
-        .from("forum_memberships")
-        .select("user_id")
-        .eq("forum_id", forumId)
-        .abortSignal(signal);
-
-      if (membershipsError) {
-        throw normalizeApiError(
-          membershipsError,
-          "We could not load forum members.",
-        );
-      }
-
       const [detail] = await signForumCovers([
         {
-          ...forum,
-          isMember: memberships.some(
-            (membership) => membership.user_id === userId,
-          ),
-          memberCount: memberships.length,
+          cover_image_path: forum.cover_image_path,
+          created_at: forum.created_at,
+          description: forum.description,
+          id: forum.id,
+          isMember: forum.is_member,
+          memberCount: forum.member_count,
+          name: forum.name,
+          owner_id: forum.owner_id,
+          rules: forum.rules,
+          slug: forum.slug,
+          updated_at: forum.updated_at,
         },
       ]);
       return detail;
