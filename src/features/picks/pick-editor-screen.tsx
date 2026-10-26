@@ -174,7 +174,7 @@ export function PickEditorScreen() {
       <ScrollView
         automaticallyAdjustKeyboardInsets
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-5 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
+        contentContainerClassName="w-full gap-5 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
         <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
           <View className="gap-1.5 border-b border-border pb-4">

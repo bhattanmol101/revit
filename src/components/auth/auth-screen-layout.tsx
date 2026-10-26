@@ -18,15 +18,18 @@ export function AuthScreenLayout({
         className="flex-1"
         behavior={Platform.select({ ios: "padding", default: undefined })}
       >
-        <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-8 sm:px-6">
-          <View className="w-full max-w-md gap-6">
-            <View className="gap-1">
-              <Text className="font-serif text-2xl font-bold tracking-tight">
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerClassName="flex-grow items-center justify-center bg-muted/30 px-5 py-10 sm:px-6"
+        >
+          <View className="w-full max-w-md gap-7">
+            <View className="items-center gap-1.5">
+              <Text className="font-serif text-3xl font-bold tracking-tight">
                 Revit
               </Text>
               <Text variant="muted">Good finds. Trusted opinions.</Text>
             </View>
-            <View className="gap-2">
+            <View className="gap-2.5">
               <Text variant="h1" className="text-left">
                 {title}
               </Text>
@@ -34,7 +37,9 @@ export function AuthScreenLayout({
                 {description}
               </Text>
             </View>
-            {children}
+            <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+              {children}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

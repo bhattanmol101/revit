@@ -63,7 +63,7 @@ export default function AuthScreen() {
           : "Start sharing the restaurants and recommendations you care about."
       }
     >
-      <View className="gap-4">
+      <View className="gap-5">
         <View className="gap-2">
           <Text variant="small">Email</Text>
           <Input
@@ -74,7 +74,7 @@ export default function AuthScreen() {
             inputMode="email"
             keyboardType="email-address"
             onChangeText={setEmail}
-            placeholder="you@example.com"
+            placeholder="name@example.com"
             value={email}
           />
         </View>
@@ -86,7 +86,9 @@ export default function AuthScreen() {
               mode === "signIn" ? "current-password" : "new-password"
             }
             onChangeText={setPassword}
-            placeholder="At least 8 characters"
+            placeholder={
+              mode === "signIn" ? "Your password" : "At least 8 characters"
+            }
             value={password}
           />
         </View>
@@ -109,7 +111,7 @@ export default function AuthScreen() {
             </Button>
           </Link>
         ) : null}
-        <Button disabled={loading} onPress={submit}>
+        <Button className="mt-1" size="lg" disabled={loading} onPress={submit}>
           <Text>
             {loading
               ? "Please wait…"
@@ -125,6 +127,7 @@ export default function AuthScreen() {
             setError(null);
             setMessage(null);
           }}
+          className="mt-1"
           variant="ghost"
         >
           <Text>

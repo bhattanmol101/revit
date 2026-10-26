@@ -1,5 +1,11 @@
 import { Link } from "expo-router";
-import { ArrowRight, MessageCircleQuestion, Star } from "lucide-react-native";
+import {
+  ArrowRight,
+  Bookmark,
+  MessageCircleQuestion,
+  Star,
+  UsersRound,
+} from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
@@ -24,52 +30,96 @@ export function CreateChoiceScreen() {
             Share your taste
           </Text>
           <Text variant="muted" className="text-base leading-6">
-            Ask people for their rating or share a restaurant rating.
+            Choose what you’d like to share with the community.
           </Text>
         </View>
 
-        <View className="items-stretch gap-4 sm:flex-row">
-          <Card className="flex-1 justify-between gap-4 p-4">
-            <CardHeader className="gap-3 px-0">
-              <View className="size-9 items-center justify-center rounded-md bg-selected">
-                <Icon as={MessageCircleQuestion} className="text-primary" />
-              </View>
-              <CardTitle className="text-lg">Ask for ratings</CardTitle>
-              <CardDescription className="leading-5">
-                Post a question and let people respond with a 1–5 rating.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
-              <Link href={routes.createAsk} asChild>
-                <Button className="w-full">
-                  <Text>Start an Ask</Text>
-                  <Icon as={ArrowRight} />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        <View className="gap-4">
+          <View className="items-stretch gap-4 sm:flex-row">
+            <Card className="flex-1 justify-between gap-4 p-4">
+              <CardHeader className="gap-3 px-0">
+                <View className="size-9 items-center justify-center rounded-md bg-selected">
+                  <Icon as={MessageCircleQuestion} className="text-primary" />
+                </View>
+                <CardTitle className="text-lg">Ask for ratings</CardTitle>
+                <CardDescription className="leading-5">
+                  Post a question and let people respond with a 1–5 rating.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                <Link href={routes.createAsk} asChild>
+                  <Button className="w-full">
+                    <Text>Start an Ask</Text>
+                    <Icon as={ArrowRight} />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
 
-          <Card className="flex-1 justify-between gap-4 p-4">
-            <CardHeader className="gap-3 px-0">
-              <View className="size-9 items-center justify-center rounded-md bg-elevated">
-                <Icon as={Star} className="text-rating" />
-              </View>
-              <CardTitle className="text-lg">
-                Share a restaurant rating
-              </CardTitle>
-              <CardDescription className="leading-5">
-                Rate a restaurant and add an optional review or photos.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
-              <Link href={routes.createShare} asChild>
-                <Button variant="outline" className="w-full">
-                  <Text>Rate a restaurant</Text>
-                  <Icon as={ArrowRight} />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+            <Card className="flex-1 justify-between gap-4 p-4">
+              <CardHeader className="gap-3 px-0">
+                <View className="size-9 items-center justify-center rounded-md bg-elevated">
+                  <Icon as={Star} className="text-rating" />
+                </View>
+                <CardTitle className="text-lg">
+                  Share a restaurant rating
+                </CardTitle>
+                <CardDescription className="leading-5">
+                  Rate a restaurant and add an optional review or photos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                <Link href={routes.createShare} asChild>
+                  <Button variant="outline" className="w-full">
+                    <Text>Rate a restaurant</Text>
+                    <Icon as={ArrowRight} />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </View>
+
+          <View className="items-stretch gap-4 sm:flex-row">
+            <Card className="flex-1 justify-between gap-4 p-4">
+              <CardHeader className="gap-3 px-0">
+                <View className="size-9 items-center justify-center rounded-md bg-selected">
+                  <Icon as={UsersRound} className="text-primary" />
+                </View>
+                <CardTitle className="text-lg">Create a forum</CardTitle>
+                <CardDescription className="leading-5">
+                  Start a public space for focused conversations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                <Link href={routes.createForum} asChild>
+                  <Button variant="outline" className="w-full">
+                    <Text>Create a forum</Text>
+                    <Icon as={ArrowRight} />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-1 justify-between gap-4 p-4">
+              <CardHeader className="gap-3 px-0">
+                <View className="size-9 items-center justify-center rounded-md bg-elevated">
+                  <Icon as={Bookmark} className="text-primary" />
+                </View>
+                <CardTitle className="text-lg">Create a Pick</CardTitle>
+                <CardDescription className="leading-5">
+                  Build an ordered list of restaurants to share.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                <Link href={routes.createPick} asChild>
+                  <Button variant="outline" className="w-full">
+                    <Text>Create a Pick</Text>
+                    <Icon as={ArrowRight} />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

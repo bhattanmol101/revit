@@ -1,6 +1,13 @@
 import { Image } from "expo-image";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { Users } from "lucide-react-native";
+import {
+  Delete,
+  DeleteIcon,
+  Plus,
+  Trash,
+  Trash2,
+  Users,
+} from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
@@ -67,86 +74,86 @@ export function ForumDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
-        <View className="gap-2 rounded-lg border border-border bg-card p-3 shadow-none">
+      <ScrollView contentContainerClassName="w-full gap-2 py-2 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
+        <View className="rounded-lg border border-border bg-card shadow-none">
           {forumData.coverImageUrl ? (
             <Image
               accessibilityLabel={`${forumData.name} cover image`}
-              className="h-44 w-full rounded-md bg-muted"
+              className="h-36 w-full rounded-t-md bg-muted"
+              style={{ height: 144, width: "100%" }}
               contentFit="cover"
               source={forumData.coverImageUrl}
             />
           ) : null}
-          <View className="flex-row items-start justify-between gap-3">
-            <View className="min-w-0 flex-1 gap-1">
-              <Text variant="h1" className="text-left">
-                {forumData.name}
-              </Text>
-              <Text variant="muted">/{forumData.slug}</Text>
+          <View className="gap-2 p-2">
+            <View className="gap-2">
+              <Text className="font-semibold">{forumData.name}</Text>
+              {forumData.description ? (
+                <Text className="text-md">{forumData.description}</Text>
+              ) : null}
             </View>
-            <Button
-              disabled={membership.isPending || isOwner}
-              size="sm"
-              variant={forumData.isMember ? "outline" : "default"}
-              onPress={() => membership.mutate(!forumData.isMember)}
-            >
-              <Text>
-                {membership.isPending
-                  ? "Updating…"
-                  : isOwner
-                    ? "Owner"
-                    : forumData.isMember
-                      ? "Leave"
-                      : "Join"}
-              </Text>
-            </Button>
-          </View>
-          {forumData.description ? (
-            <Text className="leading-5">{forumData.description}</Text>
-          ) : null}
-          <View className="flex-row items-center gap-1">
-            <Icon as={Users} className="size-4 text-muted-foreground" />
-            <Text variant="muted" className="text-xs">
-              {forumData.memberCount}{" "}
-              {forumData.memberCount === 1 ? "member" : "members"}
-            </Text>
-          </View>
-          {forumData.rules ? (
-            <View className="gap-1 border-t border-border pt-2">
-              <Text className="text-sm font-semibold">Rules</Text>
-              <Text variant="muted" className="text-sm leading-5">
-                {forumData.rules}
-              </Text>
+            {forumData.rules ? (
+              <View className="gap-1 border-t border-border pt-2">
+                <Text className="text-sm font-semibold">Rules</Text>
+                <Text variant="muted" className="text-sm leading-5">
+                  {forumData.rules}
+                </Text>
+              </View>
+            ) : null}
+            <View className="flex flex-row items-center justify-between border-t border-border pt-2">
+              <View className="flex flex-row items-center gap-3">
+                <Button
+                  disabled={membership.isPending || isOwner}
+                  size="sm"
+                  variant={forumData.isMember ? "outline" : "default"}
+                  onPress={() => membership.mutate(!forumData.isMember)}
+                >
+                  <Text>
+                    {membership.isPending
+                      ? "Updating…"
+                      : isOwner
+                        ? "Owner"
+                        : forumData.isMember
+                          ? "Leave"
+                          : "Join"}
+                  </Text>
+                </Button>
+
+                {forumData.isMember ? (
+                  <Link href={routes.createForumPost(forumData.id)} asChild>
+                    <Button className="self-start" size="sm">
+                      <Icon as={Plus} className="size-4" />
+                    </Button>
+                  </Link>
+                ) : null}
+
+                {isOwner ? (
+                  <Button
+                    className="self-start"
+                    size="sm"
+                    variant="destructive"
+                    onPress={() => setIsDeleteOpen(true)}
+                  >
+                    <Icon as={Trash2} className="size-4" />
+                  </Button>
+                ) : null}
+              </View>
+              <View className="flex-row items-center gap-1">
+                <Icon as={Users} className="size-4 text-muted-foreground" />
+                <Text variant="muted" className="text-xs">
+                  {forumData.memberCount}
+                </Text>
+              </View>
             </View>
-          ) : null}
-          {isOwner ? (
-            <Button
-              className="self-start"
-              size="sm"
-              variant="destructive"
-              onPress={() => setIsDeleteOpen(true)}
-            >
-              <Text>Delete forum</Text>
-            </Button>
-          ) : null}
-          {membership.isError ? (
-            <Text className="text-destructive" variant="small">
-              {membership.error.message}
-            </Text>
-          ) : null}
+            {membership.isError ? (
+              <Text className="text-destructive" variant="small">
+                {membership.error.message}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
         <View className="gap-2">
-          <Text variant="h2" className="text-xl">
-            Forum posts
-          </Text>
-          {forumData.isMember ? (
-            <Link href={routes.createForumPost(forumData.id)} asChild>
-              <Button className="self-start" size="sm">
-                <Text>New post</Text>
-              </Button>
-            </Link>
-          ) : null}
           {!forumData.isMember ? (
             <Text variant="muted">
               Join to post, comment, or rate an Ask in this forum.
@@ -165,7 +172,7 @@ export function ForumDetailScreen() {
             <FeedbackState title="No forum posts yet" />
           ) : null}
           {postItems.length > 0 ? (
-            <View className="-mx-6 gap-4 md:mx-0 md:gap-6">
+            <View className="gap-2">
               {postItems.map((post) => (
                 <ForumPostCard key={post.id} post={post} />
               ))}

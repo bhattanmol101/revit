@@ -35,13 +35,6 @@ export function DiscoverScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="gap-6"
       >
-        <View className="gap-1">
-          <Text variant="h1" className="text-left">
-            Discover
-          </Text>
-          <Text variant="muted">Find people, posts, and restaurants.</Text>
-        </View>
-
         <SearchInput
           accessibilityLabel="Search Revit"
           autoCapitalize="none"

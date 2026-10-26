@@ -11,6 +11,7 @@ import {
   uploadPostImages,
 } from "@/api/posts";
 import { supabase } from "@/lib/supabase/client";
+import { randomUUID } from "expo-crypto";
 
 import { normalizeApiError } from "./errors";
 import { runApiRequest } from "./request";
@@ -169,7 +170,7 @@ export async function createShareRating(
 ): Promise<Post> {
   validateShareRating(input);
 
-  const postId = crypto.randomUUID();
+  const postId = randomUUID();
   await reservePostImageCleanup(input.authorId, postId, input.images);
   const uploadedPaths = await uploadPostImages({
     authorId: input.authorId,

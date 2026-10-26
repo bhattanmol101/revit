@@ -80,7 +80,7 @@ export function CreateForumScreen() {
       <ScrollView
         automaticallyAdjustKeyboardInsets
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-5 px-6 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
+        contentContainerClassName="w-full gap-5 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
         <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
           <View className="gap-1.5 border-b border-border pb-4">
@@ -146,9 +146,9 @@ export function CreateForumScreen() {
               <View className="relative">
                 <Image
                   accessibilityLabel="Selected forum cover"
-                  className="h-40 w-full rounded-lg bg-muted"
                   contentFit="cover"
-                  source={cover.uri}
+                  source={{ uri: cover.uri }}
+                  style={{ width: "100%", height: 160 }}
                 />
                 <Button
                   accessibilityLabel="Remove cover image"

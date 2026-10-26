@@ -20,6 +20,7 @@ import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useDeletePersonalPick, usePersonalPick } from "@/queries/picks";
+import { Separator } from "@/components/ui/separator";
 
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,38 +55,41 @@ export function PickDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
-        <View className="gap-2">
+      <ScrollView contentContainerClassName="w-full gap-2 px-2 py-3 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
+        <View className="gap-2 border border-muted rounded-md px-4 py-2 bg-muted mb-2">
           <View className="flex-row items-start justify-between gap-3">
-            <Text variant="h1" className="min-w-0 flex-1 text-left">
-              {personalPick.title}
-            </Text>
+            <View>
+              <Text variant="h2" className="text-xl">
+                {personalPick.title}
+              </Text>
+              {personalPick.description ? (
+                <Text variant="muted" className="leading-5">
+                  {personalPick.description}
+                </Text>
+              ) : null}
+            </View>
             {isOwner ? (
               <View className="flex-row gap-2">
                 <Button
-                  size="sm"
+                  size="xs"
                   variant="outline"
+                  hitSlop={8}
                   onPress={() => router.push(routes.editPick(personalPick.id))}
                 >
-                  <Icon as={Edit3} />
-                  <Text>Edit</Text>
+                  <Icon as={Edit3} className="size-4" />
                 </Button>
                 <Button
-                  size="sm"
+                  size="xs"
                   variant="destructive"
+                  className="py-1 px-2"
                   onPress={() => setIsDeleteOpen(true)}
+                  hitSlop={8}
                 >
-                  <Icon as={Trash2} />
-                  <Text>Delete</Text>
+                  <Icon as={Trash2} className="size-4" />
                 </Button>
               </View>
             ) : null}
           </View>
-          {personalPick.description ? (
-            <Text variant="muted" className="leading-5">
-              {personalPick.description}
-            </Text>
-          ) : null}
         </View>
 
         <View className="gap-2">
@@ -96,22 +100,33 @@ export function PickDetailScreen() {
               asChild
             >
               <Card className="gap-2 py-3 shadow-none">
-                <CardContent className="flex-row gap-3">
-                  <Text className="w-5 pt-0.5 text-center font-semibold text-primary">
-                    {item.position}
-                  </Text>
-                  <Icon as={MapPin} className="mt-0.5 text-primary" />
-                  <View className="min-w-0 flex-1 gap-1">
-                    <Text className="font-semibold">
-                      {item.restaurant.name}
-                    </Text>
-                    <Text variant="muted" className="text-xs">
-                      {item.restaurant.address_line_1},{" "}
-                      {item.restaurant.locality}
-                    </Text>
-                    {item.note ? (
-                      <Text className="text-sm leading-5">{item.note}</Text>
-                    ) : null}
+                <CardContent className="flex-row items-center gap-4">
+                  <View key={item.position} className="items-center">
+                    <View className="size-5 items-center justify-center rounded-full border-2 border-primary-foreground/40 bg-background/10">
+                      <Text className="text-[11px] font-semibold leading-none text-primary-foreground">
+                        {item.position}
+                      </Text>
+                    </View>
+                    {/*{position < 3 ? (
+                      <View className="h-2 w-0.5 bg-primary-foreground/40" />
+                    ) : null}*/}
+                  </View>
+                  <View className="flex flex-row gap-2">
+                    <View className="mt-0.5">
+                      <Icon as={MapPin} />
+                    </View>
+                    <View className="gap-1">
+                      <Text className="font-semibold">
+                        {item.restaurant.name}
+                      </Text>
+                      <Text variant="muted" className="text-xs">
+                        {item.restaurant.address_line_1},{" "}
+                        {item.restaurant.locality}
+                      </Text>
+                      {item.note ? (
+                        <Text className="text-sm leading-5">{item.note}</Text>
+                      ) : null}
+                    </View>
                   </View>
                 </CardContent>
               </Card>

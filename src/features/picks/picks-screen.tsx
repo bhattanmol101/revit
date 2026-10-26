@@ -1,8 +1,7 @@
 import { Link } from "expo-router";
-import { Bookmark, Plus } from "lucide-react-native";
+import { Bookmark } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -22,22 +21,6 @@ export function PicksScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <PageScrollView contentContainerClassName="gap-6">
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="flex-1 gap-1">
-            <Text variant="h1" className="text-left">
-              Your Picks
-            </Text>
-            <Text variant="muted">
-              Ordered restaurant lists you can share publicly.
-            </Text>
-          </View>
-          <Link href={routes.createPick} asChild>
-            <Button size="sm" className="rounded-full">
-              <Icon as={Plus} />
-            </Button>
-          </Link>
-        </View>
-
         {picks.isLoading ? <ContentSkeleton /> : null}
         {picks.isError ? (
           <FeedbackState

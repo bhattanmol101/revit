@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
+import { randomUUID } from "expo-crypto";
 
 import { normalizeApiError } from "./errors";
 import type { AskImageUpload } from "./posts";
@@ -37,56 +38,49 @@ export function createForum(
   input: CreateForumInput & { coverImage?: AskImageUpload },
 ): Promise<Forum> {
   return runApiRequest(async (signal) => {
-    const { data, error } = await supabase
-      .from("forums")
-      .insert({
-        description: input.description?.trim() || null,
-        name: input.name.trim(),
-        owner_id: input.ownerId,
-        rules: input.rules.trim(),
-        slug: input.slug.trim(),
-      })
-      .select(
-        "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
-      )
-      .abortSignal(signal)
-      .single();
-
-    if (error)
-      throw normalizeApiError(error, "We could not create this forum.");
-    if (!input.coverImage) return data;
-    const path = `${input.ownerId}/${data.id}/cover.${input.coverImage.extension}`;
+    const forumId = input.coverImage ? randomUUID() : undefined;
+    const path = input.coverImage
+      ? `${input.ownerId}/${forumId}/cover.${input.coverImage.extension}`
+      : undefined;
     try {
-      const { error: uploadError } = await supabase.storage
-        .from("forum-images")
-        .upload(path, input.coverImage.data, {
-          contentType: input.coverImage.contentType,
-          upsert: false,
-        });
-      if (uploadError)
-        throw normalizeApiError(
-          uploadError,
-          "We could not upload the forum cover.",
-        );
+      if (input.coverImage && path) {
+        const { error: uploadError } = await supabase.storage
+          .from("forum-images")
+          .upload(path, input.coverImage.data, {
+            contentType: input.coverImage.contentType,
+            upsert: false,
+          });
+        if (uploadError)
+          throw normalizeApiError(
+            uploadError,
+            "We could not upload the forum cover.",
+          );
+      }
 
-      const { data: updated, error: updateError } = await supabase
+      const { data, error } = await supabase
         .from("forums")
-        .update({ cover_image_path: path })
-        .eq("id", data.id)
+        .insert({
+          ...(forumId ? { id: forumId } : {}),
+          ...(path ? { cover_image_path: path } : {}),
+          description: input.description?.trim() || null,
+          name: input.name.trim(),
+          owner_id: input.ownerId,
+          rules: input.rules.trim(),
+          slug: input.slug.trim(),
+        })
         .select(
           "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
         )
         .abortSignal(signal)
         .single();
-      if (updateError)
-        throw normalizeApiError(
-          updateError,
-          "We could not save the forum cover.",
-        );
-      return updated;
+
+      if (error)
+        throw normalizeApiError(error, "We could not create this forum.");
+      return data;
     } catch (cause) {
-      await supabase.storage.from("forum-images").remove([path]);
-      await supabase.from("forums").delete().eq("id", data.id);
+      if (path) {
+        await supabase.storage.from("forum-images").remove([path]);
+      }
       throw cause;
     }
   });

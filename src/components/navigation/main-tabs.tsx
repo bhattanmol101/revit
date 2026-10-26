@@ -24,9 +24,14 @@ export default function MainTabs() {
 
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: true,
-        header: () => <AppHeader showAccountActions title="Revit" />,
+        header: () => (
+          <AppHeader
+            showAccountActions
+            title={tabTitles[route.name] ?? "Profile"}
+          />
+        ),
         headerShadowVisible: false,
         tabBarActiveTintColor: isDark ? theme.text : theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
@@ -38,7 +43,7 @@ export default function MainTabs() {
           paddingBottom: bottomPadding,
           paddingTop: 6,
         },
-      }}
+      })}
     >
       <Tabs.Screen
         name="index"
@@ -78,6 +83,15 @@ export default function MainTabs() {
     </Tabs>
   );
 }
+
+const tabTitles: Record<string, string> = {
+  index: "Home",
+  discover: "Discover",
+  create: "Create",
+  forums: "Forums",
+  picks: "Picks",
+  profile: "Profile",
+};
 
 function tabIcon(IconComponent: LucideIcon) {
   return ({ color, size }: { color: ColorValue; size: number }) => (

@@ -51,14 +51,7 @@ export function HomeScreen() {
         keyExtractor={(post) => post.id}
         ListEmptyComponent={<FeedEmpty feed={feed} feedMode={feedMode} />}
         ListFooterComponent={<FeedFooter feed={feed} />}
-        ListHeaderComponent={
-          <FeedHeader
-            feedMode={feedMode}
-            isRefreshing={feed.isFetching && !feed.isFetchingNextPage}
-            onChangeFeedMode={setFeedMode}
-            onRefresh={() => void refreshFeed()}
-          />
-        }
+
         refreshControl={
           <RefreshControl
             refreshing={feed.isFetching && !feed.isFetchingNextPage}

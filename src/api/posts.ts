@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { randomUUID } from "expo-crypto";
 import type { Tables, TablesUpdate } from "@/lib/supabase/database.types";
 
 import { normalizeApiError } from "./errors";
@@ -95,7 +96,7 @@ export function createForumSharePost(
 export async function createAskPost(input: CreateAskPostInput): Promise<Post> {
   validateAskPost(input);
 
-  const postId = crypto.randomUUID();
+  const postId = randomUUID();
   await reservePostImageCleanup(input.authorId, postId, input.images);
   const uploadedPaths = await uploadPostImages({
     authorId: input.authorId,
@@ -143,7 +144,7 @@ async function createForumPost({
 }): Promise<Post> {
   validateForumPost({ authorId, body, entityId, postType });
 
-  const postId = crypto.randomUUID();
+  const postId = randomUUID();
   await reservePostImageCleanup(authorId, postId, images);
   const uploadedPaths = await uploadPostImages({ authorId, images, postId });
 

@@ -1,7 +1,7 @@
 -- Create forum posts and their media atomically, and only expose stale upload
 -- reservations to the client-side storage cleanup worker.
 
-create function public.create_forum_post_with_media(
+create or replace function public.create_forum_post_with_media(
   p_post_id uuid,
   p_forum_id uuid,
   p_post_type public.post_type,
@@ -87,7 +87,7 @@ grant execute on function public.create_forum_post_with_media(
   text[]
 ) to authenticated;
 
-create function public.get_stale_post_image_cleanup()
+create or replace function public.get_stale_post_image_cleanup()
 returns setof text
 language sql
 stable
@@ -104,7 +104,7 @@ $$;
 revoke all on function public.get_stale_post_image_cleanup() from public;
 grant execute on function public.get_stale_post_image_cleanup() to authenticated;
 
-create function public.get_forum_summaries(p_forum_id uuid default null)
+create or replace function public.get_forum_summaries(p_forum_id uuid default null)
 returns table (
   id uuid,
   owner_id uuid,

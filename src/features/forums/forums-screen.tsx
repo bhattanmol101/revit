@@ -1,9 +1,8 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Plus, Users } from "lucide-react-native";
+import { Users } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -20,22 +19,6 @@ export function ForumsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <PageScrollView contentContainerClassName="gap-6">
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="flex-1 gap-1">
-            <Text variant="h1" className="text-left">
-              Forums
-            </Text>
-            <Text variant="muted">
-              Public spaces for focused restaurant conversations.
-            </Text>
-          </View>
-          <Link href={routes.createForum} asChild>
-            <Button size="sm" className="rounded-full">
-              <Icon as={Plus} />
-            </Button>
-          </Link>
-        </View>
-
         {forums.isLoading ? <ContentSkeleton /> : null}
         {forums.isError ? (
           <FeedbackState
@@ -52,7 +35,7 @@ export function ForumsScreen() {
           />
         ) : null}
         {forums.data?.length ? (
-          <View className="gap-4">
+          <View className="gap-2">
             {forums.data.map((forum) => (
               <Link key={forum.id} href={routes.forum(forum.id)} asChild>
                 <Pressable
@@ -66,18 +49,17 @@ export function ForumsScreen() {
                         accessibilityLabel={`${forum.name} cover image`}
                         className="h-28 w-full bg-muted"
                         contentFit="cover"
+                        style={{ height: 112, width: "100%" }}
                         source={forum.coverImageUrl}
                       />
                     ) : (
                       <ForumCoverFallback />
                     )}
 
-                    <View className="min-h-28 gap-2 p-4">
-                      <Text className="text-lg font-semibold leading-6">
-                        {forum.name}
-                      </Text>
+                    <View className="gap-1 px-4 py-3">
+                      <Text className="font-semibold">{forum.name}</Text>
                       <Text
-                        className="text-sm leading-5"
+                        className="text-xs leading-5"
                         numberOfLines={2}
                         variant="muted"
                       >
@@ -86,7 +68,7 @@ export function ForumsScreen() {
                       </Text>
                     </View>
 
-                    <View className="flex-row items-center justify-between border-t border-border px-4 py-3">
+                    <View className="flex-row items-center justify-between border-t border-border px-4 py-2">
                       <View className="flex-row items-center gap-1.5">
                         <Icon
                           as={Users}

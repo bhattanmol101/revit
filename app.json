@@ -54,6 +54,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "expo-navigation-bar": {
+        "enforceContrast": false
+      },
+      "eas": {
+        "projectId": "fb4563df-9cd9-4786-98ac-7372bfcc81a5"
+      }
+    },
+    "owner": "aeradron"
   }
 }
