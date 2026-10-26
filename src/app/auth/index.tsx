@@ -1,4 +1,4 @@
-import { type Href, Link } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -9,39 +9,32 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Text } from "@/components/ui/text";
 import { supabase } from "@/lib/supabase/client";
 
-export default function AuthScreen() {
-  const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
+export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    if (loading) return;
     setError(null);
-    setMessage(null);
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError("Enter a valid email address.");
       return;
     }
-    if (password.length < 8) {
-      setError("Use at least 8 characters for your password.");
+    if (!password) {
+      setError("Enter your password.");
       return;
     }
     setLoading(true);
     try {
-      const result =
-        mode === "signIn"
-          ? await supabase.auth.signInWithPassword({ email, password })
-          : await supabase.auth.signUp({ email, password });
+      const result = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
       if (result.error) {
         setError(result.error.message);
         return;
-      }
-      if (mode === "signUp" && !result.data.session) {
-        setMessage(
-          "Check your email to confirm your account, then return here to sign in.",
-        );
       }
     } catch (submissionError) {
       setError(
@@ -56,12 +49,9 @@ export default function AuthScreen() {
 
   return (
     <AuthScreenLayout
-      title={mode === "signIn" ? "Welcome back" : "Create your account"}
-      description={
-        mode === "signIn"
-          ? "Sign in to see the ratings shared by people you follow."
-          : "Start sharing the restaurants and recommendations you care about."
-      }
+      keyboardAware
+      title="Welcome back"
+      description="Sign in to see the ratings shared by people you follow."
     >
       <View className="gap-5">
         <View className="gap-2">
@@ -73,6 +63,7 @@ export default function AuthScreen() {
             autoCorrect={false}
             inputMode="email"
             keyboardType="email-address"
+            editable={!loading}
             onChangeText={setEmail}
             placeholder="name@example.com"
             value={email}
@@ -82,13 +73,12 @@ export default function AuthScreen() {
           <Text variant="small">Password</Text>
           <PasswordInput
             accessibilityLabel="Password"
-            autoComplete={
-              mode === "signIn" ? "current-password" : "new-password"
-            }
+            autoComplete="current-password"
             onChangeText={setPassword}
-            placeholder={
-              mode === "signIn" ? "Your password" : "At least 8 characters"
-            }
+            placeholder="Your password"
+            editable={!loading}
+            returnKeyType="done"
+            onSubmitEditing={() => void submit()}
             value={password}
           />
         </View>
@@ -101,41 +91,19 @@ export default function AuthScreen() {
             {error}
           </Text>
         ) : null}
-        {message ? (
-          <Text className="text-sm text-muted-foreground">{message}</Text>
-        ) : null}
-        {mode === "signIn" ? (
-          <Link href={"/auth/reset" as Href} asChild>
-            <Button className="self-end" size="xs" variant="link">
-              <Text className="text-xs">Forgot password?</Text>
-            </Button>
-          </Link>
-        ) : null}
-        <Button className="mt-1" size="lg" disabled={loading} onPress={submit}>
-          <Text>
-            {loading
-              ? "Please wait…"
-              : mode === "signIn"
-                ? "Sign in"
-                : "Create account"}
+        <Link href="/auth/forgot-password" className="self-end">
+          <Text className="text-xs text-muted-foreground">
+            Forgot password?
           </Text>
+        </Link>
+        <Button size="lg" disabled={loading} onPress={submit}>
+          <Text>{loading ? "Please wait…" : "Sign in"}</Text>
         </Button>
-        <Button
-          disabled={loading}
-          onPress={() => {
-            setMode(mode === "signIn" ? "signUp" : "signIn");
-            setError(null);
-            setMessage(null);
-          }}
-          className="mt-1"
-          variant="ghost"
-        >
-          <Text>
-            {mode === "signIn"
-              ? "Need an account? Create one"
-              : "Already have an account? Sign in"}
-          </Text>
-        </Button>
+        <Link href="/auth/sign-up" asChild>
+          <Button disabled={loading} className="mt-1" variant="ghost">
+            <Text>Need an account? Create one</Text>
+          </Button>
+        </Link>
       </View>
     </AuthScreenLayout>
   );

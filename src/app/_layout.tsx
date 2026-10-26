@@ -3,8 +3,8 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import { useEffect } from "react";
-import { View } from "react-native";
+import { Fragment, useEffect } from "react";
+import { Platform, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 import "../global.css";
@@ -23,6 +23,8 @@ import {
 
 SplashScreen.preventAutoHideAsync();
 Uniwind.setTheme("system");
+
+const SafeAreaContainer = Platform.OS === "web" ? Fragment : SafeAreaProvider;
 
 export default function TabLayout() {
   const { theme } = useUniwind();
@@ -47,7 +49,7 @@ export default function TabLayout() {
 
   return (
     <>
-      <SafeAreaProvider>
+      <SafeAreaContainer>
         <AppProvider>
           <AuthProvider>
             <ThemeProvider value={navigationTheme}>
@@ -55,7 +57,7 @@ export default function TabLayout() {
             </ThemeProvider>
           </AuthProvider>
         </AppProvider>
-      </SafeAreaProvider>
+      </SafeAreaContainer>
 
       <StatusBar style={isDark ? "light" : "dark"} />
       <NavigationBar style={isDark ? "light" : "dark"} />

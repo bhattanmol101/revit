@@ -8,7 +8,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react-native";
-import { type ColorValue, View } from "react-native";
+import { type ColorValue, Platform, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUniwind } from "uniwind";
 
@@ -21,6 +21,15 @@ export default function MainTabs() {
   const isDark = themeName === "dark";
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 8);
+  // CSS keeps web insets current without interrupting streamed hydration.
+  const tabBarInsets = (Platform.OS === "web"
+    ? {
+        height: "calc(58px + max(env(safe-area-inset-bottom, 0px), 8px))",
+        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        paddingLeft: "env(safe-area-inset-left, 0px)",
+        paddingRight: "env(safe-area-inset-right, 0px)",
+      }
+    : { height: 58 + bottomPadding, paddingBottom: bottomPadding }) as ViewStyle;
 
   return (
     <Tabs
@@ -39,8 +48,7 @@ export default function MainTabs() {
         tabBarStyle: {
           backgroundColor: theme.backgroundElement,
           borderTopColor: theme.border,
-          height: 58 + bottomPadding,
-          paddingBottom: bottomPadding,
+          ...tabBarInsets,
           paddingTop: 6,
         },
       })}

@@ -10,6 +10,8 @@ export default function AuthLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!session && !isPasswordRecovery}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="sign-up" />
+        <Stack.Screen name="forgot-password" />
         <Stack.Screen name="reset" />
       </Stack.Protected>
 

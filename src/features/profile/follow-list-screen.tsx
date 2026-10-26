@@ -64,7 +64,7 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
         ListFooterComponent={
           list.isFetchingNextPage ? (
             <ActivityIndicator className="my-5" />
-          ) : null
+          ) : undefined
         }
         onEndReached={() => {
           if (list.hasNextPage && !list.isFetchingNextPage) {
