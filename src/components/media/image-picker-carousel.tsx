@@ -163,7 +163,7 @@ export function ImagePickerCarousel({
           style={
             presentation.emptyFrame
               ? {
-                  alignSelf: presentation.maxWidth ? "flex-end" : "stretch",
+                  alignSelf: presentation.maxWidth ? "flex-start" : "stretch",
                   aspectRatio: presentation.aspectRatio,
                   maxWidth: presentation.maxWidth,
                 }

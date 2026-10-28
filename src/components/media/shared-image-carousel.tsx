@@ -98,7 +98,7 @@ export function SharedImageCarousel({
       className={cn("relative w-full overflow-hidden bg-muted", className)}
       onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
       style={{
-        alignSelf: presentation.maxWidth ? "flex-end" : "stretch",
+        alignSelf: presentation.maxWidth ? "flex-start" : "stretch",
         height: pageHeight,
         maxWidth: presentation.maxWidth,
       }}

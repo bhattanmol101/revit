@@ -5,6 +5,9 @@ import {
   deletePersonalPick,
   getPersonalPick,
   getPersonalPicksByAuthor,
+  getPicksFromFollowing,
+  getFollowedPickIds,
+  setPickFollow,
   type SavePersonalPickInput,
   updatePersonalPick,
 } from "@/api/picks";
@@ -74,5 +77,31 @@ export function useDeletePersonalPick(pickId: string, authorId: string) {
         queryKey: queryKeys.picks.byAuthor(authorId),
       });
     },
+  });
+}
+
+export function usePicksFromFollowing(userId: string) {
+  return useQuery({
+    enabled: Boolean(userId),
+    queryKey: ["picks", "following-directory", userId],
+    queryFn: () => getPicksFromFollowing(userId),
+    staleTime: 30_000,
+  });
+}
+
+export function useFollowedPicks(userId: string) {
+  return useQuery({
+    enabled: Boolean(userId),
+    queryKey: ["picks", "followed", userId],
+    queryFn: () => getFollowedPickIds(userId),
+  });
+}
+
+export function useTogglePickFollow(userId: string, pickId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (follow: boolean) => setPickFollow(userId, pickId, follow),
+    onSuccess: () =>
+      client.invalidateQueries({ queryKey: ["picks", "followed", userId] }),
   });
 }

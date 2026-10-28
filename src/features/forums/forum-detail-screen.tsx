@@ -1,7 +1,7 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { Plus, Trash2, Users } from "lucide-react-native";
+import { Globe, Plus, Trash2, Users } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, useWindowDimensions, View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
@@ -21,6 +21,7 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { ForumAvatar } from "@/features/forums/forum-avatar";
 import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { SharePostCard } from "@/features/posts/share-post-card";
@@ -36,6 +37,7 @@ import {
 import { useShareRatingScore } from "@/queries/shares";
 
 export function ForumDetailScreen() {
+  const { width: windowWidth } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const forum = useForum(id, user?.id ?? "");
@@ -52,6 +54,8 @@ export function ForumDetailScreen() {
   }
 
   const isOwner = forumData.owner_id === user?.id;
+  const showForumSidebarBesideFeed = windowWidth >= 560;
+  const forumSidebarWidth = Math.min(320, Math.round(windowWidth * 0.3));
   const postItems = posts.data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
@@ -67,7 +71,7 @@ export function ForumDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-2 py-2 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
+      <ScrollView contentContainerClassName="w-full gap-4 py-2 md:mx-auto md:max-w-6xl md:px-6 md:py-6">
         <View className="rounded-lg border border-border bg-card shadow-none">
           <ForumCoverDisplay
             forumId={forumData.id}
@@ -75,24 +79,86 @@ export function ForumDetailScreen() {
             imageUrl={forumData.coverImageUrl}
             className="rounded-t-md"
           />
-          <View className="gap-2 p-2">
-            <View className="gap-2">
-              <Text className="font-semibold">{forumData.name}</Text>
-              {forumData.description ? (
-                <Text className="text-md">{forumData.description}</Text>
-              ) : null}
+          <View className="p-3">
+            <View className="flex-row items-center gap-3">
+              <ForumAvatar
+                name={forumData.name}
+                imageUrl={forumData.imageUrl}
+                size={48}
+              />
+              <View className="min-w-0 flex-1">
+                <Text className="text-lg font-semibold">{forumData.name}</Text>
+              </View>
             </View>
-            {forumData.rules ? (
-              <View className="gap-1 border-t border-border pt-2">
-                <Text className="text-sm font-semibold">Rules</Text>
-                <Text variant="muted" className="text-sm leading-5">
-                  {forumData.rules}
-                </Text>
+          </View>
+        </View>
+
+        <View
+          className="gap-4"
+          style={{
+            flexDirection: showForumSidebarBesideFeed ? "row" : "column",
+          }}
+        >
+          <View className="min-w-0 flex-1 gap-2">
+            {!forumData.isMember ? (
+              <Text variant="muted">
+                Join to post, comment, or rate an Ask in this forum.
+              </Text>
+            ) : null}
+            {posts.isLoading ? <PostsLoadingState /> : null}
+            {posts.isError ? (
+              <FeedbackState
+                actionLabel="Retry"
+                onAction={() => void posts.refetch()}
+                title="Couldn’t load forum posts."
+                variant="error"
+              />
+            ) : null}
+            {!posts.isLoading && !posts.isError && postItems.length === 0 ? (
+              <FeedbackState title="No forum posts yet" />
+            ) : null}
+            {postItems.length > 0 ? (
+              <View className="gap-2">
+                {postItems.map((post) => (
+                  <ForumPostCard key={post.id} post={post} />
+                ))}
               </View>
             ) : null}
-            <View className="flex flex-row items-center justify-between border-t border-border pt-2">
-              <View className="flex flex-row items-center gap-3">
+          </View>
+
+          <View
+            className="w-full gap-3"
+            style={
+              showForumSidebarBesideFeed
+                ? { flexShrink: 0, width: forumSidebarWidth }
+                : undefined
+            }
+          >
+            <Card className="gap-4 rounded-lg p-4 shadow-none">
+              <Text className="font-semibold">About this community</Text>
+              <Text className="text-sm leading-5" variant="muted">
+                {forumData.description?.trim() ||
+                  "A community for discussions, experiences, and recommendations."}
+              </Text>
+
+              <View className="flex-row flex-wrap items-center gap-x-4 gap-y-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Icon as={Users} className="size-4 text-muted-foreground" />
+                  <Text className="text-xs text-muted-foreground">
+                    {forumData.memberCount} members
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                  <Icon as={Globe} className="size-4 text-muted-foreground" />
+                  <Text className="text-xs text-muted-foreground">
+                    Public forum
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row gap-2">
                 <Button
+                  className="flex-1"
                   disabled={membership.isPending || isOwner}
                   size="sm"
                   variant={forumData.isMember ? "outline" : "default"}
@@ -111,63 +177,41 @@ export function ForumDetailScreen() {
 
                 {forumData.isMember ? (
                   <Link href={routes.createForumPost(forumData.id)} asChild>
-                    <Button className="self-start" size="sm">
+                    <Button className="flex-1" size="sm" variant="outline">
                       <Icon as={Plus} className="size-4" />
+                      <Text>Create post</Text>
                     </Button>
                   </Link>
                 ) : null}
-
-                {isOwner ? (
-                  <Button
-                    className="self-start"
-                    size="sm"
-                    variant="destructive"
-                    onPress={() => setIsDeleteOpen(true)}
-                  >
-                    <Icon as={Trash2} className="size-4" />
-                  </Button>
-                ) : null}
               </View>
-              <View className="flex-row items-center gap-1">
-                <Icon as={Users} className="size-4 text-muted-foreground" />
-                <Text variant="muted" className="text-xs">
-                  {forumData.memberCount}
+
+              {membership.isError ? (
+                <Text className="text-destructive" variant="small">
+                  {membership.error.message}
                 </Text>
-              </View>
-            </View>
-            {membership.isError ? (
-              <Text className="text-destructive" variant="small">
-                {membership.error.message}
-              </Text>
-            ) : null}
-          </View>
-        </View>
+              ) : null}
 
-        <View className="gap-2">
-          {!forumData.isMember ? (
-            <Text variant="muted">
-              Join to post, comment, or rate an Ask in this forum.
-            </Text>
-          ) : null}
-          {posts.isLoading ? <PostsLoadingState /> : null}
-          {posts.isError ? (
-            <FeedbackState
-              actionLabel="Retry"
-              onAction={() => void posts.refetch()}
-              title="Couldn’t load forum posts."
-              variant="error"
-            />
-          ) : null}
-          {!posts.isLoading && !posts.isError && postItems.length === 0 ? (
-            <FeedbackState title="No forum posts yet" />
-          ) : null}
-          {postItems.length > 0 ? (
-            <View className="gap-2">
-              {postItems.map((post) => (
-                <ForumPostCard key={post.id} post={post} />
-              ))}
-            </View>
-          ) : null}
+              {forumData.rules ? (
+                <View className="gap-1 border-t border-border pt-3">
+                  <Text className="text-sm font-semibold">Rules</Text>
+                  <Text variant="muted" className="text-sm leading-5">
+                    {forumData.rules}
+                  </Text>
+                </View>
+              ) : null}
+
+              {isOwner ? (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onPress={() => setIsDeleteOpen(true)}
+                >
+                  <Icon as={Trash2} className="size-4" />
+                  <Text>Delete forum</Text>
+                </Button>
+              ) : null}
+            </Card>
+          </View>
         </View>
       </ScrollView>
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

@@ -1,10 +1,19 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import {
   Dialog,
   DialogContent,
@@ -77,8 +86,7 @@ function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
   const ratingScore = useShareRatingScore(post.id);
   const comments = useTopLevelComments(post.id);
 
-  if (entity.isLoading || ratingScore.isLoading)
-    return <PostDetailLoading />;
+  if (entity.isLoading || ratingScore.isLoading) return <PostDetailLoading />;
   if (entity.isError || ratingScore.isError || !entity.data) {
     return (
       <PostDetailMessage
@@ -131,8 +139,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
   const comments = useTopLevelComments(post.id);
   const score = ratingScore.data;
 
-  if (entity.isLoading || ratingScore.isLoading)
-    return <PostDetailLoading />;
+  if (entity.isLoading || ratingScore.isLoading) return <PostDetailLoading />;
 
   if (entity.isError || ratingScore.isError) {
     return (
@@ -229,8 +236,11 @@ function AskPostDetail({
           />
         }
       >
-        <AskPostCard isDetail post={post} />
-        {isAuthor ? <AuthorActions post={post} /> : null}
+        <AskPostCard
+          isDetail
+          post={post}
+          ownerActions={isAuthor ? <AuthorActions post={post} /> : undefined}
+        />
         <CommentSection comments={comments} postId={post.id} />
       </ScrollView>
     </SafeAreaView>
@@ -238,6 +248,12 @@ function AskPostDetail({
 }
 
 function AuthorActions({ post }: { post: PostWithDetails }) {
+  const triggerRef = useRef<React.ElementRef<typeof View>>(null);
+  const { width, height } = useWindowDimensions();
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
   const updatePost = useUpdateAskPost(post.id, post.author_id);
   const deletePost = useDeletePost(post.author_id);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -279,12 +295,70 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 
   return (
     <>
-      <Button variant="outline" onPress={openEditor}>
-        <Text>Edit</Text>
-      </Button>
-      <Button variant="destructive" onPress={() => setIsDeleteOpen(true)}>
-        <Text>Delete</Text>
-      </Button>
+      <View ref={triggerRef} collapsable={false}>
+        <Button
+          accessibilityLabel="Post options"
+          accessibilityState={{ expanded: menuPosition !== null }}
+          className="size-8 rounded-full p-0"
+          size="icon"
+          variant="ghost"
+          onPress={() =>
+            triggerRef.current?.measureInWindow((x, y, w, h) =>
+              setMenuPosition({
+                top: Math.min(y + h + 4, height - 110),
+                right: Math.max(8, width - x - w),
+              }),
+            )
+          }
+        >
+          <Icon as={MoreVertical} className="size-4 text-foreground" />
+        </Button>
+      </View>
+      <Modal
+        transparent
+        visible={menuPosition !== null}
+        onRequestClose={() => setMenuPosition(null)}
+      >
+        <View className="flex-1">
+          <Pressable
+            className="absolute inset-0"
+            accessibilityRole="button"
+            accessibilityLabel="Close post options"
+            onPress={() => setMenuPosition(null)}
+          />
+          {menuPosition ? (
+            <View
+              className="absolute w-44 rounded-lg border border-border bg-popover p-1 shadow-lg"
+              style={menuPosition}
+            >
+              <Button
+                className="w-full justify-start"
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setMenuPosition(null);
+                  openEditor();
+                }}
+              >
+                <Icon as={Pencil} className="size-4 text-foreground" />
+                <Text>Edit post</Text>
+              </Button>
+              <Button
+                className="w-full justify-start"
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setMenuPosition(null);
+                  setIsDeleteOpen(true);
+                }}
+              >
+                <Icon as={Trash2} className="size-4 text-destructive" />
+                <Text className="text-destructive">Delete post</Text>
+              </Button>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>

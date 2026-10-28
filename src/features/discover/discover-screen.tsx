@@ -195,7 +195,7 @@ function EntityResults({ entities }: { entities: Entity[] }) {
   return (
     <ResultSection>
       {entities.map((entity) => (
-        <Link key={entity.id} href={{ pathname: routes.createShare, params: { entityId: entity.id } }} asChild>
+        <Link key={entity.id} href={routes.entity(entity.id)} asChild>
           <Button
             className="gap-3 border border-border bg-card"
             size="content"
@@ -209,7 +209,9 @@ function EntityResults({ entities }: { entities: Entity[] }) {
                 {entity.name}
               </Text>
               <Text variant="muted" className="truncate text-left text-xs">
-                {[entity.category.label, entity.locality].filter(Boolean).join(" · ")}
+                {[entity.category.label, entity.locality]
+                  .filter(Boolean)
+                  .join(" · ")}
               </Text>
             </View>
           </Button>

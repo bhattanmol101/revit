@@ -11,8 +11,15 @@ export const POST_IMAGE_PRESENTATION: ImagePresentation = {
 };
 
 export const FORUM_COVER_PRESENTATION: ImagePresentation = {
-  aspectRatio: 16 / 9,
+  aspectRatio: 1080 / 128,
   contentFit: "cover",
+  emptyFrame: true,
+};
+
+export const FORUM_IMAGE_PRESENTATION: ImagePresentation = {
+  aspectRatio: 1,
+  contentFit: "cover",
+  maxWidth: 220,
   emptyFrame: true,
 };
 

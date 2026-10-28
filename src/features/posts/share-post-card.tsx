@@ -84,10 +84,7 @@ export function SharePostCard({
       </CardHeader>
       <CardContent className="gap-2 px-0">
         <Link
-          href={{
-            pathname: routes.createShare,
-            params: { entityId: entity.id },
-          }}
+          href={routes.entity(entity.id)}
           asChild
           className="px-2 md:px-3 md:pt-1 py-0"
         >
@@ -95,11 +92,7 @@ export function SharePostCard({
             className="flex flex-row gap-2 items-center"
             accessibilityLabel={`View ${entity.name}`}
           >
-            <Icon
-              as={MapPin}
-              className="size-5"
-              color={Colors.light.primary}
-            />
+            <Icon as={MapPin} className="size-5" color={Colors.light.primary} />
             <View className="flex-1 items-start gap-0.5">
               <Text className="text-[14px] font-semibold" numberOfLines={1}>
                 {entity.name}

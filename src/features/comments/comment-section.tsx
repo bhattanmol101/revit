@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { MessageCircle } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -14,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
@@ -114,7 +116,7 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
   };
 
   return (
-    <View className="gap-3">
+    <View className="mx-auto w-full max-w-[36rem] gap-3">
       <View className="flex-row items-baseline justify-between gap-3">
         <Text className="text-xl font-semibold">Comments</Text>
         <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
@@ -156,10 +158,13 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
       ) : null}
 
       {!comments.isLoading && !comments.isError && items.length === 0 ? (
-        <FeedbackState
-          description="Start the conversation."
-          title="No comments yet"
-        />
+        <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-6">
+          <View className="size-10 items-center justify-center rounded-full bg-muted">
+            <Icon as={MessageCircle} className="size-5 text-foreground" />
+          </View>
+          <Text className="font-semibold">No comments yet</Text>
+          <Text variant="muted">Start the conversation.</Text>
+        </View>
       ) : null}
 
       {items.length > 0 ? (
@@ -404,7 +409,7 @@ function CommentItem({
       className={
         isReply
           ? "gap-2 rounded-md bg-muted/70 p-3"
-          : "gap-3 rounded-lg border border-border bg-card p-3 shadow-none"
+          : "gap-2 rounded-lg border border-border bg-card p-3 shadow-none"
       }
     >
       <View className="flex-row items-start justify-between gap-3">

@@ -18,6 +18,7 @@ export const routes = {
     pathname: "/restaurants/search",
     params: { returnTo: "share" },
   },
+  entity: (id: string) => ({ pathname: "/entities/[id]", params: { id } }),
   forum: (id: string) => ({ pathname: "/forums/[id]", params: { id } }),
   createForumPost: (id: string) => ({
     pathname: "/forums/[id]/create",

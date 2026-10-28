@@ -106,6 +106,7 @@ function RootNavigator() {
           <Stack.Screen name="activity" options={{ headerShown: true }} />
           <Stack.Screen name="create/ask" options={{ headerShown: true }} />
           <Stack.Screen name="create/share" options={{ headerShown: true }} />
+          <Stack.Screen name="entities/[id]" options={{ headerShown: true }} />
           <Stack.Screen name="posts/[id]" options={{ headerShown: true }} />
           <Stack.Screen
             name="restaurants/[id]"

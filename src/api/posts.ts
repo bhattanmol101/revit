@@ -354,6 +354,7 @@ export function getAskPostsByAuthor(
         .select(POST_DETAILS_SELECT)
         .eq("author_id", authorId)
         .eq("post_type", "ASK")
+        .is("forum_id", null)
         .order("created_at", { ascending: false })
         .order("id", { ascending: true })
         .range(offset, offset + POST_PAGE_SIZE)

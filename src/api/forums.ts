@@ -1,6 +1,6 @@
+import { randomUUID } from "expo-crypto";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
-import { randomUUID } from "expo-crypto";
 
 import { normalizeApiError } from "./errors";
 import type { AskImageUpload } from "./posts";
@@ -10,6 +10,8 @@ export type Forum = Tables<"forums">;
 
 export type ForumSummary = Forum & {
   coverImageUrl: string | null;
+  imageUrl: string | null;
+  isMember: boolean;
   memberCount: number;
 };
 
@@ -35,33 +37,49 @@ export type CreateForumInput = Pick<
 > & { ownerId: string };
 
 export function createForum(
-  input: CreateForumInput & { coverImage?: AskImageUpload },
+  input: CreateForumInput & {
+    forumImage?: AskImageUpload;
+    coverImage?: AskImageUpload;
+  },
 ): Promise<Forum> {
   return runApiRequest(async (signal) => {
-    const forumId = input.coverImage ? randomUUID() : undefined;
-    const path = input.coverImage
+    const forumId =
+      input.forumImage || input.coverImage ? randomUUID() : undefined;
+    const imagePath = input.forumImage
+      ? `${input.ownerId}/${forumId}/image.${input.forumImage.extension}`
+      : undefined;
+    const coverPath = input.coverImage
       ? `${input.ownerId}/${forumId}/cover.${input.coverImage.extension}`
       : undefined;
+    const uploadedPaths = [imagePath, coverPath].filter(
+      (path): path is string => Boolean(path),
+    );
     try {
-      if (input.coverImage && path) {
+      for (const [image, path, label] of [
+        [input.forumImage, imagePath, "forum image"],
+        [input.coverImage, coverPath, "forum cover"],
+      ] as const) {
+        if (!image || !path) continue;
         const { error: uploadError } = await supabase.storage
           .from("forum-images")
-          .upload(path, input.coverImage.data, {
-            contentType: input.coverImage.contentType,
+          .upload(path, image.data, {
+            contentType: image.contentType,
             upsert: false,
           });
-        if (uploadError)
+        if (uploadError) {
           throw normalizeApiError(
             uploadError,
-            "We could not upload the forum cover.",
+            `We could not upload the ${label}.`,
           );
+        }
       }
 
       const { data, error } = await supabase
         .from("forums")
         .insert({
           ...(forumId ? { id: forumId } : {}),
-          ...(path ? { cover_image_path: path } : {}),
+          ...(imagePath ? { image_path: imagePath } : {}),
+          ...(coverPath ? { cover_image_path: coverPath } : {}),
           description: input.description?.trim() || null,
           name: input.name.trim(),
           owner_id: input.ownerId,
@@ -69,7 +87,7 @@ export function createForum(
           slug: input.slug.trim(),
         })
         .select(
-          "id, owner_id, slug, name, description, rules, cover_image_path, created_at, updated_at",
+          "id, owner_id, slug, name, description, rules, image_path, cover_image_path, created_at, updated_at",
         )
         .abortSignal(signal)
         .single();
@@ -78,8 +96,8 @@ export function createForum(
         throw normalizeApiError(error, "We could not create this forum.");
       return data;
     } catch (cause) {
-      if (path) {
-        await supabase.storage.from("forum-images").remove([path]);
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("forum-images").remove(uploadedPaths);
       }
       throw cause;
     }
@@ -102,6 +120,8 @@ export function getForums(): Promise<ForumSummary[]> {
         created_at: forum.created_at,
         description: forum.description,
         id: forum.id,
+        image_path: forum.image_path,
+        isMember: forum.is_member,
         memberCount: forum.member_count,
         name: forum.name,
         owner_id: forum.owner_id,
@@ -110,7 +130,7 @@ export function getForums(): Promise<ForumSummary[]> {
         updated_at: forum.updated_at,
       }));
 
-      return signForumCovers(summaries);
+      return signForumImages(summaries);
     },
     { retries: 1 },
   );
@@ -130,12 +150,13 @@ export function getForum(forumId: string): Promise<ForumDetail | null> {
 
       if (!forum) return null;
 
-      const [detail] = await signForumCovers([
+      const [detail] = await signForumImages([
         {
           cover_image_path: forum.cover_image_path,
           created_at: forum.created_at,
           description: forum.description,
           id: forum.id,
+          image_path: forum.image_path,
           isMember: forum.is_member,
           memberCount: forum.member_count,
           name: forum.name,
@@ -151,19 +172,27 @@ export function getForum(forumId: string): Promise<ForumDetail | null> {
   );
 }
 
-async function signForumCovers<T extends Forum>(
+async function signForumImages<T extends Forum>(
   forums: T[],
-): Promise<Array<T & { coverImageUrl: string | null }>> {
-  const paths = forums.flatMap((forum) =>
-    forum.cover_image_path ? [forum.cover_image_path] : [],
-  );
-  if (paths.length === 0)
-    return forums.map((forum) => ({ ...forum, coverImageUrl: null }));
+): Promise<
+  Array<T & { coverImageUrl: string | null; imageUrl: string | null }>
+> {
+  const paths = forums.flatMap((forum) => [
+    ...(forum.image_path ? [forum.image_path] : []),
+    ...(forum.cover_image_path ? [forum.cover_image_path] : []),
+  ]);
+  if (paths.length === 0) {
+    return forums.map((forum) => ({
+      ...forum,
+      coverImageUrl: null,
+      imageUrl: null,
+    }));
+  }
 
   const { data, error } = await supabase.storage
     .from("forum-images")
     .createSignedUrls(paths, 60 * 60);
-  if (error) throw normalizeApiError(error, "We could not load forum covers.");
+  if (error) throw normalizeApiError(error, "We could not load forum images.");
 
   const urls = new Map(data.map(({ path, signedUrl }) => [path, signedUrl]));
   return forums.map((forum) => ({
@@ -171,6 +200,7 @@ async function signForumCovers<T extends Forum>(
     coverImageUrl: forum.cover_image_path
       ? (urls.get(forum.cover_image_path) ?? null)
       : null,
+    imageUrl: forum.image_path ? (urls.get(forum.image_path) ?? null) : null,
   }));
 }
 

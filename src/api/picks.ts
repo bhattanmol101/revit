@@ -171,3 +171,89 @@ function savePersonalPick(
     return data;
   });
 }
+
+export type PickDirectoryItem = PersonalPick & {
+  author: import("./follows").FollowProfile;
+};
+
+export async function getPicksFromFollowing(
+  userId: string,
+): Promise<PickDirectoryItem[]> {
+  const { getFollowing } = await import("./follows");
+  const authors: import("./follows").FollowProfile[] = [];
+  let offset: number | undefined = 0;
+  do {
+    const page = await getFollowing(userId, offset);
+    authors.push(...page.items);
+    offset = page.nextOffset;
+  } while (offset !== undefined);
+  const groups = await Promise.all(
+    authors.map(async (author) => {
+      const picks: PersonalPick[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        const page = await runApiRequest(
+          async (signal) => {
+            const { data, error } = await supabase
+              .from("picks")
+              .select(
+                "id, author_id, pick_type, title, description, created_at, updated_at",
+              )
+              .eq("author_id", author.id)
+              .eq("pick_type", "PERSONAL")
+              .order("created_at", { ascending: false })
+              .order("id", { ascending: true })
+              .range(offset, offset + 999)
+              .abortSignal(signal);
+            if (error)
+              throw normalizeApiError(error, "We could not load Picks.");
+            return data;
+          },
+          { retries: 1 },
+        );
+        picks.push(...page);
+        if (page.length < 1000) break;
+      }
+      return picks.map((pick) => ({ ...pick, author }));
+    }),
+  );
+  return groups.flat().sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+}
+
+export async function getFollowedPickIds(userId: string): Promise<string[]> {
+  return runApiRequest(async (signal) => {
+    const ids: string[] = [];
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await supabase
+        .from("pick_follows")
+        .select("pick_id")
+        .eq("user_id", userId)
+        .range(offset, offset + 999)
+        .abortSignal(signal);
+      if (error)
+        throw normalizeApiError(error, "We could not load followed Picks.");
+      ids.push(...data.map((item) => item.pick_id));
+      if (data.length < 1000) return ids;
+    }
+  });
+}
+
+export async function setPickFollow(
+  userId: string,
+  pickId: string,
+  follow: boolean,
+): Promise<void> {
+  return runApiRequest(async (signal) => {
+    const request = follow
+      ? supabase
+          .from("pick_follows")
+          .insert({ user_id: userId, pick_id: pickId })
+      : supabase
+          .from("pick_follows")
+          .delete()
+          .eq("user_id", userId)
+          .eq("pick_id", pickId);
+    const { error } = await request.abortSignal(signal);
+    if (error)
+      throw normalizeApiError(error, "We could not update the followed Pick.");
+  });
+}

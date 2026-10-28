@@ -99,6 +99,7 @@ export type Database = {
           category_id: string
           country_code: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           image_url: string | null
@@ -117,6 +118,7 @@ export type Database = {
           category_id: string
           country_code?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -135,6 +137,7 @@ export type Database = {
           category_id?: string
           country_code?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -347,6 +350,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          image_path: string | null
           name: string
           owner_id: string
           rules: string
@@ -358,6 +362,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_path?: string | null
           name: string
           owner_id: string
           rules?: string
@@ -369,6 +374,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_path?: string | null
           name?: string
           owner_id?: string
           rules?: string
@@ -456,6 +462,12 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pick_follows: {
+        Row: { user_id: string; pick_id: string; created_at: string }
+        Insert: { user_id: string; pick_id: string; created_at?: string }
+        Update: { user_id?: string; pick_id?: string; created_at?: string }
+        Relationships: []
       }
       pick_items: {
         Row: {
@@ -884,6 +896,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          image_path: string | null
           is_member: boolean
           member_count: number
           name: string

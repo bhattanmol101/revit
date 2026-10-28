@@ -1,140 +1,217 @@
 import { Link } from "expo-router";
+import { Image } from "expo-image";
 import { Bookmark } from "lucide-react-native";
+import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
-
+import type { PersonalPick, PickDirectoryItem } from "@/api/picks";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
-import { usePersonalPicksByAuthor } from "@/queries/picks";
+import {
+  useFollowedPicks,
+  usePersonalPick,
+  usePersonalPicksByAuthor,
+  usePicksFromFollowing,
+} from "@/queries/picks";
+
+type Filter = "your" | "followed" | "all";
 
 export function PicksScreen() {
-  const { profile } = useAuth();
-  const picks = usePersonalPicksByAuthor(profile?.id ?? "");
-  const items = picks.data ?? [];
-
+  const { profile, user } = useAuth();
+  const [filter, setFilter] = useState<Filter>("your");
+  const [search, setSearch] = useState("");
+  const own = usePersonalPicksByAuthor(user?.id ?? "");
+  const directory = usePicksFromFollowing(user?.id ?? "");
+  const followed = useFollowedPicks(user?.id ?? "");
+  const loading =
+    filter === "your"
+      ? own.isLoading
+      : directory.isLoading || (filter === "followed" && followed.isLoading);
+  const error =
+    filter === "your"
+      ? own.isError
+      : directory.isError || (filter === "followed" && followed.isError);
+  const items = useMemo(() => {
+    const source =
+      filter === "your"
+        ? (own.data ?? []).map((pick) => ({ ...pick, author: profile }))
+        : (directory.data ?? []).filter(
+            (pick) =>
+              filter === "all" || (followed.data ?? []).includes(pick.id),
+          );
+    const query = search.trim().toLocaleLowerCase();
+    return source.filter(
+      (pick) =>
+        !query ||
+        [
+          pick.title,
+          pick.description,
+          pick.author?.display_name,
+          pick.author?.username,
+        ].some((value) => value?.toLocaleLowerCase().includes(query)),
+    );
+  }, [filter, own.data, directory.data, followed.data, profile, search]);
+  const retry = () => {
+    if (filter === "your") void own.refetch();
+    else {
+      void directory.refetch();
+      if (filter === "followed") void followed.refetch();
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <PageScrollView contentContainerClassName="gap-6">
-        {picks.isLoading ? <ContentSkeleton /> : null}
-        {picks.isError ? (
-          <FeedbackState
-            actionLabel="Retry"
-            onAction={() => void picks.refetch()}
-            title="Couldn’t load Picks."
-            variant="error"
+      <PageScrollView contentWidth="standard" contentContainerClassName="gap-5">
+        <View className="w-full gap-4">
+          <Text variant="muted" className="leading-5">
+            Discover collections from people you follow.
+          </Text>
+          <SearchInput
+            accessibilityLabel="Search Picks or people"
+            placeholder="Search Picks or people…"
+            value={search}
+            onChangeText={setSearch}
           />
-        ) : null}
-        {!picks.isLoading && !picks.isError && items.length === 0 ? (
-          <FeedbackState
-            description="Create your first ordered list of finds."
-            title="No Picks yet"
-          />
-        ) : null}
-        {items.map((pick) => (
-          <Link key={pick.id} href={routes.pick(pick.id)} asChild>
-            <Pressable
-              accessibilityRole="link"
-              className="w-full rounded-lg active:opacity-90"
-            >
-              <Card className="w-full flex-row gap-0 overflow-hidden py-0 shadow-none">
-                <PickOrderRail />
-
-                <View className="min-w-0 flex-1">
-                  <View className="flex-1 justify-center gap-1 px-3 py-2 md:px-4">
-                    <Text className="text-base font-semibold leading-5">
-                      {pick.title}
-                    </Text>
-                    <Text
-                      className="text-[13px] leading-4.5"
-                      numberOfLines={2}
-                      variant="muted"
-                    >
-                      {pick.description?.trim() || "A collection of finds"}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center justify-between gap-3 border-t border-border px-3 py-1.5 md:px-4">
-                    <View className="min-w-0 flex-row items-center gap-2">
-                      <Icon
-                        as={Bookmark}
-                        className="size-4 text-muted-foreground"
-                      />
-                      <Text variant="muted" className="text-xs">
-                        Personal Pick
-                      </Text>
-                    </View>
-                    <Text
-                      variant="muted"
-                      className="shrink-0 text-xs"
-                      numberOfLines={1}
-                    >
-                      {formatUpdatedAt(pick.updated_at)}
-                    </Text>
-                  </View>
-                </View>
-              </Card>
-            </Pressable>
-          </Link>
-        ))}
+          <View className="flex-row flex-wrap gap-2">
+            {(
+              [
+                ["your", "Your"],
+                ["followed", "Followed"],
+                ["all", "All"],
+              ] as const
+            ).map(([value, label]) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={filter === value ? "default" : "outline"}
+                onPress={() => setFilter(value)}
+              >
+                <Text>{label}</Text>
+              </Button>
+            ))}
+          </View>
+          {loading ? <ContentSkeleton /> : null}
+          {error ? (
+            <FeedbackState
+              title="Couldn’t load Picks."
+              variant="error"
+              actionLabel="Retry"
+              onAction={retry}
+            />
+          ) : null}
+          {!loading && !error && items.length === 0 ? (
+            <FeedbackState
+              title={
+                search.trim()
+                  ? "No Picks match your search"
+                  : filter === "your"
+                    ? "No Picks yet"
+                    : filter === "followed"
+                      ? "No followed Picks yet"
+                      : "No Picks from people you follow"
+              }
+              description={
+                filter === "your" && !search.trim()
+                  ? "Create your first ordered list of finds."
+                  : undefined
+              }
+            />
+          ) : null}
+          {!loading && !error ? (
+            <View className="gap-2">
+              {items.map((pick) => (
+                <PickRow key={pick.id} pick={pick} />
+              ))}
+            </View>
+          ) : null}
+        </View>
       </PageScrollView>
     </SafeAreaView>
   );
 }
 
-function PickOrderRail() {
+type RowPick = PersonalPick & { author: PickDirectoryItem["author"] | null };
+function PickRow({ pick }: { pick: RowPick }) {
+  const detail = usePersonalPick(pick.id);
+  const images = (detail.data?.items ?? [])
+    .filter((item) => Boolean(item.entity.image_url))
+    .slice(0, 3);
+  const initials = (pick.author?.display_name ?? "?")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
   return (
-    <View className="w-10 items-center justify-center bg-primary py-2 md:w-16">
-      {Array.from({ length: 3 }, (_, index) => {
-        const position = index + 1;
-
-        return (
-          <View key={position} className="items-center">
-            <View className="size-5 items-center justify-center rounded-full border-2 border-primary-foreground/40 bg-background/10">
-              <Text className="text-[11px] font-semibold leading-none text-primary-foreground">
-                {position}
+    <Link href={routes.pick(pick.id)} asChild>
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={`Open ${pick.title}`}
+        className="w-full active:opacity-90"
+      >
+        <Card className="w-full flex-row items-center gap-3 p-3 shadow-none">
+          <View className="flex-row gap-1">
+            {images.length ? (
+              images.map((item) => (
+                <Image
+                  key={item.entity_id}
+                  source={{ uri: item.entity.image_url ?? undefined }}
+                  contentFit="cover"
+                  style={{ width: 48, height: 64, borderRadius: 6 }}
+                />
+              ))
+            ) : (
+              <View className="size-16 items-center justify-center rounded-md bg-secondary">
+                <Icon as={Bookmark} className="size-5 text-muted-foreground" />
+              </View>
+            )}
+          </View>
+          <View className="min-w-0 flex-1 gap-1">
+            <Text className="font-semibold" numberOfLines={1}>
+              {pick.title}
+            </Text>
+            <Text variant="muted" className="text-sm" numberOfLines={1}>
+              {pick.description?.trim() || "A collection of finds"}
+            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <Avatar
+                alt={`${pick.author?.display_name ?? "User"}'s avatar`}
+                className="size-5"
+              >
+                {pick.author?.avatar_url ? (
+                  <AvatarImage source={{ uri: pick.author.avatar_url }} />
+                ) : null}
+                <AvatarFallback>
+                  <Text className="text-[9px]">{initials}</Text>
+                </AvatarFallback>
+              </Avatar>
+              <Text variant="muted" className="text-xs" numberOfLines={1}>
+                @{pick.author?.username ?? "user"}
               </Text>
             </View>
-            {position < 3 ? (
-              <View className="h-2 w-0.5 bg-primary-foreground/40" />
-            ) : null}
           </View>
-        );
-      })}
-    </View>
+          <Text variant="muted" className="text-xs" numberOfLines={1}>
+            {formatUpdatedAt(pick.updated_at)}
+          </Text>
+        </Card>
+      </Pressable>
+    </Link>
   );
 }
-
 function formatUpdatedAt(value: string) {
-  const timestamp = new Date(value).getTime();
-  const elapsedMs = Date.now() - timestamp;
-
-  if (!Number.isFinite(timestamp) || elapsedMs < 0) return "Updated recently";
-
-  const minutes = Math.floor(elapsedMs / 60_000);
-  if (minutes < 1) return "Updated just now";
-  if (minutes < 60) return `Updated ${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Updated ${hours}h ago`;
-
-  const days = Math.floor(hours / 24);
+  const time = new Date(value).getTime();
+  const days = Math.floor((Date.now() - time) / 86400000);
+  if (!Number.isFinite(time) || days < 0) return "Updated recently";
+  if (days === 0) return "Updated today";
   if (days < 7) return `Updated ${days}d ago`;
-
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `Updated ${weeks}w ago`;
-
-  return `Updated ${new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "short",
-    year:
-      new Date(value).getFullYear() === new Date().getFullYear()
-        ? undefined
-        : "numeric",
-  }).format(new Date(value))}`;
+  if (days < 35) return `Updated ${Math.floor(days / 7)}w ago`;
+  return `Updated ${new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: new Date(value).getFullYear() === new Date().getFullYear() ? undefined : "numeric" }).format(new Date(value))}`;
 }

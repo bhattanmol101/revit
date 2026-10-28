@@ -1,6 +1,4 @@
 import { Link } from "expo-router";
-import { LogOut } from "lucide-react-native";
-import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -8,13 +6,18 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import type { PostWithDetails } from "@/api/posts";
 import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
-import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -22,7 +25,6 @@ import { AskPostCard } from "@/features/posts/ask-post-card";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useFollowStatus, useFollowToggle } from "@/queries/follows";
-import { usePersonalPicksByAuthor } from "@/queries/picks";
 import { useAskPostsByAuthor } from "@/queries/posts";
 
 import { useFollowCounts } from "@/queries/profiles";
@@ -36,9 +38,7 @@ export function ProfileView({
   isOwnProfile = false,
   profile,
 }: ProfileViewProps) {
-  const { signOut, user } = useAuth();
-  const [signOutError, setSignOutError] = useState<string | null>(null);
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { user } = useAuth();
   const isOwn = isOwnProfile || user?.id === profile.id;
   const counts = useFollowCounts(profile.id);
   const posts = useAskPostsByAuthor(profile.id);
@@ -61,7 +61,7 @@ export function ProfileView({
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
+        contentContainerClassName="w-full md:gap-6 gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6 py-1"
         refreshControl={
           <RefreshControl
             refreshing={
@@ -73,104 +73,106 @@ export function ProfileView({
           />
         }
       >
-        <View className="gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
-          <Avatar
-            alt={`${profile.display_name}'s avatar`}
-            className="size-20 border-2 border-card shadow-none"
+        <View className="overflow-hidden md:rounded-xl border border-border bg-card">
+          <View
+            className="h-28 overflow-hidden sm:h-36"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
           >
-            {profile.avatar_url ? (
-              <AvatarImage
-                accessibilityLabel={`${profile.display_name}'s avatar`}
-                source={{ uri: profile.avatar_url }}
+            <Svg
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid slice"
+              viewBox="0 0 900 144"
+            >
+              <Defs>
+                <LinearGradient id="profileCover" x1="0" y1="1" x2="1" y2="0">
+                  <Stop offset="0" stopColor="#101b33" />
+                  <Stop offset="1" stopColor="#2453ae" />
+                </LinearGradient>
+              </Defs>
+              <Rect width="900" height="144" fill="url(#profileCover)" />
+              <Circle
+                cx="125"
+                cy="180"
+                r="105"
+                fill="#142b58"
+                stroke="#2859ac"
               />
-            ) : null}
-            <AvatarFallback>
-              <Text className="text-xl font-semibold">{initials}</Text>
-            </AvatarFallback>
-          </Avatar>
+              <Circle
+                cx="760"
+                cy="310"
+                r="245"
+                fill="#16356c"
+                stroke="#2c62bd"
+              />
+            </Svg>
+          </View>
 
-          <View className="min-w-0 flex-1 gap-2">
-            <View className="gap-1">
-              <Text variant="h1" className="text-left">
-                {profile.display_name}
-              </Text>
-              <Text variant="muted" className="text-sm">
-                @{profile.username}
-              </Text>
-            </View>
+          <View className="px-5 pb-3 sm:flex-row sm:items-start sm:gap-5 sm:px-8 sm:pb-7">
+            <Avatar
+              alt={`${profile.display_name}'s avatar`}
+              className="-mt-10 size-24 border-2 border-blue-500 shadow-none sm:-mt-8 sm:size-28"
+            >
+              {profile.avatar_url ? (
+                <AvatarImage
+                  accessibilityLabel={`${profile.display_name}'s avatar`}
+                  source={{ uri: profile.avatar_url }}
+                />
+              ) : null}
+              <AvatarFallback>
+                <Text className="text-3xl font-semibold">{initials}</Text>
+              </AvatarFallback>
+            </Avatar>
 
-            <Text className="max-w-2xl leading-6 text-foreground">
-              {profile.bio?.trim() ||
-                (isOwnProfile
-                  ? "Add a bio to tell people what you like."
-                  : "No bio yet.")}
-            </Text>
-
-            {!isOwn ? (
-              <Button
-                className="mt-2 min-w-28 self-start"
-                disabled={followStatus.isLoading || followToggle.isPending}
-                variant={followStatus.data ? "outline" : "default"}
-                onPress={() =>
-                  followToggle.mutate(!(followStatus.data ?? false))
-                }
-              >
-                <Text>
-                  {followToggle.isPending
-                    ? "Updating…"
-                    : followStatus.data
-                      ? "Following"
-                      : "Follow"}
+            <View className="min-w-0 flex-1 gap-3 pt-3 sm:pt-5">
+              <View className="gap-1">
+                <Text variant="h1" className="text-left">
+                  {profile.display_name}
                 </Text>
-              </Button>
-            ) : null}
-
-            {isOwn ? (
-              <Button
-                className="mt-2 self-start"
-                disabled={isSigningOut}
-                size="sm"
-                variant="outline"
-                onPress={() => {
-                  setSignOutError(null);
-                  setIsSigningOut(true);
-                  void signOut()
-                    .catch((error: unknown) => {
-                      setSignOutError(
-                        error instanceof Error
-                          ? error.message
-                          : "We couldn’t sign you out. Please try again.",
-                      );
-                    })
-                    .finally(() => setIsSigningOut(false));
-                }}
-              >
-                <Icon as={LogOut} />
-                <Text>{isSigningOut ? "Signing out…" : "Sign out"}</Text>
-              </Button>
-            ) : null}
-
-            {signOutError ? (
-              <Text variant="small" className="text-destructive">
-                {signOutError}
+                <Text variant="muted" className="text-sm">
+                  @{profile.username}
+                </Text>
+              </View>
+              <Text className="max-w-2xl leading-6 text-foreground">
+                {profile.bio?.trim() ||
+                  (isOwnProfile
+                    ? "Add a bio to tell people what you like."
+                    : "No bio yet.")}
               </Text>
-            ) : null}
-
-            {!isOwn && (followStatus.isError || followToggle.isError) ? (
-              <Text variant="small" className="text-destructive">
-                {followToggle.error?.message ??
-                  "We couldn’t load the follow status. Pull to refresh."}
-              </Text>
-            ) : null}
+              <FollowCounts
+                followers={counts.data?.followers}
+                following={counts.data?.following}
+                isLoading={counts.isLoading}
+                username={profile.username}
+              />
+              {!isOwn ? (
+                <Button
+                  className="min-w-28 self-start"
+                  disabled={followStatus.isLoading || followToggle.isPending}
+                  variant={followStatus.data ? "outline" : "default"}
+                  onPress={() =>
+                    followToggle.mutate(!(followStatus.data ?? false))
+                  }
+                >
+                  <Text>
+                    {followToggle.isPending
+                      ? "Updating…"
+                      : followStatus.data
+                        ? "Following"
+                        : "Follow"}
+                  </Text>
+                </Button>
+              ) : null}
+              {!isOwn && (followStatus.isError || followToggle.isError) ? (
+                <Text variant="small" className="text-destructive">
+                  {followToggle.error?.message ??
+                    "We couldn’t load the follow status. Pull to refresh."}
+                </Text>
+              ) : null}
+            </View>
           </View>
         </View>
-
-        <FollowCounts
-          followers={counts.data?.followers}
-          following={counts.data?.following}
-          isLoading={counts.isLoading}
-          username={profile.username}
-        />
 
         {counts.isError ? (
           <FeedbackState
@@ -190,53 +192,8 @@ export function ProfileView({
           posts={posts.data?.pages.flatMap((page) => page.items) ?? []}
           retry={() => void posts.refetch()}
         />
-
-        <ProfilePicks profileId={profile.id} />
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function ProfilePicks({ profileId }: { profileId: string }) {
-  const picks = usePersonalPicksByAuthor(profileId);
-
-  return (
-    <View className="gap-3">
-      <Text variant="h2" className="text-xl">
-        Picks
-      </Text>
-      {picks.isLoading ? <Skeleton className="h-20 w-full" /> : null}
-      {picks.isError ? (
-        <FeedbackState
-          actionLabel="Retry"
-          onAction={() => void picks.refetch()}
-          title="Couldn’t load Picks."
-          variant="error"
-        />
-      ) : null}
-      {!picks.isLoading && !picks.isError && picks.data?.length === 0 ? (
-        <FeedbackState title="No Picks yet" />
-      ) : null}
-      {picks.data?.map((pick) => (
-        <Link key={pick.id} href={routes.pick(pick.id)} asChild>
-          <Pressable
-            accessibilityRole="link"
-            className="rounded-lg active:opacity-90"
-          >
-            <Card className="gap-1 py-3 shadow-none">
-              <CardHeader>
-                <CardTitle>{pick.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Text variant="muted">
-                  {pick.description?.trim() || "Restaurant collection"}
-                </Text>
-              </CardContent>
-            </Card>
-          </Pressable>
-        </Link>
-      ))}
-    </View>
   );
 }
 
@@ -258,11 +215,7 @@ function ProfilePosts({
   retry: () => void;
 }) {
   return (
-    <View className="-mx-2 gap-3 sm:mx-0">
-      <Text variant="h2" className="border-0 px-2 pb-0 text-xl sm:px-0">
-        Posts
-      </Text>
-
+    <View className="gap-1">
       {isLoading ? (
         <View className="gap-3">
           <Skeleton className="h-40 w-full" />
@@ -314,24 +267,17 @@ function FollowCounts({
   username: string;
 }) {
   return (
-    <View className="flex-row gap-3">
+    <View className="flex-row items-center gap-4">
       <Link href={routes.followers(username)} asChild>
-        <Button
-          variant="secondary"
-          className="min-w-28 items-start"
-          size="content"
-        >
+        <Pressable accessibilityRole="link" className="py-1 active:opacity-70">
           <Count label="Followers" value={followers} isLoading={isLoading} />
-        </Button>
+        </Pressable>
       </Link>
+      <View className="h-4 w-px bg-border" />
       <Link href={routes.following(username)} asChild>
-        <Button
-          variant="secondary"
-          className="min-w-28 items-start"
-          size="content"
-        >
+        <Pressable accessibilityRole="link" className="py-1 active:opacity-70">
           <Count label="Following" value={following} isLoading={isLoading} />
-        </Button>
+        </Pressable>
       </Link>
     </View>
   );
@@ -347,11 +293,11 @@ function Count({
   value?: number;
 }) {
   return (
-    <View className="gap-1">
+    <View className="flex-row items-center gap-1">
       {isLoading ? (
-        <Skeleton className="h-6 w-10" />
+        <Skeleton className="h-4 w-6" />
       ) : (
-        <Text className="text-lg font-semibold">{value ?? 0}</Text>
+        <Text className="font-semibold">{value ?? 0}</Text>
       )}
       <Text variant="muted">{label}</Text>
     </View>

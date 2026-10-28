@@ -3,7 +3,10 @@ import { router, Stack } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
-import { FORUM_COVER_PRESENTATION } from "@/components/media/image-presentation";
+import {
+  FORUM_COVER_PRESENTATION,
+  FORUM_IMAGE_PRESENTATION,
+} from "@/components/media/image-presentation";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,6 +26,8 @@ export function CreateForumScreen() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
+  const [forumImage, setForumImage] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
   const [cover, setCover] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const slug = slugFromName(name);
   const canSubmit = Boolean(
@@ -32,15 +37,25 @@ export function CreateForumScreen() {
   const submit = async () => {
     if (!user || !canSubmit) return;
     try {
+      const forumImageUpload = forumImage
+        ? await readLocalImage({
+            file: forumImage.file,
+            fileName: forumImage.fileName,
+            mimeType: forumImage.mimeType,
+            uri: forumImage.uri,
+          })
+        : undefined;
+      const coverImageUpload = cover
+        ? await readLocalImage({
+            file: cover.file,
+            fileName: cover.fileName,
+            mimeType: cover.mimeType,
+            uri: cover.uri,
+          })
+        : undefined;
       const forum = await createForum.mutateAsync({
-        coverImage: cover
-          ? await readLocalImage({
-              file: cover.file,
-              fileName: cover.fileName,
-              mimeType: cover.mimeType,
-              uri: cover.uri,
-            })
-          : undefined,
+        forumImage: forumImageUpload,
+        coverImage: coverImageUpload,
         description,
         name,
         ownerId: user.id,
@@ -59,7 +74,7 @@ export function CreateForumScreen() {
           header: () => (
             <AppHeader
               leading="close"
-              onLeadingPress={() => router.replace(routes.forums)}
+              onLeadingPress={() => router.replace(routes.create)}
               title="Forums"
               titleAlign="center"
               trailing={
@@ -107,9 +122,28 @@ export function CreateForumScreen() {
 
           <View className="gap-2.5">
             <View className="gap-0.5">
+              <Text variant="small">Forum image (optional)</Text>
+              <Text variant="muted">
+                A square image shown beside your forum name.
+              </Text>
+            </View>
+            <ImagePickerCarousel
+              images={forumImage ? [forumImage] : []}
+              onImagesChange={(images) => setForumImage(images[0] ?? null)}
+              maxImages={1}
+              selectionLimit={1}
+              presentation={FORUM_IMAGE_PRESENTATION}
+              replaceExisting
+              addLabel={forumImage ? "Change forum image" : "Add forum image"}
+              disabled={createForum.isPending}
+            />
+          </View>
+
+          <View className="gap-2.5">
+            <View className="gap-0.5">
               <Text variant="small">Cover image (optional)</Text>
               <Text variant="muted">
-                Give your forum a recognizable visual identity.
+                A wide banner displayed across the top of your forum.
               </Text>
             </View>
             <ImagePickerCarousel

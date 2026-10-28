@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
@@ -21,10 +21,15 @@ import { PostMediaGallery } from "./post-media-gallery";
 
 type AskPostCardProps = {
   isDetail?: boolean;
+  ownerActions?: ReactNode;
   post: PostWithDetails;
 };
 
-export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
+export function AskPostCard({
+  isDetail = false,
+  post,
+  ownerActions,
+}: AskPostCardProps) {
   const [expandedDrawer, setExpandedDrawer] = useState<
     "comments" | "rating" | null
   >(null);
@@ -70,9 +75,12 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
             </Link>
           </View>
 
-          <Badge className="rounded-full px-2 py-0.5" variant="default">
-            <Text className="text-[9px] font-semibold">ASK</Text>
-          </Badge>
+          <View className="flex-row items-center gap-1">
+            <Badge className="rounded-full px-2 py-0.5" variant="default">
+              <Text className="text-[9px] font-semibold">ASK</Text>
+            </Badge>
+            {ownerActions}
+          </View>
         </View>
       </CardHeader>
 

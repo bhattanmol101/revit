@@ -83,7 +83,8 @@ export default function MainTabs() {
       <Tabs.Screen
         name="profile"
         options={{
-          href: null,
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: "none" },
           title: "Profile",
           tabBarIcon: tabIcon(UserRound),
         }}

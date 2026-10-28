@@ -176,7 +176,7 @@ function AddRestaurantForm({
               pathname: "/create/share",
               params: { restaurantId: restaurant.id },
             }
-          : routes.restaurant(restaurant.id),
+          : routes.entity(restaurant.id),
       );
     } catch {
       // The API error remains visible below and supports a corrected retry.
@@ -346,7 +346,7 @@ function RestaurantResult({
   }
 
   return (
-    <Link href={routes.restaurant(restaurant.id)} asChild>
+    <Link href={routes.entity(restaurant.id)} asChild>
       <Button
         className="w-full items-start border border-border bg-card"
         size="content"

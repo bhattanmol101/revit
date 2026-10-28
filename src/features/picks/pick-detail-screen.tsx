@@ -1,10 +1,11 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { Edit3, MapPin, Trash2 } from "lucide-react-native";
+import { Image } from "expo-image";
+import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Platform, Pressable, ScrollView, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import {
   Dialog,
@@ -19,14 +20,25 @@ import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
-import { useDeletePersonalPick, usePersonalPick } from "@/queries/picks";
-import { Separator } from "@/components/ui/separator";
+import {
+  useDeletePersonalPick,
+  usePersonalPick,
+  useFollowedPicks,
+  useTogglePickFollow,
+} from "@/queries/picks";
+import { useFollowStatus } from "@/queries/follows";
 
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const pick = usePersonalPick(id);
   const deletePick = useDeletePersonalPick(id, user?.id ?? "");
+  const followedPicks = useFollowedPicks(user?.id ?? "");
+  const toggleFollow = useTogglePickFollow(user?.id ?? "", id);
+  const authorFollow = useFollowStatus(
+    user?.id ?? "",
+    pick.data?.author_id ?? "",
+  );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const goBack = () => {
     if (router.canGoBack()) {
@@ -55,23 +67,58 @@ export function PickDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="w-full gap-2 px-2 py-3 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
-        <View className="gap-2 border border-muted rounded-md px-4 py-2 bg-muted mb-2">
+      <ScrollView contentContainerClassName="w-full gap-6 px-4 py-6 md:mx-auto md:max-w-4xl md:px-6 md:py-12">
+        <View className="gap-4">
+          <View className="flex-row items-center gap-3">
+            <View className="h-0.5 w-7 rounded-full bg-primary" />
+            <Text className="text-xs font-semibold tracking-widest text-primary">
+              PERSONAL PICK
+            </Text>
+          </View>
           <View className="flex-row items-start justify-between gap-3">
-            <View>
-              <Text variant="h2" className="text-xl">
+            <View className="min-w-0 flex-1 gap-2">
+              <Text
+                accessibilityRole="header"
+                className="text-3xl leading-tight text-foreground md:text-5xl"
+                style={{
+                  fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+                }}
+              >
                 {personalPick.title}
               </Text>
               {personalPick.description ? (
-                <Text variant="muted" className="leading-5">
+                <Text variant="muted" className="text-base leading-6">
                   {personalPick.description}
                 </Text>
               ) : null}
             </View>
+            {!isOwner && authorFollow.data ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={
+                  followedPicks.isLoading ||
+                  followedPicks.isError ||
+                  toggleFollow.isPending
+                }
+                onPress={() =>
+                  toggleFollow.mutate(!(followedPicks.data ?? []).includes(id))
+                }
+              >
+                <Text>
+                  {toggleFollow.isPending
+                    ? "Updating…"
+                    : (followedPicks.data ?? []).includes(id)
+                      ? "Following"
+                      : "Follow"}
+                </Text>
+              </Button>
+            ) : null}
             {isOwner ? (
               <View className="flex-row gap-2">
                 <Button
-                  size="xs"
+                  accessibilityLabel="Edit Pick"
+                  size="icon"
                   variant="outline"
                   hitSlop={8}
                   onPress={() => router.push(routes.editPick(personalPick.id))}
@@ -79,9 +126,9 @@ export function PickDetailScreen() {
                   <Icon as={Edit3} className="size-4" />
                 </Button>
                 <Button
-                  size="xs"
+                  accessibilityLabel="Delete Pick"
+                  size="icon"
                   variant="destructive"
-                  className="py-1 px-2"
                   onPress={() => setIsDeleteOpen(true)}
                   hitSlop={8}
                 >
@@ -92,43 +139,74 @@ export function PickDetailScreen() {
           </View>
         </View>
 
-        <View className="gap-2">
+        {toggleFollow.isError || followedPicks.isError ? (
+          <Text variant="muted">
+            Couldn’t update or load followed Picks. Please try again.
+          </Text>
+        ) : null}
+        <View className="gap-3">
           {personalPick.items.map((item) => (
             <Link
               key={item.entity_id}
-              href={{ pathname: routes.createShare, params: { entityId: item.entity.id } }}
+              href={routes.entity(item.entity.id)}
               asChild
             >
-              <Card className="gap-2 py-3 shadow-none">
-                <CardContent className="flex-row items-center gap-4">
-                  <View key={item.position} className="items-center">
-                    <View className="size-5 items-center justify-center rounded-full border-2 border-primary-foreground/40 bg-background/10">
-                      <Text className="text-[11px] font-semibold leading-none text-primary-foreground">
-                        {item.position}
-                      </Text>
-                    </View>
-                    {/*{position < 3 ? (
-                      <View className="h-2 w-0.5 bg-primary-foreground/40" />
-                    ) : null}*/}
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={`Open ${item.entity.name}`}
+                className="rounded-xl active:opacity-80"
+              >
+                <Card className="flex-row items-center gap-3 rounded-xl border-border bg-card p-3 shadow-none sm:gap-5 sm:p-5">
+                  <View className="items-center justify-center border-r border-border pr-3 sm:pr-5">
+                    <Text
+                      className="text-3xl text-primary sm:text-5xl"
+                      style={{
+                        fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+                      }}
+                    >
+                      {String(item.position).padStart(2, "0")}
+                    </Text>
                   </View>
-                  <View className="flex flex-row gap-2">
-                    <View className="mt-0.5">
-                      <Icon as={MapPin} />
-                    </View>
-                    <View className="gap-1">
-                      <Text className="font-semibold">
-                        {item.entity.name}
-                      </Text>
-                      <Text variant="muted" className="text-xs">
-                        {[item.entity.category.label, item.entity.locality].filter(Boolean).join(" · ")}
-                      </Text>
-                      {item.note ? (
-                        <Text className="text-sm leading-5">{item.note}</Text>
-                      ) : null}
-                    </View>
+                  <View className="size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary sm:size-20">
+                    {item.entity.image_url ? (
+                      <Image
+                        source={{ uri: item.entity.image_url }}
+                        contentFit="cover"
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    ) : (
+                      <Icon
+                        as={MapPin}
+                        className="size-6 text-muted-foreground"
+                      />
+                    )}
                   </View>
-                </CardContent>
-              </Card>
+                  <View className="min-w-0 flex-1 gap-1">
+                    <Text className="text-base font-semibold sm:text-lg">
+                      {item.entity.name}
+                    </Text>
+                    <Text variant="muted" className="text-sm">
+                      {[item.entity.category.label, item.entity.locality]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </Text>
+                    {item.note ? (
+                      <View className="mt-1 flex-row items-start gap-2">
+                        <Text className="text-lg font-semibold leading-5 text-primary">
+                          “
+                        </Text>
+                        <Text className="min-w-0 flex-1 text-sm leading-5">
+                          {item.note}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Icon
+                    as={ChevronRight}
+                    className="size-4 shrink-0 text-muted-foreground"
+                  />
+                </Card>
+              </Pressable>
             </Link>
           ))}
         </View>
@@ -138,8 +216,8 @@ export function PickDetailScreen() {
           <DialogHeader>
             <DialogTitle>Delete this Pick?</DialogTitle>
             <DialogDescription>
-              This permanently deletes the list. The finds themselves are
-              not affected.
+              This permanently deletes the list. The finds themselves are not
+              affected.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

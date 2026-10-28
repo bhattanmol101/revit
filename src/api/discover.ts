@@ -52,6 +52,7 @@ export function discover(query: string): Promise<DiscoverResults> {
               "id, post_type, body, author:profiles!posts_author_id_fkey(display_name)",
             )
             .ilike("body", pattern)
+            .is("forum_id", null)
             .order("created_at", { ascending: false })
             .limit(DISCOVER_RESULT_LIMIT)
             .abortSignal(signal),
