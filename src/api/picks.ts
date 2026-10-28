@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 import { normalizeApiError } from "./errors";
 import { runApiRequest } from "./request";
-import type { Restaurant } from "./restaurants";
+import type { Entity } from "./entities";
 
 export type PersonalPick = Tables<"picks">;
 
@@ -10,7 +10,7 @@ export type PersonalPickItem = Pick<
   Tables<"pick_items">,
   "created_at" | "entity_id" | "note" | "pick_id" | "position"
 > & {
-  restaurant: Restaurant;
+  entity: Entity;
 };
 
 export type PersonalPickDetail = PersonalPick & {
@@ -77,26 +77,22 @@ export function getPersonalPick(
       const { data: items, error: itemsError } = await supabase
         .from("pick_items")
         .select(
-          "pick_id, entity_id, position, note, created_at, restaurant:entities!pick_items_entity_id_fkey(id, name, address_line_1, address_line_2, locality, administrative_area, country_code, postal_code, category:entity_categories!inner(slug))",
+          "pick_id, entity_id, position, note, created_at, entity:entities!pick_items_entity_id_fkey(id, category_id, name, description, image_url, address_line_1, address_line_2, locality, administrative_area, country_code, postal_code, category:entity_categories!inner(id, slug, label))",
         )
         .eq("pick_id", pick.id)
-        .eq("restaurant.category.slug", "restaurant")
         .order("position", { ascending: true })
         .abortSignal(signal);
 
       if (itemsError) {
         throw normalizeApiError(
           itemsError,
-          "We could not load this Pick's restaurants.",
+          "We could not load the finds in this Pick.",
         );
       }
 
       return {
         ...pick,
-        items: items.map(({ restaurant, ...item }) => {
-          const { category: _category, ...restaurantDetails } = restaurant;
-          return { ...item, restaurant: restaurantDetails };
-        }),
+        items: items as unknown as PersonalPickItem[],
       };
     },
     { retries: 1 },
@@ -142,7 +138,7 @@ function savePersonalPick(
   }
 
   if (input.items.length === 0) {
-    throw new Error("Add at least one restaurant to your Pick.");
+    throw new Error("Add at least one find to your Pick.");
   }
 
   if (operation === "update_personal_pick" && !targetPickId) {

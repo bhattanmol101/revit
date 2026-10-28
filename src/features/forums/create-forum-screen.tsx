@@ -1,13 +1,12 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
+import type * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
-import { ImagePlus, X } from "lucide-react-native";
 import { useState } from "react";
-import { Platform, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
+import { FORUM_COVER_PRESENTATION } from "@/components/media/image-presentation";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
@@ -25,7 +24,6 @@ export function CreateForumScreen() {
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
   const [cover, setCover] = useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [coverError, setCoverError] = useState<string | null>(null);
   const slug = slugFromName(name);
   const canSubmit = Boolean(
     user && name.trim() && slug.trim().length >= 3 && !createForum.isPending,
@@ -114,59 +112,16 @@ export function CreateForumScreen() {
                 Give your forum a recognizable visual identity.
               </Text>
             </View>
-            <Button
-              className="self-start"
+            <ImagePickerCarousel
+              images={cover ? [cover] : []}
+              onImagesChange={(images) => setCover(images[0] ?? null)}
+              maxImages={1}
+              selectionLimit={1}
+              presentation={FORUM_COVER_PRESENTATION}
+              replaceExisting
+              addLabel={cover ? "Change cover image" : "Add cover image"}
               disabled={createForum.isPending}
-              variant="outline"
-              onPress={() =>
-                void (async () => {
-                  setCoverError(null);
-                  if (Platform.OS !== "web") {
-                    const permission =
-                      await ImagePicker.requestMediaLibraryPermissionsAsync();
-                    if (!permission.granted) {
-                      setCoverError(
-                        "Photo access is needed to add a cover image.",
-                      );
-                      return;
-                    }
-                  }
-                  const result = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ["images"],
-                    quality: 0.85,
-                  });
-                  if (!result.canceled) setCover(result.assets[0]);
-                })()
-              }
-            >
-              <Icon as={ImagePlus} />
-              <Text>{cover ? "Change cover image" : "Add cover image"}</Text>
-            </Button>
-            {cover ? (
-              <View className="relative">
-                <Image
-                  accessibilityLabel="Selected forum cover"
-                  contentFit="cover"
-                  source={{ uri: cover.uri }}
-                  style={{ width: "100%", height: 160 }}
-                />
-                <Button
-                  accessibilityLabel="Remove cover image"
-                  className="absolute right-2 top-2 rounded-md bg-background/90"
-                  disabled={createForum.isPending}
-                  size="icon"
-                  variant="outline"
-                  onPress={() => setCover(null)}
-                >
-                  <Icon as={X} />
-                </Button>
-              </View>
-            ) : null}
-            {coverError ? (
-              <Text className="text-destructive" variant="small">
-                {coverError}
-              </Text>
-            ) : null}
+            />
           </View>
 
           <View className="gap-2">

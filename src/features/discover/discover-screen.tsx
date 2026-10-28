@@ -8,7 +8,7 @@ import type {
   DiscoveryPost,
   DiscoveryProfile,
 } from "@/api/discover";
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
@@ -21,7 +21,7 @@ import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useDiscover } from "@/queries/discover";
 
-type ResultFilter = "people" | "posts" | "restaurants";
+type ResultFilter = "people" | "posts" | "entities";
 
 export function DiscoverScreen() {
   const [query, setQuery] = useState("");
@@ -39,7 +39,7 @@ export function DiscoverScreen() {
           accessibilityLabel="Search Revit"
           autoCapitalize="none"
           autoCorrect={false}
-          placeholder="Search people, posts, or restaurants"
+          placeholder="Search people, posts, or finds"
           value={query}
           onChangeText={setQuery}
         />
@@ -80,14 +80,14 @@ function DiscoverResultsView({
   const [filter, setFilter] = useState<ResultFilter>("people");
   const profiles = results?.profiles ?? [];
   const posts = results?.posts ?? [];
-  const restaurants = results?.restaurants ?? [];
+  const entities = results?.entities ?? [];
   const hasResults =
-    profiles.length > 0 || posts.length > 0 || restaurants.length > 0;
+    profiles.length > 0 || posts.length > 0 || entities.length > 0;
 
   if (!hasResults) {
     return (
       <SearchState
-        description="Try a different name, username, post phrase, or restaurant location."
+        description="Try a different name, username, post phrase, or find."
         title="No results found"
       />
     );
@@ -96,14 +96,18 @@ function DiscoverResultsView({
   return (
     <View className="gap-5">
       <View className="flex-row flex-wrap gap-2">
-        {(["people", "posts", "restaurants"] as const).map((item) => (
+        {(["people", "posts", "entities"] as const).map((item) => (
           <Button
             key={item}
             size="sm"
             variant={filter === item ? "default" : "outline"}
             onPress={() => setFilter(item)}
           >
-            <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+            <Text>
+              {item === "entities"
+                ? "Finds"
+                : item.charAt(0).toUpperCase() + item.slice(1)}
+            </Text>
           </Button>
         ))}
       </View>
@@ -113,8 +117,8 @@ function DiscoverResultsView({
       {filter === "posts" && posts.length > 0 ? (
         <PostResults posts={posts} />
       ) : null}
-      {filter === "restaurants" && restaurants.length > 0 ? (
-        <RestaurantResults restaurants={restaurants} />
+      {filter === "entities" && entities.length > 0 ? (
+        <EntityResults entities={entities} />
       ) : null}
     </View>
   );
@@ -174,7 +178,7 @@ function PostResults({ posts }: { posts: DiscoveryPost[] }) {
             </View>
             <View className="min-w-0 flex-1 items-start gap-0.5">
               <Text className="truncate text-left font-semibold">
-                {post.body ?? "Restaurant rating"}
+                {post.body ?? "Rating"}
               </Text>
               <Text variant="muted" className="truncate text-left text-xs">
                 {post.authorName}
@@ -187,15 +191,11 @@ function PostResults({ posts }: { posts: DiscoveryPost[] }) {
   );
 }
 
-function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
+function EntityResults({ entities }: { entities: Entity[] }) {
   return (
     <ResultSection>
-      {restaurants.map((restaurant) => (
-        <Link
-          key={restaurant.id}
-          href={routes.restaurant(restaurant.id)}
-          asChild
-        >
+      {entities.map((entity) => (
+        <Link key={entity.id} href={{ pathname: routes.createShare, params: { entityId: entity.id } }} asChild>
           <Button
             className="gap-3 border border-border bg-card"
             size="content"
@@ -206,10 +206,10 @@ function RestaurantResults({ restaurants }: { restaurants: Restaurant[] }) {
             </View>
             <View className="min-w-0 flex-1 items-start gap-0.5">
               <Text className="truncate text-left font-semibold">
-                {restaurant.name}
+                {entity.name}
               </Text>
               <Text variant="muted" className="truncate text-left text-xs">
-                {restaurant.address_line_1}, {restaurant.locality}
+                {[entity.category.label, entity.locality].filter(Boolean).join(" · ")}
               </Text>
             </View>
           </Button>

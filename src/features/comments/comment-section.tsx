@@ -175,6 +175,14 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
               }}
               onEdit={openEditor}
               onReply={openReply}
+              replyingTo={replyingTo}
+              replyBody={replyBody}
+              canReply={canReply}
+              isReplyPending={createReply.isPending}
+              replyError={createReply.error?.message}
+              onReplyBodyChange={setReplyBody}
+              onCancelReply={() => setReplyingTo(null)}
+              onSubmitReply={() => void submitReply()}
             />
           ))}
         </View>
@@ -202,52 +210,6 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
           </Button>
         </View>
       ) : null}
-
-      <Dialog
-        open={replyingTo !== null}
-        onOpenChange={(open) => !open && setReplyingTo(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Reply{replyingTo ? ` to ${replyingTo.author.display_name}` : ""}
-            </DialogTitle>
-            <DialogDescription>
-              Your reply will appear beneath this comment.
-            </DialogDescription>
-          </DialogHeader>
-          <View className="gap-2">
-            <Textarea
-              accessibilityLabel="Write a reply"
-              editable={!createReply.isPending}
-              maxLength={2000}
-              onChangeText={setReplyBody}
-              placeholder="Write a reply…"
-              value={replyBody}
-            />
-            <Text className="text-right" variant="muted">
-              {replyBody.length}/2000
-            </Text>
-            {createReply.isError ? (
-              <Text className="text-destructive" variant="small">
-                {createReply.error.message}
-              </Text>
-            ) : null}
-          </View>
-          <DialogFooter>
-            <Button
-              disabled={createReply.isPending}
-              onPress={() => setReplyingTo(null)}
-              variant="secondary"
-            >
-              <Text>Cancel</Text>
-            </Button>
-            <Button disabled={!canReply} onPress={() => void submitReply()}>
-              <Text>{createReply.isPending ? "Replying…" : "Post reply"}</Text>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog
         open={editing !== null}
@@ -337,12 +299,28 @@ function CommentThreadItem({
   onDelete,
   onEdit,
   onReply,
+  replyingTo,
+  replyBody,
+  canReply,
+  isReplyPending,
+  replyError,
+  onReplyBodyChange,
+  onCancelReply,
+  onSubmitReply,
 }: {
   comment: CommentThread;
   currentUserId?: string;
   onDelete: (comment: CommentWithAuthor) => void;
   onEdit: (comment: CommentWithAuthor) => void;
   onReply: (comment: CommentWithAuthor) => void;
+  replyingTo: CommentWithAuthor | null;
+  replyBody: string;
+  canReply: boolean;
+  isReplyPending: boolean;
+  replyError?: string;
+  onReplyBodyChange: (body: string) => void;
+  onCancelReply: () => void;
+  onSubmitReply: () => void;
 }) {
   return (
     <View className="gap-2">
@@ -353,6 +331,41 @@ function CommentThreadItem({
         onEdit={() => onEdit(comment)}
         onReply={() => onReply(comment)}
       />
+      {replyingTo?.id === comment.id ? (
+        <View className="ml-4 gap-3 rounded-lg border border-border bg-card p-3 shadow-none sm:ml-8">
+          <Text className="text-sm" variant="muted">
+            Replying to {comment.author.display_name}
+          </Text>
+          <Textarea
+            accessibilityLabel={`Reply to ${comment.author.display_name}`}
+            editable={!isReplyPending}
+            maxLength={2000}
+            onChangeText={onReplyBodyChange}
+            placeholder="Write a reply…"
+            value={replyBody}
+          />
+          <View className="flex-row items-center justify-between gap-3">
+            <Text variant="muted">{replyBody.length}/2000</Text>
+            <View className="flex-row gap-2">
+              <Button
+                disabled={isReplyPending}
+                onPress={onCancelReply}
+                variant="secondary"
+              >
+                <Text>Cancel</Text>
+              </Button>
+              <Button disabled={!canReply} onPress={onSubmitReply}>
+                <Text>{isReplyPending ? "Replying…" : "Post reply"}</Text>
+              </Button>
+            </View>
+          </View>
+          {replyError ? (
+            <Text className="text-destructive" variant="small">
+              {replyError}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
       {comment.replies.length > 0 ? (
         <View className="ml-4 gap-2 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
           {comment.replies.map((reply) => (

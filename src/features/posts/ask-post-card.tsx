@@ -32,7 +32,7 @@ export function AskPostCard({ isDetail = false, post }: AskPostCardProps) {
   const isCommentsExpanded = expandedDrawer === "comments";
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
+    <Card className="mx-auto w-full max-w-xl self-center gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
       <CardHeader className="md:pt-3 pt-2.5 pb-2">
         <View className="flex-row items-start justify-between gap-2">
           <Avatar

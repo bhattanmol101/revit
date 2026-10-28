@@ -1,101 +1,48 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
+import type * as ImagePicker from "expo-image-picker";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ImagePlus, X } from "lucide-react-native";
 import { useDeferredValue, useState } from "react";
-import { Platform, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import type { Post } from "@/api/posts";
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
+import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
-import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
+import { StarRating } from "@/features/ratings/star-rating";
 import { successFeedback } from "@/lib/feedback";
 import type { LocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
+import { useEntityCategories, useEntitySearch } from "@/queries/entities";
 import {
   useCreateForumAskPost,
   useCreateForumSharePost,
 } from "@/queries/posts";
-import { useRestaurantSearch } from "@/queries/restaurants";
-
-const MIN_POST_ASPECT_RATIO = 4 / 5;
-const MAX_POST_ASPECT_RATIO = 16 / 9;
 
 export function ForumPostComposerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const [type, setType] = useState<"ASK" | "SHARE">("ASK");
   const [body, setBody] = useState("");
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [entity, setEntity] = useState<Entity | null>(null);
+  const [score, setScore] = useState<number | null>(null);
+  const [categorySlug, setCategorySlug] = useState("place");
   const [search, setSearch] = useState("");
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
-  const [pickerError, setPickerError] = useState<string | null>(null);
-  const [isPicking, setIsPicking] = useState(false);
-  const results = useRestaurantSearch(useDeferredValue(search));
+  const categories = useEntityCategories();
+  const results = useEntitySearch(useDeferredValue(search), categorySlug);
   const createAsk = useCreateForumAskPost(id);
   const createShare = useCreateForumSharePost(id);
   const isSaving = createAsk.isPending || createShare.isPending;
   const error = createAsk.error ?? createShare.error;
   const canPublish = Boolean(
-    user && (type === "SHARE" ? restaurant : body.trim()) && !isSaving,
+    user && (type === "SHARE" ? entity && score : body.trim()) && !isSaving,
   );
-
-  const pickImages = async () => {
-    setPickerError(null);
-    if (images.length >= 3) {
-      setPickerError("A forum post can contain up to three images.");
-      return;
-    }
-
-    setIsPicking(true);
-    try {
-      if (Platform.OS !== "web") {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-          setPickerError("Photo access is needed to add an image.");
-          return;
-        }
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsMultipleSelection: true,
-        mediaTypes: ["images"],
-        orderedSelection: true,
-        quality: 0.85,
-        selectionLimit: 3 - images.length,
-      });
-      if (result.canceled) return;
-      if (
-        result.assets.some(
-          (asset) => asset.fileSize && asset.fileSize > 10 * 1024 * 1024,
-        )
-      ) {
-        setPickerError("Each image must be smaller than 10 MB.");
-        return;
-      }
-      setImages((current) =>
-        [...current, ...result.assets]
-          .filter(
-            (asset, index, all) =>
-              all.findIndex((candidate) => candidate.uri === asset.uri) ===
-              index,
-          )
-          .slice(0, 3),
-      );
-    } catch {
-      setPickerError("We couldn’t open your photo library. Please try again.");
-    } finally {
-      setIsPicking(false);
-    }
-  };
 
   const publish = async () => {
     if (!user || !canPublish) return;
@@ -109,13 +56,14 @@ export function ForumPostComposerScreen() {
           images: images.map(toLocalImage),
         });
       } else {
-        if (!restaurant) return;
+        if (!entity || !score) return;
         post = await createShare.mutateAsync({
           authorId: user.id,
           body,
-          entityId: restaurant.id,
+          entityId: entity.id,
           forumId: id,
           images: images.map(toLocalImage),
+          score,
         });
       }
       successFeedback();
@@ -187,16 +135,42 @@ export function ForumPostComposerScreen() {
           </View>
           {type === "SHARE" ? (
             <View className="gap-2">
-              <Text variant="small">Restaurant</Text>
-              {restaurant ? (
-                <Button variant="outline" onPress={() => setRestaurant(null)}>
-                  <Text>{restaurant.name} · Change</Text>
+              <Text variant="small">Category</Text>
+              {!entity ? (
+                <View className="flex-row flex-wrap gap-2">
+                  {(categories.data ?? []).map((category) => (
+                    <Button
+                      key={category.slug}
+                      size="xs"
+                      variant={
+                        categorySlug === category.slug ? "default" : "outline"
+                      }
+                      onPress={() => {
+                        setCategorySlug(category.slug);
+                        setSearch("");
+                      }}
+                    >
+                      <Text>{category.label}</Text>
+                    </Button>
+                  ))}
+                </View>
+              ) : null}
+              <Text variant="small">Find</Text>
+              {entity ? (
+                <Button
+                  variant="outline"
+                  onPress={() => {
+                    setEntity(null);
+                    setScore(null);
+                  }}
+                >
+                  <Text>{entity.name} · Change</Text>
                 </Button>
               ) : (
                 <>
                   <SearchInput
-                    accessibilityLabel="Search restaurants"
-                    placeholder="Search restaurant"
+                    accessibilityLabel="Search finds"
+                    placeholder="Search finds by name or location"
                     value={search}
                     onChangeText={setSearch}
                   />
@@ -215,12 +189,13 @@ export function ForumPostComposerScreen() {
                       size="content"
                       variant="outline"
                       onPress={() => {
-                        setRestaurant(item);
+                        setEntity(item);
+                        setScore(null);
                         setSearch("");
                       }}
                     >
                       <Text>
-                        {item.name} · {item.locality}
+                        {item.name} · {item.category.label}
                       </Text>
                     </Button>
                   ))}
@@ -228,10 +203,28 @@ export function ForumPostComposerScreen() {
                   !results.isLoading &&
                   !results.isError &&
                   results.data?.length === 0 ? (
-                    <Text variant="muted">No restaurants found.</Text>
+                    <Text variant="muted">
+                      No finds in this category yet.
+                    </Text>
                   ) : null}
                 </>
               )}
+              {entity ? (
+                <View className="gap-2 pt-2">
+                  <Text variant="small">Your rating</Text>
+                  <View className="flex-row items-center gap-3">
+                    <StarRating
+                      value={score}
+                      starSize={24}
+                      gap={8}
+                      onChange={setScore}
+                    />
+                    <Text variant="muted">
+                      {score === null ? "Choose 1–5 stars" : `${score}/5`}
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
             </View>
           ) : null}
           <View className="gap-2">
@@ -255,59 +248,18 @@ export function ForumPostComposerScreen() {
               <Text variant="small">Images (optional)</Text>
               <Text variant="muted">{images.length}/3</Text>
             </View>
-            {images.length > 0 ? (
-              <View className="gap-3 sm:flex-row">
-                {images.map((image, index) => (
-                  <View key={image.uri} className="relative flex-1">
-                    <Image
-                      accessibilityLabel={`Selected image ${index + 1}`}
-                      className="w-full rounded-md bg-muted"
-                      contentFit="contain"
-                      source={image.uri}
-                      style={{
-                        aspectRatio: getPostPreviewAspectRatio(image),
-                        width: "100%",
-                      }}
-                    />
-                    <Button
-                      accessibilityLabel={`Remove image ${index + 1}`}
-                      className="absolute right-2 top-2 rounded-md bg-background/90"
-                      disabled={isSaving}
-                      size="icon"
-                      variant="outline"
-                      onPress={() =>
-                        setImages((current) =>
-                          current.filter(
-                            (candidate) => candidate.uri !== image.uri,
-                          ),
-                        )
-                      }
-                    >
-                      <Icon as={X} />
-                    </Button>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-            <Button
-              className="self-start"
-              disabled={images.length >= 3 || isSaving || isPicking}
-              variant="outline"
-              onPress={() => void pickImages()}
-            >
-              <Icon as={ImagePlus} />
-              <Text>{isPicking ? "Opening library…" : "Add images"}</Text>
-            </Button>
-            {pickerError ? (
-              <Text className="text-destructive" variant="small">
-                {pickerError}
-              </Text>
-            ) : null}
+            <ImagePickerCarousel
+              images={images}
+              onImagesChange={setImages}
+              maxImages={3}
+              disabled={isSaving}
+              addLabel="Add images"
+            />
           </View>
           {type === "SHARE" ? (
             <Text variant="muted" className="text-xs">
-              Forum Shares are discussion posts only; they do not change the
-              restaurant’s global rating.
+              This rating is shown in the forum and does not change the find’s
+              global rating.
             </Text>
           ) : null}
           {error ? (
@@ -329,13 +281,4 @@ function toLocalImage(image: ImagePicker.ImagePickerAsset): LocalImage {
     mimeType: image.mimeType,
     uri: image.uri,
   };
-}
-
-function getPostPreviewAspectRatio(image: ImagePicker.ImagePickerAsset) {
-  const naturalRatio =
-    image.width && image.height ? image.width / image.height : 1;
-  return Math.min(
-    MAX_POST_ASPECT_RATIO,
-    Math.max(MIN_POST_ASPECT_RATIO, naturalRatio),
-  );
 }

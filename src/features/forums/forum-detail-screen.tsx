@@ -1,13 +1,5 @@
-import { Image } from "expo-image";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import {
-  Delete,
-  DeleteIcon,
-  Plus,
-  Trash,
-  Trash2,
-  Users,
-} from "lucide-react-native";
+import { Plus, Trash2, Users } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
@@ -29,17 +21,18 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { SharePostCard } from "@/features/posts/share-post-card";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
+import { useEntity } from "@/queries/entities";
 import {
   useDeleteForum,
   useForum,
   useForumMembership,
   useForumPosts,
 } from "@/queries/forums";
-import { useRestaurant } from "@/queries/restaurants";
 import { useShareRatingScore } from "@/queries/shares";
 
 export function ForumDetailScreen() {
@@ -76,15 +69,12 @@ export function ForumDetailScreen() {
       />
       <ScrollView contentContainerClassName="w-full gap-2 py-2 md:mx-auto md:max-w-2xl md:px-6 md:py-6">
         <View className="rounded-lg border border-border bg-card shadow-none">
-          {forumData.coverImageUrl ? (
-            <Image
-              accessibilityLabel={`${forumData.name} cover image`}
-              className="h-36 w-full rounded-t-md bg-muted"
-              style={{ height: 144, width: "100%" }}
-              contentFit="cover"
-              source={forumData.coverImageUrl}
-            />
-          ) : null}
+          <ForumCoverDisplay
+            forumId={forumData.id}
+            forumName={forumData.name}
+            imageUrl={forumData.coverImageUrl}
+            className="rounded-t-md"
+          />
           <View className="gap-2 p-2">
             <View className="gap-2">
               <Text className="font-semibold">{forumData.name}</Text>
@@ -220,10 +210,10 @@ function ForumPostCard({ post }: { post: PostWithDetails }) {
 }
 
 function ForumSharePostCard({ post }: { post: PostWithDetails }) {
-  const restaurant = useRestaurant(post.entity_id ?? "");
+  const entity = useEntity(post.entity_id ?? "");
   const ratingScore = useShareRatingScore(post.id);
 
-  if (restaurant.isLoading || ratingScore.isLoading) {
+  if (entity.isLoading || ratingScore.isLoading) {
     return (
       <Card className="gap-3 rounded-lg p-5 shadow-none">
         <CardContent className="gap-3 px-0">
@@ -236,15 +226,15 @@ function ForumSharePostCard({ post }: { post: PostWithDetails }) {
   }
 
   if (
-    restaurant.isError ||
+    entity.isError ||
     ratingScore.isError ||
-    !restaurant.data ||
+    !entity.data ||
     ratingScore.data === null ||
     ratingScore.data === undefined
   ) {
     return (
       <FeedbackState
-        description="This restaurant rating is unavailable."
+        description="This find’s rating is unavailable."
         title="Share post unavailable"
         variant="error"
       />
@@ -254,7 +244,7 @@ function ForumSharePostCard({ post }: { post: PostWithDetails }) {
   return (
     <SharePostCard
       post={{ ...post, ratingScore: ratingScore.data }}
-      restaurant={restaurant.data}
+      entity={entity.data}
     />
   );
 }

@@ -1,16 +1,17 @@
-import { ChevronUp, Star } from "lucide-react-native";
+import { ChevronUp } from "lucide-react-native";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
-import { useTheme } from "@/hooks/use-theme";
 import { selectionFeedback } from "@/lib/feedback";
 import { useAuth } from "@/providers/auth-provider";
 import { useMyAskRating, useSetMyAskRating } from "@/queries/ratings";
+import { StarRating } from "@/features/ratings/star-rating";
 
 const SCORES = [1, 2, 3, 4, 5] as const;
+
 
 type AskRatingControlProps = {
   postId: string;
@@ -19,7 +20,6 @@ type AskRatingControlProps = {
 
 export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
   const { user } = useAuth();
-  const theme = useTheme();
   const raterId = user?.id ?? "";
   const rating = useMyAskRating(postId, raterId);
   const setRating = useSetMyAskRating(postId, raterId);
@@ -95,38 +95,20 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
         ) : (
           <>
             <View className="flex-row items-center gap-3">
-              <View className="flex-row items-center gap-2">
-                {SCORES.map((score) => {
-                  const isSelected = currentScore === score;
-                  const isActive =
-                    currentScore !== null && score <= currentScore;
-
-                  return (
-                    <Button
-                      key={score}
-                      accessibilityLabel={`Rate ${score} out of 5`}
-                      accessibilityState={{ selected: isSelected }}
-                      disabled={setRating.isPending}
-                      hitSlop={8}
-                      onPress={() => {
-                        selectionFeedback();
-                        setRating.mutate(score);
-                      }}
-                      size="icon"
-                      variant="ghost"
-                      className="p-0"
-                    >
-                      <Icon
-                        as={Star}
-                        className="size-5 text-rating"
-                        fill={isActive ? theme.rating : "none"}
-                        stroke={theme.rating}
-                        strokeWidth={isActive ? 0 : 1.8}
-                      />
-                    </Button>
-                  );
-                })}
-              </View>
+              <StarRating
+                value={currentScore}
+                disabled={setRating.isPending}
+                starSize={20}
+                gap={8}
+                paddingHorizontal={0}
+                paddingVertical={0}
+                marginHorizontal={0}
+                marginVertical={0}
+                onChange={(score) => {
+                  selectionFeedback();
+                  setRating.mutate(score);
+                }}
+              />
               <Text className="text-xs font-medium" variant="muted">
                 {currentScore === null ? "Not Rated" : `${currentScore}/5`}
               </Text>

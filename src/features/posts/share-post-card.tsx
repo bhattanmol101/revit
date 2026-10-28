@@ -1,9 +1,9 @@
 import { Link } from "expo-router";
-import { MapPin, MessageCircle, Star, StarHalf } from "lucide-react-native";
+import { MapPin, MessageCircle } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
 
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
 import type { SharePostWithDetails } from "@/api/shares";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,32 +15,32 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { InlineCommentDrawer } from "@/features/comments/inline-comment-drawer";
-import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
+import { Colors } from "@/constants/theme";
 import { useCommentCount } from "@/queries/comments";
+import { StarRating } from "@/features/ratings/star-rating";
 
 import { PostMediaGallery } from "./post-media-gallery";
 
 type SharePostCardProps = {
   isDetail?: boolean;
   post: SharePostWithDetails;
-  restaurant: Restaurant;
+  entity: Entity;
 };
 
 export function SharePostCard({
   isDetail = false,
   post,
-  restaurant,
+  entity,
 }: SharePostCardProps) {
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const comments = useCommentCount(post.id);
   const commentCount = comments.data ?? 0;
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
+    <Card className="mx-auto w-full max-w-[36rem] self-center gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
       <CardHeader className="md:pt-3 py-2">
         <View className="flex-row items-start justify-between gap-2">
           <Avatar
@@ -84,26 +84,45 @@ export function SharePostCard({
       </CardHeader>
       <CardContent className="gap-2 px-0">
         <Link
-          href={routes.restaurant(restaurant.id)}
+          href={{
+            pathname: routes.createShare,
+            params: { entityId: entity.id },
+          }}
           asChild
           className="px-2 md:px-3 md:pt-1 py-0"
         >
-          <Button
-            accessibilityLabel={`View ${restaurant.name}`}
-            size="icon"
-            variant="ghost"
+          <View
+            className="flex flex-row gap-2 items-center"
+            accessibilityLabel={`View ${entity.name}`}
           >
-            <Icon as={MapPin} className="size-5 text-primary" />
+            <Icon
+              as={MapPin}
+              className="size-5"
+              color={Colors.light.primary}
+            />
             <View className="flex-1 items-start gap-0.5">
               <Text className="text-[14px] font-semibold" numberOfLines={1}>
-                {restaurant.name}
+                {entity.name}
               </Text>
-              <Text className="text-xs" variant="muted" numberOfLines={1}>
-                {restaurant.locality}
+              <Text
+                className="text-xs text-muted-foreground"
+                variant="muted"
+                numberOfLines={1}
+              >
+                {[entity.category.label, entity.locality]
+                  .filter(Boolean)
+                  .join(" · ")}
               </Text>
             </View>
-            <ShareRating score={post.ratingScore} />
-          </Button>
+            <StarRating
+              value={post.ratingScore}
+              readOnly
+              allowHalf
+              animated={false}
+              starSize={16}
+              gap={5}
+            />
+          </View>
         </Link>
 
         <View className="px-2">
@@ -162,31 +181,6 @@ export function SharePostCard({
         ) : null}
       </CardFooter>
     </Card>
-  );
-}
-
-function ShareRating({ score }: { score: number }) {
-  const theme = useTheme();
-  const safeScore = Math.max(0, Math.min(score, 5));
-
-  return (
-    <View className="flex-row shrink-0 items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => {
-        const isFilled = safeScore >= star;
-        const isHalfFilled = !isFilled && safeScore >= star - 0.5;
-
-        return (
-          <Icon
-            key={star}
-            as={isHalfFilled ? StarHalf : Star}
-            className="size-4 text-rating"
-            fill={isFilled || isHalfFilled ? theme.rating : "none"}
-            stroke={theme.rating}
-            strokeWidth={isFilled || isHalfFilled ? 0 : 1.8}
-          />
-        );
-      })}
-    </View>
   );
 }
 

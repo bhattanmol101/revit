@@ -93,49 +93,55 @@ export type Database = {
       }
       entities: {
         Row: {
-          address_line_1: string
+          address_line_1: string | null
           address_line_2: string | null
           administrative_area: string | null
           category_id: string
           country_code: string | null
           created_at: string
+          description: string | null
           id: string
-          locality: string
+          image_url: string | null
+          locality: string | null
           name: string
-          normalized_address: string
-          normalized_locality: string
+          normalized_address: string | null
+          normalized_locality: string | null
           normalized_name: string
           postal_code: string | null
           updated_at: string
         }
         Insert: {
-          address_line_1: string
+          address_line_1?: string | null
           address_line_2?: string | null
           administrative_area?: string | null
           category_id: string
           country_code?: string | null
           created_at?: string
+          description?: string | null
           id?: string
-          locality: string
+          image_url?: string | null
+          locality?: string | null
           name: string
-          normalized_address: string
-          normalized_locality: string
+          normalized_address?: string | null
+          normalized_locality?: string | null
           normalized_name: string
           postal_code?: string | null
           updated_at?: string
         }
         Update: {
-          address_line_1?: string
+          address_line_1?: string | null
           address_line_2?: string | null
           administrative_area?: string | null
           category_id?: string
           country_code?: string | null
           created_at?: string
+          description?: string | null
           id?: string
-          locality?: string
+          image_url?: string | null
+          locality?: string | null
           name?: string
-          normalized_address?: string
-          normalized_locality?: string
+          normalized_address?: string | null
+          normalized_locality?: string | null
           normalized_name?: string
           postal_code?: string | null
           updated_at?: string
@@ -216,6 +222,52 @@ export type Database = {
           },
           {
             foreignKeyName: "entity_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_share_ratings: {
+        Row: {
+          author_id: string
+          created_at: string
+          entity_id: string
+          post_id: string
+          score: number
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          entity_id: string
+          post_id: string
+          score: number
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          entity_id?: string
+          post_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_share_ratings_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_share_ratings_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_share_ratings_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: true
             referencedRelation: "posts"
@@ -672,6 +724,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_entity: {
+        Args: {
+          p_category_slug: string
+          p_name: string
+          p_description?: string | null
+          p_image_url?: string | null
+          p_address_line_1?: string | null
+          p_address_line_2?: string | null
+          p_locality?: string | null
+          p_administrative_area?: string | null
+          p_country_code?: string | null
+          p_postal_code?: string | null
+        }
+        Returns: Database["public"]["Tables"]["entities"]["Row"]
+      }
       create_personal_pick: {
         Args: { p_description?: string; p_items?: Json; p_title: string }
         Returns: {
@@ -767,6 +834,7 @@ export type Database = {
           p_media_paths?: string[]
           p_post_id: string
           p_post_type: Database["public"]["Enums"]["post_type"]
+          p_score?: number
         }
         Returns: Database["public"]["Tables"]["posts"]["Row"]
       }
@@ -830,6 +898,13 @@ export type Database = {
         Returns: string[]
       }
       get_restaurant_rating_summary: {
+        Args: { p_entity_id: string }
+        Returns: {
+          average_score: number
+          rating_count: number
+        }[]
+      }
+      get_entity_rating_summary: {
         Args: { p_entity_id: string }
         Returns: {
           average_score: number

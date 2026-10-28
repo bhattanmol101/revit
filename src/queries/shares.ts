@@ -8,9 +8,9 @@ import {
 import {
   type CreateShareRatingInput,
   createShareRating,
-  getMyRestaurantRating,
-  getRestaurantRatingSummary,
-  getSharePostsByRestaurant,
+  getMyEntityRating,
+  getEntityRatingSummary,
+  getSharePostsForEntity,
   getShareRatingScore,
   type SharePostPage,
   updateShareRating,
@@ -28,19 +28,19 @@ export type CreateShareRatingMutationInput = Omit<
   images: LocalImage[];
 };
 
-export function useMyRestaurantRating(entityId: string, authorId: string) {
+export function useMyEntityRating(entityId: string, authorId: string) {
   return useQuery({
     enabled: entityId.length > 0 && authorId.length > 0,
-    queryFn: () => getMyRestaurantRating(entityId, authorId),
+    queryFn: () => getMyEntityRating(entityId, authorId),
     queryKey: queryKeys.shares.mine(entityId, authorId),
     staleTime: 30_000,
   });
 }
 
-export function useRestaurantRatingSummary(entityId: string) {
+export function useEntityRatingSummary(entityId: string) {
   return useQuery({
     enabled: entityId.length > 0,
-    queryFn: () => getRestaurantRatingSummary(entityId),
+    queryFn: () => getEntityRatingSummary(entityId),
     queryKey: queryKeys.shares.summary(entityId),
     staleTime: 30_000,
   });
@@ -55,14 +55,14 @@ export function useShareRatingScore(postId: string) {
   });
 }
 
-export function useSharePostsByRestaurant(entityId: string) {
+export function useSharePostsByEntity(entityId: string) {
   return useInfiniteQuery<SharePostPage>({
     enabled: entityId.length > 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
-      getSharePostsByRestaurant(entityId, pageParam as number, signal),
-    queryKey: queryKeys.shares.byRestaurant(entityId),
+      getSharePostsForEntity(entityId, pageParam as number, signal),
+    queryKey: queryKeys.shares.byEntity(entityId),
   });
 }
 
@@ -82,7 +82,7 @@ export function useCreateShareRating() {
         queryKey: queryKeys.shares.summary(input.entityId),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.shares.byRestaurant(input.entityId),
+        queryKey: queryKeys.shares.byEntity(input.entityId),
       });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.posts.byId(post.id),
@@ -110,7 +110,7 @@ export function useUpdateShareRating(
           queryKey: queryKeys.shares.summary(entityId),
         }),
         queryClient.invalidateQueries({
-          queryKey: queryKeys.shares.byRestaurant(entityId),
+          queryKey: queryKeys.shares.byEntity(entityId),
         }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.shares.score(post.id),

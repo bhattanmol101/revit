@@ -1,14 +1,12 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
+import type * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
-import { ImagePlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,80 +16,18 @@ import { useAuth } from "@/providers/auth-provider";
 import { useCreateAskPost } from "@/queries/posts";
 
 const MAX_IMAGES = 3;
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MIN_POST_ASPECT_RATIO = 4 / 5;
-const MAX_POST_ASPECT_RATIO = 16 / 9;
 
 export function AskComposerScreen() {
   const { user } = useAuth();
   const createPost = useCreateAskPost();
   const [body, setBody] = useState("");
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
-  const [pickerError, setPickerError] = useState<string | null>(null);
-  const [isPicking, setIsPicking] = useState(false);
   const bodyLength = body.length;
   const canPublish =
     Boolean(user) &&
     body.trim().length >= 1 &&
     bodyLength <= 2000 &&
     !createPost.isPending;
-
-  const pickImages = async () => {
-    setPickerError(null);
-
-    if (images.length >= MAX_IMAGES) {
-      setPickerError("An Ask post can contain up to three images.");
-      return;
-    }
-
-    setIsPicking(true);
-
-    try {
-      if (Platform.OS !== "web") {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (!permission.granted) {
-          setPickerError("Photo access is needed to add an image.");
-          return;
-        }
-      }
-
-      const remaining = MAX_IMAGES - images.length;
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsMultipleSelection: true,
-        mediaTypes: ["images"],
-        orderedSelection: true,
-        quality: 0.85,
-        selectionLimit: remaining,
-      });
-
-      if (result.canceled) return;
-
-      const oversized = result.assets.some(
-        (asset) => asset.fileSize && asset.fileSize > MAX_IMAGE_BYTES,
-      );
-
-      if (oversized) {
-        setPickerError("Each image must be smaller than 10 MB.");
-        return;
-      }
-
-      setImages((current) =>
-        [...current, ...result.assets]
-          .filter(
-            (asset, index, all) =>
-              all.findIndex((candidate) => candidate.uri === asset.uri) ===
-              index,
-          )
-          .slice(0, MAX_IMAGES),
-      );
-    } catch {
-      setPickerError("We couldn’t open your photo library. Please try again.");
-    } finally {
-      setIsPicking(false);
-    }
-  };
 
   const publish = async () => {
     if (!user || !canPublish) return;
@@ -203,71 +139,13 @@ export function AskComposerScreen() {
             </View>
 
             <View className="gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text variant="small">Images (optional)</Text>
-                <Text variant="muted">{images.length}/3</Text>
-              </View>
-
-              {images.length > 0 ? (
-                <View className="gap-3">
-                  {images.map((image, index) => (
-                    <View key={image.uri} className="relative flex-1">
-                      <Image
-                        accessibilityLabel={`Selected image ${index + 1}`}
-                        className="w-full rounded-md bg-muted"
-                        contentFit="contain"
-                        source={image.uri}
-                        style={{
-                          aspectRatio: getPostPreviewAspectRatio(image),
-                          width: "100%",
-                        }}
-                      />
-                      <Button
-                        accessibilityLabel={`Remove image ${index + 1}`}
-                        className="absolute right-2 top-2 rounded-md bg-background/90"
-                        disabled={createPost.isPending}
-                        size="icon"
-                        variant="outline"
-                        onPress={() =>
-                          setImages((current) =>
-                            current.filter(
-                              (candidate) => candidate.uri !== image.uri,
-                            ),
-                          )
-                        }
-                      >
-                        <Icon as={X} />
-                      </Button>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-
-              <Button
-                className="self-start"
-                disabled={
-                  images.length >= MAX_IMAGES ||
-                  createPost.isPending ||
-                  isPicking
-                }
-                variant="outline"
-                onPress={() => void pickImages()}
-              >
-                <Icon as={ImagePlus} />
-                <Text>
-                  {isPicking
-                    ? "Opening…"
-                    : images.length
-                      ? "Add more images"
-                      : "Add images"}
-                </Text>
-              </Button>
-
-              {pickerError ? (
-                <Text variant="small" className="text-destructive">
-                  {pickerError}
-                </Text>
-              ) : null}
+              <ImagePickerCarousel
+                images={images}
+                onImagesChange={setImages}
+                maxImages={MAX_IMAGES}
+                disabled={createPost.isPending}
+                addLabel="Add images"
+              />
             </View>
 
             {createPost.isError ? (
@@ -279,14 +157,5 @@ export function AskComposerScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
-}
-
-function getPostPreviewAspectRatio(image: ImagePicker.ImagePickerAsset) {
-  const naturalRatio =
-    image.width && image.height ? image.width / image.height : 1;
-  return Math.min(
-    MAX_POST_ASPECT_RATIO,
-    Math.max(MIN_POST_ASPECT_RATIO, naturalRatio),
   );
 }

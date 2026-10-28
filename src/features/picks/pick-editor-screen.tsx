@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, MapPin, Trash2 } from "lucide-react-native";
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,11 +23,11 @@ import {
   usePersonalPick,
   useUpdatePersonalPick,
 } from "@/queries/picks";
-import { useRestaurantSearch } from "@/queries/restaurants";
+import { useEntitySearch } from "@/queries/entities";
 
 type DraftPickItem = {
   note: string;
-  restaurant: Restaurant;
+  entity: Entity;
 };
 
 export function PickEditorScreen() {
@@ -41,7 +41,7 @@ export function PickEditorScreen() {
   const [items, setItems] = useState<DraftPickItem[]>([]);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
-  const restaurantSearch = useRestaurantSearch(deferredSearch);
+  const entitySearch = useEntitySearch(deferredSearch);
   const initializedPickId = useRef<string | null>(null);
   const isEditing = Boolean(pickId);
   const isSaving = createPick.isPending || updatePick.isPending;
@@ -57,16 +57,16 @@ export function PickEditorScreen() {
     setItems(
       pick.data.items.map((item) => ({
         note: item.note ?? "",
-        restaurant: item.restaurant,
+        entity: item.entity,
       })),
     );
   }, [pick.data, pickId]);
 
-  const addRestaurant = (restaurant: Restaurant) => {
-    if (items.some((item) => item.restaurant.id === restaurant.id)) return;
+  const addEntity = (entity: Entity) => {
+    if (items.some((item) => item.entity.id === entity.id)) return;
 
     selectionFeedback();
-    setItems((current) => [...current, { note: "", restaurant }]);
+    setItems((current) => [...current, { note: "", entity }]);
     setSearch("");
   };
 
@@ -104,7 +104,7 @@ export function PickEditorScreen() {
       const input = {
         description,
         items: items.map((item) => ({
-          entityId: item.restaurant.id,
+          entityId: item.entity.id,
           note: item.note,
         })),
         title,
@@ -182,7 +182,7 @@ export function PickEditorScreen() {
               {isEditing ? "Edit Pick" : "Create a Pick"}
             </Text>
             <Text variant="muted" className="leading-5">
-              Curate an ordered list of restaurants worth sharing.
+              Curate an ordered list of finds worth sharing.
             </Text>
           </View>
 
@@ -217,53 +217,53 @@ export function PickEditorScreen() {
 
           <View className="gap-2.5">
             <View className="gap-0.5">
-              <Text variant="small">Find restaurants</Text>
+              <Text variant="small">Add finds</Text>
               <Text variant="muted">
-                Add places, then arrange them in the order you recommend.
+                Add finds, then arrange them in the order you recommend.
               </Text>
             </View>
             <SearchInput
-              accessibilityLabel="Find a restaurant for this Pick"
+              accessibilityLabel="Finds for this Pick"
               editable={!isSaving}
-              placeholder="Search restaurants to add"
+              placeholder="Search finds to add"
               value={search}
               onChangeText={setSearch}
             />
-            {search.trim().length >= 2 && restaurantSearch.isLoading ? (
+            {search.trim().length >= 2 && entitySearch.isLoading ? (
               <View className="flex-row items-center gap-2 py-1">
                 <ActivityIndicator />
-                <Text variant="muted">Searching restaurants…</Text>
+                <Text variant="muted">Searching finds…</Text>
               </View>
             ) : null}
-            {restaurantSearch.isError ? (
+            {entitySearch.isError ? (
               <Text className="text-destructive" variant="small">
-                {restaurantSearch.error.message}
+                {entitySearch.error.message}
               </Text>
             ) : null}
-            {restaurantSearch.data?.map((restaurant) => {
+            {entitySearch.data?.map((entity) => {
               const isAdded = items.some(
-                (item) => item.restaurant.id === restaurant.id,
+                (item) => item.entity.id === entity.id,
               );
 
               return (
                 <Button
-                  key={restaurant.id}
+                  key={entity.id}
                   className="border border-border bg-card"
                   size="content"
                   disabled={isAdded || isSaving}
                   variant="ghost"
-                  onPress={() => addRestaurant(restaurant)}
+                  onPress={() => addEntity(entity)}
                 >
                   <Icon as={MapPin} className="text-primary" />
                   <View className="min-w-0 flex-1 gap-0.5">
                     <Text className="truncate text-left font-medium">
-                      {restaurant.name}
+                      {entity.name}
                     </Text>
                     <Text
                       variant="muted"
                       className="truncate text-left text-xs"
                     >
-                      {restaurant.address_line_1}, {restaurant.locality}
+                      {[entity.category.label, entity.locality].filter(Boolean).join(" · ")}
                     </Text>
                   </View>
                   <Text className="text-xs text-primary">
@@ -279,19 +279,19 @@ export function PickEditorScreen() {
               <Text variant="small">Your order</Text>
               {items.length > 0 ? (
                 <Text variant="muted" className="text-xs">
-                  {items.length} {items.length === 1 ? "place" : "places"}
+                  {items.length} {items.length === 1 ? "find" : "finds"}
                 </Text>
               ) : null}
             </View>
             {items.length === 0 ? (
               <FeedbackState
-                description="Search above and add at least one restaurant to continue."
-                title="No restaurants added"
+                description="Search above and add at least one find to continue."
+                title="No finds added"
               />
             ) : null}
             {items.map((item, index) => (
               <View
-                key={item.restaurant.id}
+                key={item.entity.id}
                 className="gap-2 rounded-lg border border-border bg-background p-3"
               >
                 <View className="flex-row items-start gap-2">
@@ -300,14 +300,14 @@ export function PickEditorScreen() {
                   </Text>
                   <View className="min-w-0 flex-1 gap-0.5">
                     <Text className="truncate font-medium">
-                      {item.restaurant.name}
+                        {item.entity.name}
                     </Text>
                     <Text variant="muted" className="truncate text-xs">
-                      {item.restaurant.locality}
+                      {[item.entity.category.label, item.entity.locality].filter(Boolean).join(" · ")}
                     </Text>
                   </View>
                   <Button
-                    accessibilityLabel={`Move ${item.restaurant.name} up`}
+                    accessibilityLabel={`Move ${item.entity.name} up`}
                     disabled={index === 0 || isSaving}
                     size="icon"
                     variant="ghost"
@@ -316,7 +316,7 @@ export function PickEditorScreen() {
                     <Icon as={ChevronUp} />
                   </Button>
                   <Button
-                    accessibilityLabel={`Move ${item.restaurant.name} down`}
+                    accessibilityLabel={`Move ${item.entity.name} down`}
                     disabled={index === items.length - 1 || isSaving}
                     size="icon"
                     variant="ghost"
@@ -325,7 +325,7 @@ export function PickEditorScreen() {
                     <Icon as={ChevronDown} />
                   </Button>
                   <Button
-                    accessibilityLabel={`Remove ${item.restaurant.name}`}
+                    accessibilityLabel={`Remove ${item.entity.name}`}
                     disabled={isSaving}
                     size="icon"
                     variant="ghost"
@@ -335,7 +335,7 @@ export function PickEditorScreen() {
                   </Button>
                 </View>
                 <Input
-                  accessibilityLabel={`Note for ${item.restaurant.name}`}
+                  accessibilityLabel={`Note for ${item.entity.name}`}
                   editable={!isSaving}
                   maxLength={500}
                   placeholder="Why it belongs here (optional)"

@@ -5,7 +5,7 @@ import type {
   PostWithDetails,
 } from "@/api/posts";
 import {
-  getSharePostsByEntity,
+  getSharePostsByEntity as loadSharePostsByEntity,
   reservePostImageCleanup,
   tryRemovePostImages,
   uploadPostImages,
@@ -18,13 +18,13 @@ import { runApiRequest } from "./request";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
-export type MyRestaurantRating = {
+export type MyEntityRating = {
   body: string | null;
   postId: string;
   score: number;
 };
 
-export type RestaurantRatingSummary = {
+export type EntityRatingSummary = {
   averageScore: number | null;
   ratingCount: number;
 };
@@ -45,10 +45,10 @@ export type CreateShareRatingInput = {
   score: number;
 };
 
-export function getMyRestaurantRating(
+export function getMyEntityRating(
   entityId: string,
   authorId: string,
-): Promise<MyRestaurantRating | null> {
+): Promise<MyEntityRating | null> {
   return runApiRequest(
     async (signal) => {
       const { data, error } = await supabase
@@ -62,7 +62,7 @@ export function getMyRestaurantRating(
       if (error) {
         throw normalizeApiError(
           error,
-          "We could not load your restaurant rating.",
+          "We could not load your rating.",
         );
       }
 
@@ -78,20 +78,20 @@ export function getMyRestaurantRating(
   );
 }
 
-export function getRestaurantRatingSummary(
+export function getEntityRatingSummary(
   entityId: string,
-): Promise<RestaurantRatingSummary> {
+): Promise<EntityRatingSummary> {
   return runApiRequest(
     async (signal) => {
       const { data, error } = await supabase
-        .rpc("get_restaurant_rating_summary", { p_entity_id: entityId })
+        .rpc("get_entity_rating_summary", { p_entity_id: entityId })
         .abortSignal(signal)
         .single();
 
       if (error) {
         throw normalizeApiError(
           error,
-          "We could not load this restaurant’s rating.",
+          "We could not load this find’s rating.",
         );
       }
 
@@ -107,6 +107,21 @@ export function getRestaurantRatingSummary(
 export function getShareRatingScore(postId: string): Promise<number | null> {
   return runApiRequest(
     async (signal) => {
+      const { data: forumRating, error: forumRatingError } = await supabase
+        .from("forum_share_ratings")
+        .select("score")
+        .eq("post_id", postId)
+        .abortSignal(signal)
+        .maybeSingle();
+
+      if (forumRatingError) {
+        throw normalizeApiError(
+          forumRatingError,
+          "We could not load this rating.",
+        );
+      }
+      if (forumRating) return forumRating.score;
+
       const { data, error } = await supabase
         .from("entity_ratings")
         .select("score")
@@ -117,7 +132,7 @@ export function getShareRatingScore(postId: string): Promise<number | null> {
       if (error) {
         throw normalizeApiError(
           error,
-          "We could not load this restaurant rating.",
+          "We could not load this rating.",
         );
       }
 
@@ -127,12 +142,12 @@ export function getShareRatingScore(postId: string): Promise<number | null> {
   );
 }
 
-export async function getSharePostsByRestaurant(
+export async function getSharePostsForEntity(
   entityId: string,
   offset = 0,
   requestSignal?: AbortSignal,
 ): Promise<SharePostPage> {
-  const page = await getSharePostsByEntity(entityId, offset, requestSignal);
+  const page = await loadSharePostsByEntity(entityId, offset, requestSignal);
 
   if (page.items.length === 0) return { ...page, items: [] };
 
@@ -148,7 +163,7 @@ export async function getSharePostsByRestaurant(
         .abortSignal(signal);
 
       if (error) {
-        throw normalizeApiError(error, "We could not load restaurant ratings.");
+        throw normalizeApiError(error, "We could not load ratings.");
       }
 
       return new Map(data.map((rating) => [rating.post_id, rating.score]));
@@ -194,12 +209,12 @@ export async function createShareRating(
       if (error) {
         throw normalizeApiError(
           error,
-          "We could not publish your restaurant rating.",
+          "We could not publish your rating.",
         );
       }
 
       if (!data) {
-        throw new Error("We could not publish your restaurant rating.");
+        throw new Error("We could not publish your rating.");
       }
       return data as Post;
     });
@@ -232,7 +247,7 @@ export function updateShareRating(
     if (error) {
       throw normalizeApiError(
         error,
-        "We could not update your restaurant rating.",
+        "We could not update your rating.",
       );
     }
 
@@ -242,7 +257,7 @@ export function updateShareRating(
 
 function validateShareRating(input: CreateShareRatingInput) {
   if (!input.authorId || !input.entityId) {
-    throw new Error("Choose a restaurant before publishing.");
+    throw new Error("Choose a find before publishing.");
   }
 
   validateScore(input.score);
@@ -252,7 +267,7 @@ function validateShareRating(input: CreateShareRatingInput) {
   }
 
   if (input.images.length > 3) {
-    throw new Error("A restaurant rating can contain up to three images.");
+    throw new Error("A rating can contain up to three images.");
   }
 
   for (const image of input.images) {

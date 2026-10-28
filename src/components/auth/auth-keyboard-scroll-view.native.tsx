@@ -10,7 +10,7 @@ const StyledKeyboardAwareScrollView = withUniwind(KeyboardAwareScrollView);
 
 // Scope keyboard management to the sign-in/sign-up form, not other app screens.
 export function AuthKeyboardScrollView(
-  props: ComponentProps<typeof ScrollView>,
+  props: Omit<ComponentProps<typeof ScrollView>, "ref">,
 ) {
   return (
     <KeyboardProvider>

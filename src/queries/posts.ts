@@ -88,6 +88,7 @@ export function useCreateForumSharePost(forumId: string) {
       input: CreateAskPostMutationInput & {
         entityId: string;
         forumId: string;
+        score: number;
       },
     ) =>
       createForumSharePost({

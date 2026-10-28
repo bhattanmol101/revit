@@ -32,7 +32,7 @@ export function PicksScreen() {
         ) : null}
         {!picks.isLoading && !picks.isError && items.length === 0 ? (
           <FeedbackState
-            description="Create your first ordered restaurant list."
+            description="Create your first ordered list of finds."
             title="No Picks yet"
           />
         ) : null}
@@ -55,7 +55,7 @@ export function PicksScreen() {
                       numberOfLines={2}
                       variant="muted"
                     >
-                      {pick.description?.trim() || "Restaurant collection"}
+                      {pick.description?.trim() || "A collection of finds"}
                     </Text>
                   </View>
 

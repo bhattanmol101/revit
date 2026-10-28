@@ -96,7 +96,7 @@ export function PickDetailScreen() {
           {personalPick.items.map((item) => (
             <Link
               key={item.entity_id}
-              href={routes.restaurant(item.restaurant.id)}
+              href={{ pathname: routes.createShare, params: { entityId: item.entity.id } }}
               asChild
             >
               <Card className="gap-2 py-3 shadow-none">
@@ -117,11 +117,10 @@ export function PickDetailScreen() {
                     </View>
                     <View className="gap-1">
                       <Text className="font-semibold">
-                        {item.restaurant.name}
+                        {item.entity.name}
                       </Text>
                       <Text variant="muted" className="text-xs">
-                        {item.restaurant.address_line_1},{" "}
-                        {item.restaurant.locality}
+                        {[item.entity.category.label, item.entity.locality].filter(Boolean).join(" · ")}
                       </Text>
                       {item.note ? (
                         <Text className="text-sm leading-5">{item.note}</Text>
@@ -139,7 +138,7 @@ export function PickDetailScreen() {
           <DialogHeader>
             <DialogTitle>Delete this Pick?</DialogTitle>
             <DialogDescription>
-              This permanently deletes the list. The restaurants themselves are
+              This permanently deletes the list. The finds themselves are
               not affected.
             </DialogDescription>
           </DialogHeader>

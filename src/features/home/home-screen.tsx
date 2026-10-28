@@ -46,7 +46,7 @@ export function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList
-        contentContainerClassName="gap-1 md:gap-6 md:px-6 md:py-6 py-1"
+        contentContainerClassName="gap-1 md:gap-2 md:px-6 md:py-6 py-1"
         data={posts}
         keyExtractor={(post) => post.id}
         ListEmptyComponent={<FeedEmpty feed={feed} feedMode={feedMode} />}
@@ -174,7 +174,7 @@ function HomeFeedItem({ post }: { post: HomeFeedPost }) {
       {post.post_type === "ASK" ? (
         <AskPostCard post={post} />
       ) : (
-        <SharePostCard post={post} restaurant={post.restaurant} />
+        <SharePostCard post={post} entity={post.entity} />
       )}
     </View>
   );

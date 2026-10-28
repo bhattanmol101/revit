@@ -1,4 +1,5 @@
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
+import { searchEntities } from "@/api/entities";
 import { supabase } from "@/lib/supabase/client";
 
 import { normalizeApiError } from "./errors";
@@ -22,21 +23,21 @@ export type DiscoveryPost = {
 export type DiscoverResults = {
   posts: DiscoveryPost[];
   profiles: DiscoveryProfile[];
-  restaurants: Restaurant[];
+  entities: Entity[];
 };
 
 export function discover(query: string): Promise<DiscoverResults> {
   const searchTerm = normalizeSearchTerm(query);
 
   if (searchTerm.length < 2) {
-    return Promise.resolve({ posts: [], profiles: [], restaurants: [] });
+    return Promise.resolve({ posts: [], profiles: [], entities: [] });
   }
 
   const pattern = `%${escapeLikePattern(searchTerm)}%`;
 
   return runApiRequest(
     async (signal) => {
-      const [profilesResult, postsResult, restaurantsResult] =
+      const [profilesResult, postsResult, entities] =
         await Promise.all([
           supabase
             .from("profiles")
@@ -54,18 +55,7 @@ export function discover(query: string): Promise<DiscoverResults> {
             .order("created_at", { ascending: false })
             .limit(DISCOVER_RESULT_LIMIT)
             .abortSignal(signal),
-          supabase
-            .from("entities")
-            .select(
-              "id, name, address_line_1, address_line_2, locality, administrative_area, country_code, postal_code, category:entity_categories!inner(slug)",
-            )
-            .eq("category.slug", "restaurant")
-            .or(
-              `normalized_name.ilike.${pattern},normalized_locality.ilike.${pattern},normalized_address.ilike.${pattern}`,
-            )
-            .order("normalized_name", { ascending: true })
-            .limit(DISCOVER_RESULT_LIMIT)
-            .abortSignal(signal),
+          searchEntities(searchTerm),
         ]);
 
       if (profilesResult.error) {
@@ -82,13 +72,6 @@ export function discover(query: string): Promise<DiscoverResults> {
         );
       }
 
-      if (restaurantsResult.error) {
-        throw normalizeApiError(
-          restaurantsResult.error,
-          "We could not search restaurants.",
-        );
-      }
-
       return {
         posts: postsResult.data.map((post) => ({
           authorName: post.author.display_name,
@@ -101,9 +84,7 @@ export function discover(query: string): Promise<DiscoverResults> {
           displayName: profile.display_name,
           username: profile.username,
         })),
-        restaurants: restaurantsResult.data.map(
-          ({ category: _category, ...restaurant }) => restaurant,
-        ),
+        entities,
       };
     },
     { retries: 1 },

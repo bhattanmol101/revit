@@ -1,8 +1,6 @@
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
 import { Pressable, View } from "react-native";
-
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -10,6 +8,7 @@ import { Icon } from "@/components/ui/icon";
 import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
 import { routes } from "@/lib/routes";
 import { useForums } from "@/queries/forums";
 
@@ -44,17 +43,11 @@ export function ForumsScreen() {
                   className="w-full rounded-lg active:opacity-90"
                 >
                   <Card className="w-full gap-0 overflow-hidden py-0">
-                    {forum.coverImageUrl ? (
-                      <Image
-                        accessibilityLabel={`${forum.name} cover image`}
-                        className="h-28 w-full bg-muted"
-                        contentFit="cover"
-                        style={{ height: 112, width: "100%" }}
-                        source={forum.coverImageUrl}
-                      />
-                    ) : (
-                      <ForumCoverFallback />
-                    )}
+                    <ForumCoverDisplay
+                      forumId={forum.id}
+                      forumName={forum.name}
+                      imageUrl={forum.coverImageUrl}
+                    />
 
                     <View className="gap-1 px-4 py-3">
                       <Text className="font-semibold">{forum.name}</Text>
@@ -94,16 +87,5 @@ export function ForumsScreen() {
         ) : null}
       </PageScrollView>
     </SafeAreaView>
-  );
-}
-
-function ForumCoverFallback() {
-  return (
-    <View className="h-28 overflow-hidden bg-selected">
-      <View className="absolute -left-10 -top-14 size-32 rounded-full bg-primary/15" />
-      <View className="absolute left-1/4 top-5 h-24 w-24 rotate-45 rounded-lg bg-primary/10" />
-      <View className="absolute bottom-4 right-1/4 size-14 rounded-full bg-primary/15" />
-      <View className="absolute -right-8 -top-8 size-28 rotate-12 rounded-lg bg-primary/10" />
-    </View>
   );
 }

@@ -191,11 +191,24 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
               {replyingTo?.id === comment.id || comment.replies.length > 0 ? (
                 <View className="ml-8 gap-1.5 border-l border-border pl-3">
                   {replyingTo?.id === comment.id ? (
-                    <View className="gap-2">
+                    <View className="gap-1 rounded-lg bg-card px-2 py-1">
+                      <View className="flex-row items-center justify-between gap-2">
+                        <Text className="text-xs ml-1" variant="muted">
+                          Replying to {comment.author.display_name}
+                        </Text>
+                        <Button
+                          className="p-0"
+                          onPress={() => setReplyingTo(null)}
+                          size="xs"
+                          variant="link"
+                        >
+                          <Text className="text-xs">Cancel</Text>
+                        </Button>
+                      </View>
                       <View className="flex-row items-center gap-2">
                         <Avatar
                           alt={`${displayName}'s avatar`}
-                          className="size-10"
+                          className="size-8"
                         >
                           {profile?.avatar_url ? (
                             <AvatarImage

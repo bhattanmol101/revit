@@ -1,7 +1,7 @@
 import type { PostPage, PostWithDetails } from "@/api/posts";
 import { getPostsByIds } from "@/api/posts";
-import type { Restaurant } from "@/api/restaurants";
-import { getRestaurantsByIds } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
+import { getEntitiesByIds } from "@/api/entities";
 import { supabase } from "@/lib/supabase/client";
 
 import { normalizeApiError } from "./errors";
@@ -12,7 +12,7 @@ const HOME_FEED_PAGE_SIZE = 10;
 export type HomeFeedSharePost = PostWithDetails & {
   post_type: "SHARE";
   ratingScore: number;
-  restaurant: Restaurant;
+  entity: Entity;
 };
 
 export type HomeFeedPost =
@@ -80,15 +80,15 @@ export async function getHomeFeed(
     };
   }
 
-  const [ratings, restaurants] = await Promise.all([
+  const [ratings, entities] = await Promise.all([
     getShareScores(sharePosts.map((post) => post.id)),
-    getRestaurantsByIds(sharePosts.map((post) => post.entity_id)),
+    getEntitiesByIds(sharePosts.map((post) => post.entity_id)),
   ]);
   const ratingsByPostId = new Map(
     ratings.map((rating) => [rating.post_id, rating.score]),
   );
-  const restaurantsById = new Map(
-    restaurants.map((restaurant) => [restaurant.id, restaurant]),
+  const entitiesById = new Map(
+    entities.map((entity) => [entity.id, entity]),
   );
 
   return {
@@ -96,18 +96,18 @@ export async function getHomeFeed(
       if (post.post_type === "ASK") return [post as HomeFeedPost];
 
       const ratingScore = ratingsByPostId.get(post.id);
-      const restaurant = post.entity_id
-        ? restaurantsById.get(post.entity_id)
+      const entity = post.entity_id
+        ? entitiesById.get(post.entity_id)
         : undefined;
 
-      return ratingScore === undefined || !restaurant
+      return ratingScore === undefined || !entity
         ? []
         : [
             {
               ...post,
               post_type: "SHARE" as const,
               ratingScore,
-              restaurant,
+              entity,
             },
           ];
     }),

@@ -23,7 +23,7 @@ import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useTopLevelComments } from "@/queries/comments";
 import { useDeletePost, usePost, useUpdateAskPost } from "@/queries/posts";
-import { useRestaurant } from "@/queries/restaurants";
+import { useEntity } from "@/queries/entities";
 import { useShareRatingScore } from "@/queries/shares";
 
 import { AskPostCard } from "./ask-post-card";
@@ -73,19 +73,19 @@ export function PostDetailScreen() {
 }
 
 function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
-  const restaurant = useRestaurant(post.entity_id ?? "");
+  const entity = useEntity(post.entity_id ?? "");
   const ratingScore = useShareRatingScore(post.id);
   const comments = useTopLevelComments(post.id);
 
-  if (restaurant.isLoading || ratingScore.isLoading)
+  if (entity.isLoading || ratingScore.isLoading)
     return <PostDetailLoading />;
-  if (restaurant.isError || ratingScore.isError || !restaurant.data) {
+  if (entity.isError || ratingScore.isError || !entity.data) {
     return (
       <PostDetailMessage
         title="Share post unavailable"
-        description="We couldn’t load this restaurant."
+        description="We couldn’t load this find."
         action={() =>
-          void Promise.all([restaurant.refetch(), ratingScore.refetch()])
+          void Promise.all([entity.refetch(), ratingScore.refetch()])
         }
       />
     );
@@ -95,7 +95,7 @@ function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
     return (
       <PostDetailMessage
         title="Share post unavailable"
-        description="This restaurant rating may have been removed or is no longer available."
+        description="This rating may have been removed or is no longer available."
       />
     );
   }
@@ -117,7 +117,7 @@ function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
         <SharePostCard
           isDetail
           post={{ ...post, ratingScore: ratingScore.data }}
-          restaurant={restaurant.data}
+          entity={entity.data}
         />
         <CommentSection comments={comments} postId={post.id} />
       </ScrollView>
@@ -126,31 +126,31 @@ function ForumSharePostDetail({ post }: { post: PostWithDetails }) {
 }
 
 function SharePostDetail({ post }: { post: PostWithDetails }) {
-  const restaurant = useRestaurant(post.entity_id ?? "");
+  const entity = useEntity(post.entity_id ?? "");
   const ratingScore = useShareRatingScore(post.id);
   const comments = useTopLevelComments(post.id);
   const score = ratingScore.data;
 
-  if (restaurant.isLoading || ratingScore.isLoading)
+  if (entity.isLoading || ratingScore.isLoading)
     return <PostDetailLoading />;
 
-  if (restaurant.isError || ratingScore.isError) {
+  if (entity.isError || ratingScore.isError) {
     return (
       <PostDetailMessage
         title="Share post unavailable"
-        description="We couldn’t load this restaurant rating. Check your connection and try again."
+        description="We couldn’t load this rating. Check your connection and try again."
         action={() =>
-          void Promise.all([restaurant.refetch(), ratingScore.refetch()])
+          void Promise.all([entity.refetch(), ratingScore.refetch()])
         }
       />
     );
   }
 
-  if (!restaurant.data || score === null || score === undefined) {
+  if (!entity.data || score === null || score === undefined) {
     return (
       <PostDetailMessage
         title="Share post unavailable"
-        description="This restaurant rating may have been removed or is no longer available."
+        description="This rating may have been removed or is no longer available."
       />
     );
   }
@@ -175,7 +175,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
             refreshing={false}
             onRefresh={() =>
               void Promise.all([
-                restaurant.refetch(),
+                entity.refetch(),
                 ratingScore.refetch(),
                 comments.refetch(),
               ])
@@ -186,7 +186,7 @@ function SharePostDetail({ post }: { post: PostWithDetails }) {
         <SharePostCard
           isDetail
           post={{ ...post, ratingScore: score }}
-          restaurant={restaurant.data}
+          entity={entity.data}
         />
         <CommentSection comments={comments} postId={post.id} />
       </ScrollView>

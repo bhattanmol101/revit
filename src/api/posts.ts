@@ -65,6 +65,7 @@ export type CreateForumSharePostInput = {
   entityId: string;
   forumId: string;
   images: AskImageUpload[];
+  score: number;
 };
 
 export function createForumAskPost(
@@ -90,6 +91,7 @@ export function createForumSharePost(
     forumId: input.forumId,
     images: input.images,
     postType: "SHARE",
+    score: input.score,
   });
 }
 
@@ -134,6 +136,7 @@ async function createForumPost({
   forumId,
   images,
   postType,
+  score,
 }: {
   authorId: string;
   body?: string;
@@ -141,6 +144,7 @@ async function createForumPost({
   forumId: string;
   images: AskImageUpload[];
   postType: "ASK" | "SHARE";
+  score?: number;
 }): Promise<Post> {
   validateForumPost({ authorId, body, entityId, postType });
 
@@ -158,6 +162,7 @@ async function createForumPost({
           p_media_paths: uploadedPaths,
           p_post_id: postId,
           p_post_type: postType,
+          p_score: score,
         })
         .abortSignal(signal)
         .single();
@@ -607,10 +612,10 @@ function validateForumPost({
       throw new Error("Add your question before publishing.");
     }
     if (entityId) {
-      throw new Error("An Ask post cannot include a restaurant.");
+      throw new Error("An Ask post cannot include a find.");
     }
   } else if (!entityId) {
-    throw new Error("Choose a restaurant to share.");
+    throw new Error("Choose a find to share.");
   }
 }
 

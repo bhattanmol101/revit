@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { MapPin, Star, StarHalf } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { SharePostCard } from "@/features/posts/share-post-card";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
-import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
-import { useRestaurant } from "@/queries/restaurants";
+import { useEntity } from "@/queries/entities";
 import {
-  useRestaurantRatingSummary,
-  useSharePostsByRestaurant,
+  useEntityRatingSummary,
+  useSharePostsByEntity,
 } from "@/queries/shares";
+import { StarRating } from "@/features/ratings/star-rating";
 
 export function RestaurantDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const restaurantId = Array.isArray(params.id)
     ? params.id[0]
     : (params.id ?? "");
-  const restaurant = useRestaurant(restaurantId);
+  const restaurant = useEntity(restaurantId);
 
   const goBack = () => {
     if (router.canGoBack()) {
@@ -65,10 +65,9 @@ export function RestaurantDetailScreen() {
 }
 
 function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
-  const restaurant = useRestaurant(restaurantId);
-  const summary = useRestaurantRatingSummary(restaurantId);
-  const posts = useSharePostsByRestaurant(restaurantId);
-  const theme = useTheme();
+  const restaurant = useEntity(restaurantId);
+  const summary = useEntityRatingSummary(restaurantId);
+  const posts = useSharePostsByEntity(restaurantId);
   const sharePosts = posts.data?.pages.flatMap((page) => page.items) ?? [];
   const restaurantData = restaurant.data;
 
@@ -108,23 +107,14 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
         </View>
 
         <View className="flex-row flex-wrap items-center gap-2 border-t border-border pt-3">
-          <View className="flex-row items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map((value) => {
-              const average = summary.data?.averageScore ?? 0;
-              const filled = average >= value;
-              const halfFilled = !filled && average >= value - 0.5;
-              return (
-                <Icon
-                  key={value}
-                  as={halfFilled ? StarHalf : Star}
-                  className="size-5 text-rating"
-                  fill={filled ? theme.rating : "transparent"}
-                  stroke={theme.rating}
-                  strokeWidth={filled || halfFilled ? 0 : 1.8}
-                />
-              );
-            })}
-          </View>
+          <StarRating
+            value={summary.data?.averageScore ?? null}
+            readOnly
+            allowHalf
+            animated={false}
+            starSize={20}
+            gap={2}
+          />
           <Text className="text-2xl font-semibold">
             {summary.isLoading || summary.isError
               ? "—"
@@ -165,7 +155,7 @@ function RestaurantDetails({ restaurantId }: { restaurantId: string }) {
           <SharePostCard
             key={post.id}
             post={post}
-            restaurant={restaurantData}
+            entity={restaurantData}
           />
         ))}
         {posts.hasNextPage ? (
@@ -204,9 +194,9 @@ function RestaurantPostsLoading() {
 }
 
 function formatRestaurantLocation(restaurant: {
-  address_line_1: string;
+  address_line_1: string | null;
   administrative_area: string | null;
-  locality: string;
+  locality: string | null;
 }) {
   return [
     restaurant.address_line_1,

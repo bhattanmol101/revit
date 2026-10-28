@@ -33,8 +33,8 @@ export function createRestaurant(
   input: CreateRestaurantInput,
 ): Promise<Restaurant> {
   const name = input.name.trim();
-  const addressLine1 = input.address_line_1.trim();
-  const locality = input.locality.trim();
+  const addressLine1 = input.address_line_1?.trim() ?? "";
+  const locality = input.locality?.trim() ?? "";
 
   if (!name || !addressLine1 || !locality) {
     throw new Error("Restaurant name, address, and locality are required.");

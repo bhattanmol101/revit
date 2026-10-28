@@ -8,7 +8,7 @@ const inputVariants = cva(
     variants: {
       appearance: {
         default:
-          "border-input bg-card focus:border-primary rounded-lg border px-3",
+          "border-input bg-card rounded-lg border px-3",
         embedded:
           "border-0 bg-transparent px-0 focus:border-0 focus:ring-0 focus-visible:border-0 focus-visible:ring-0",
       },
@@ -48,7 +48,7 @@ function Input({
         Platform.select({
           web: cn(
             "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground outline-none transition-[color,box-shadow] md:text-sm",
-            "focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:ring-[2px]",
+            "focus:border-input focus-visible:border-input focus-visible:ring-0",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
           ),
         }),

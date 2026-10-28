@@ -1,89 +1,97 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
-import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { ImagePlus, MapPin, Star, X } from "lucide-react-native";
+import type * as ImagePicker from "expo-image-picker";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { MapPin } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 
-import type { Restaurant } from "@/api/restaurants";
+import type { Entity } from "@/api/entities";
+import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
+import { ENTITY_IMAGE_PRESENTATION } from "@/components/media/image-presentation";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
-import { useTheme } from "@/hooks/use-theme";
+import { StarRating } from "@/features/ratings/star-rating";
 import { selectionFeedback, successFeedback } from "@/lib/feedback";
+import { readLocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
-import { useRestaurant, useRestaurantSearch } from "@/queries/restaurants";
+import {
+  useCreateEntity,
+  useEntity,
+  useEntityCategories,
+  useEntitySearch,
+} from "@/queries/entities";
 import {
   useCreateShareRating,
-  useMyRestaurantRating,
+  useMyEntityRating,
   useUpdateShareRating,
 } from "@/queries/shares";
 
 const MAX_IMAGES = 3;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MIN_POST_ASPECT_RATIO = 4 / 5;
-const MAX_POST_ASPECT_RATIO = 16 / 9;
 
 export function ShareComposerScreen() {
   const { user } = useAuth();
-  const { restaurantId } = useLocalSearchParams<{ restaurantId?: string }>();
-  const theme = useTheme();
+  const { entityId } = useLocalSearchParams<{ entityId?: string }>();
   const [search, setSearch] = useState("");
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [entity, setEntity] = useState<Entity | null>(null);
+  const [categorySlug, setCategorySlug] = useState("place");
+  const [newName, setNewName] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newLocation, setNewLocation] = useState("");
+  const [entityImage, setEntityImage] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [entityDraftError, setEntityDraftError] = useState<string | null>(null);
   const [score, setScore] = useState<number | null>(null);
   const [body, setBody] = useState("");
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
-  const [pickerError, setPickerError] = useState<string | null>(null);
-  const [isPicking, setIsPicking] = useState(false);
-  const restaurantFromRoute = useRestaurant(restaurantId ?? "");
-  const results = useRestaurantSearch(search);
-  const existingRating = useMyRestaurantRating(
-    restaurant?.id ?? "",
-    user?.id ?? "",
-  );
+  const entityFromRoute = useEntity(entityId ?? "");
+  const categories = useEntityCategories();
+  const results = useEntitySearch(search, categorySlug);
+  const createEntity = useCreateEntity();
+  const existingRating = useMyEntityRating(entity?.id ?? "", user?.id ?? "");
   const createRating = useCreateShareRating();
   const updateRating = useUpdateShareRating(
     existingRating.data?.postId ?? "",
-    restaurant?.id ?? "",
+    entity?.id ?? "",
     user?.id ?? "",
   );
   const isUpdating = Boolean(existingRating.data);
   const isSaving = createRating.isPending || updateRating.isPending;
   const mutationError = createRating.error ?? updateRating.error;
-  const canPublish = Boolean(user && restaurant && score && !isSaving);
+  const canPublish = Boolean(user && entity && score && !isSaving);
 
   useEffect(() => {
-    if (restaurant || !restaurantFromRoute.data) return;
-    setRestaurant(restaurantFromRoute.data);
-  }, [restaurant, restaurantFromRoute.data]);
+    if (entity || !entityFromRoute.data) return;
+    setEntity(entityFromRoute.data);
+  }, [entity, entityFromRoute.data]);
 
   useEffect(() => {
-    if (!restaurant || existingRating.isLoading) return;
+    if (!entity || existingRating.isLoading) return;
 
     setScore(existingRating.data?.score ?? null);
     setBody(existingRating.data?.body ?? "");
-  }, [existingRating.data, existingRating.isLoading, restaurant]);
+  }, [existingRating.data, existingRating.isLoading, entity]);
 
-  const selectRestaurant = (nextRestaurant: Restaurant) => {
+  const selectEntity = (nextEntity: Entity) => {
     selectionFeedback();
-    setRestaurant(nextRestaurant);
+    setEntity(nextEntity);
     setSearch("");
     setScore(null);
     setBody("");
     setImages([]);
-    setPickerError(null);
   };
 
-  const clearRestaurant = () => {
-    setRestaurant(null);
-    router.setParams({ restaurantId: undefined });
+  const clearEntity = () => {
+    setEntity(null);
+    router.setParams({ entityId: undefined });
   };
 
   const closeComposer = () => {
@@ -95,64 +103,46 @@ export function ShareComposerScreen() {
     router.replace(routes.create);
   };
 
-  const pickImages = async () => {
-    setPickerError(null);
-
-    if (images.length >= MAX_IMAGES) {
-      setPickerError("A restaurant rating can contain up to three images.");
-      return;
-    }
-
-    setIsPicking(true);
-
+  const createEntityFromDraft = async () => {
+    if (!user) return;
+    setEntityDraftError(null);
     try {
-      if (Platform.OS !== "web") {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (!permission.granted) {
-          setPickerError("Photo access is needed to add an image.");
-          return;
-        }
+      if (entityImage?.fileSize && entityImage.fileSize > MAX_IMAGE_BYTES) {
+        throw new Error("The find image must be smaller than 10 MB.");
       }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsMultipleSelection: true,
-        mediaTypes: ["images"],
-        orderedSelection: true,
-        quality: 0.85,
-        selectionLimit: MAX_IMAGES - images.length,
+      const image = entityImage
+        ? await readLocalImage({
+            file: entityImage.file,
+            fileName: entityImage.fileName,
+            fileSize: entityImage.fileSize,
+            mimeType: entityImage.mimeType,
+            uri: entityImage.uri,
+          })
+        : undefined;
+      const created = await createEntity.mutateAsync({
+        authorId: user.id,
+        categorySlug,
+        name: newName.trim() || search.trim(),
+        description: newDescription,
+        locality: newLocation,
+        image,
       });
-
-      if (result.canceled) return;
-
-      if (
-        result.assets.some(
-          (asset) => asset.fileSize && asset.fileSize > MAX_IMAGE_BYTES,
-        )
-      ) {
-        setPickerError("Each image must be smaller than 10 MB.");
-        return;
-      }
-
-      setImages((current) =>
-        [...current, ...result.assets]
-          .filter(
-            (asset, index, all) =>
-              all.findIndex((candidate) => candidate.uri === asset.uri) ===
-              index,
-          )
-          .slice(0, MAX_IMAGES),
+      selectEntity(created);
+      setNewName("");
+      setNewDescription("");
+      setNewLocation("");
+      setEntityImage(null);
+    } catch (error) {
+      setEntityDraftError(
+        error instanceof Error
+          ? error.message
+          : "We could not prepare this find.",
       );
-    } catch {
-      setPickerError("We couldn’t open your photo library. Please try again.");
-    } finally {
-      setIsPicking(false);
     }
   };
 
   const publish = async () => {
-    if (!user || !restaurant || !score || !canPublish) return;
+    if (!user || !entity || !score || !canPublish) return;
 
     try {
       const post = isUpdating
@@ -160,7 +150,7 @@ export function ShareComposerScreen() {
         : await createRating.mutateAsync({
             authorId: user.id,
             body,
-            entityId: restaurant.id,
+            entityId: entity.id,
             images: images.map((image) => ({
               file: image.file,
               fileName: image.fileName,
@@ -214,25 +204,47 @@ export function ShareComposerScreen() {
           <Card className="gap-6 border-border bg-card p-4 pb-6 shadow-none">
             <View className="gap-2 py-1">
               <Text variant="h1" className="text-left">
-                Rate a restaurant
+                Rate anything
               </Text>
               <Text variant="muted" className="leading-5">
-                Your rating becomes one public restaurant post. You can update
-                it later.
+                Choose a category, find what you’re looking for, and share your
+                rating.
               </Text>
             </View>
 
             <View className="gap-3">
-              <Text variant="small">Restaurant</Text>
-              {restaurant ? (
+              <Text variant="small">Category</Text>
+              {!entity ? (
+                <View className="flex-row flex-wrap gap-2">
+                  {(categories.data ?? []).map((category) => (
+                    <Button
+                      key={category.id}
+                      size="sm"
+                      variant={
+                        category.slug === categorySlug ? "default" : "outline"
+                      }
+                      onPress={() => {
+                        setCategorySlug(category.slug);
+                        setSearch("");
+                      }}
+                    >
+                      <Text>{category.label}</Text>
+                    </Button>
+                  ))}
+                </View>
+              ) : null}
+              <Text variant="small">Find</Text>
+              {entity ? (
                 <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
                   <Icon as={MapPin} className="size-5 text-primary" />
                   <View className="min-w-0 flex-1 gap-0.5">
                     <Text className="truncate text-base font-semibold">
-                      {restaurant.name}
+                      {entity.name}
                     </Text>
                     <Text variant="muted" className="truncate text-xs">
-                      {restaurant.address_line_1}, {restaurant.locality}
+                      {[entity.category.label, entity.locality]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </Text>
                   </View>
                   <Button
@@ -240,7 +252,7 @@ export function ShareComposerScreen() {
                     className="shrink-0"
                     size="xs"
                     variant="ghost"
-                    onPress={clearRestaurant}
+                    onPress={clearEntity}
                   >
                     <Text className="text-sm text-primary">Change</Text>
                   </Button>
@@ -248,7 +260,7 @@ export function ShareComposerScreen() {
               ) : (
                 <>
                   <SearchInput
-                    accessibilityLabel="Search restaurants"
+                    accessibilityLabel="Search finds"
                     autoFocus
                     placeholder="Search by name or location"
                     value={search}
@@ -266,7 +278,7 @@ export function ShareComposerScreen() {
                       className="border border-border bg-card"
                       size="content"
                       variant="ghost"
-                      onPress={() => selectRestaurant(item)}
+                      onPress={() => selectEntity(item)}
                     >
                       <Icon as={MapPin} className="text-primary" />
                       <View className="min-w-0 flex-1 gap-0.5">
@@ -277,7 +289,9 @@ export function ShareComposerScreen() {
                           variant="muted"
                           className="truncate text-left text-xs"
                         >
-                          {item.address_line_1}, {item.locality}
+                          {[item.category.label, item.locality]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </Text>
                       </View>
                     </Button>
@@ -285,26 +299,70 @@ export function ShareComposerScreen() {
                   {search.trim().length >= 2 &&
                   !results.isLoading &&
                   results.data?.length === 0 ? (
-                    <View className="gap-2 border-t border-border pt-3">
+                    <View className="gap-3 border-t border-border pt-3">
                       <Text variant="muted" className="text-sm">
-                        Can’t find it?
+                        Can’t find it? Add it as a find
                       </Text>
-                      <Link href={routes.restaurantSearchForShare} asChild>
-                        <Button
-                          className="self-start"
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Text>Add a restaurant</Text>
-                        </Button>
-                      </Link>
+                      <Input
+                        accessibilityLabel="Find name"
+                        placeholder="Name"
+                        value={newName || search.trim()}
+                        onChangeText={setNewName}
+                      />
+                      <Textarea
+                        accessibilityLabel="Find description"
+                        placeholder="Description (optional)"
+                        value={newDescription}
+                        onChangeText={setNewDescription}
+                      />
+                      <Input
+                        accessibilityLabel="Find location"
+                        placeholder="Location (optional)"
+                        value={newLocation}
+                        onChangeText={setNewLocation}
+                      />
+                      <ImagePickerCarousel
+                        images={entityImage ? [entityImage] : []}
+                        onImagesChange={(selected) =>
+                          setEntityImage(selected[0] ?? null)
+                        }
+                        maxImages={1}
+                        selectionLimit={1}
+                        presentation={ENTITY_IMAGE_PRESENTATION}
+                        replaceExisting
+                        addLabel={entityImage ? "Change image" : "Add image"}
+                        disabled={createEntity.isPending}
+                      />
+                      {entityDraftError ? (
+                        <Text variant="small" className="text-destructive">
+                          {entityDraftError}
+                        </Text>
+                      ) : null}
+                      <Button
+                        disabled={
+                          !(newName.trim() || search.trim()) ||
+                          createEntity.isPending
+                        }
+                        size="sm"
+                        variant="outline"
+                        onPress={() => void createEntityFromDraft()}
+                      >
+                        <Text>
+                          {createEntity.isPending ? "Creating…" : "Add find"}
+                        </Text>
+                      </Button>
+                      {createEntity.isError ? (
+                        <Text variant="small" className="text-destructive">
+                          {createEntity.error.message}
+                        </Text>
+                      ) : null}
                     </View>
                   ) : null}
                 </>
               )}
             </View>
 
-            {restaurant ? (
+            {entity ? (
               <>
                 <View className="gap-3 border-t border-border pt-6">
                   <View className="flex-row items-center justify-between">
@@ -315,40 +373,23 @@ export function ShareComposerScreen() {
                   </View>
                   <View className="flex-row items-center justify-between gap-3">
                     <View className="flex-row items-center gap-3">
-                      <View className="flex-row items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((value) => {
-                          const selected = score !== null && value <= score;
-                          return (
-                            <Button
-                              key={value}
-                              accessibilityLabel={`Rate ${value} out of 5`}
-                              accessibilityState={{ selected: score === value }}
-                              disabled={isSaving || existingRating.isLoading}
-                              size="rating"
-                              variant="ghost"
-                              onPress={() => {
-                                selectionFeedback();
-                                setScore(value);
-                              }}
-                            >
-                              <Star
-                                color={theme.rating}
-                                fill={selected ? theme.rating : "transparent"}
-                                size={25}
-                                stroke={theme.rating}
-                                strokeWidth={selected ? 0 : 2}
-                              />
-                            </Button>
-                          );
-                        })}
-                      </View>
+                      <StarRating
+                        value={score}
+                        disabled={isSaving || existingRating.isLoading}
+                        starSize={25}
+                        gap={5}
+                        onChange={(nextScore) => {
+                          selectionFeedback();
+                          setScore(nextScore);
+                        }}
+                      />
                       <Text className="text-sm font-medium" variant="muted">
                         {score === null ? "Not rated" : `${score} of 5`}
                       </Text>
                     </View>
                     {score !== null ? (
                       <Button
-                        accessibilityLabel="Clear your restaurant rating"
+                        accessibilityLabel="Clear your rating"
                         className="shrink-0"
                         size="xs"
                         disabled={isSaving || existingRating.isLoading}
@@ -372,7 +413,7 @@ export function ShareComposerScreen() {
                     <Text variant="muted">{body.length}/2000</Text>
                   </View>
                   <Textarea
-                    accessibilityLabel="Restaurant review"
+                    accessibilityLabel="Review"
                     editable={!isSaving}
                     maxLength={2000}
                     placeholder="What did you like, or what should people know?"
@@ -387,62 +428,13 @@ export function ShareComposerScreen() {
                       <Text variant="small">Photos (optional)</Text>
                       <Text variant="muted">{images.length}/3</Text>
                     </View>
-                    {images.length > 0 ? (
-                      <View className="gap-3 sm:flex-row">
-                        {images.map((image, index) => (
-                          <View key={image.uri} className="relative flex-1">
-                            <Image
-                              accessibilityLabel={`Selected photo ${index + 1}`}
-                              className="w-full rounded-md bg-muted"
-                              contentFit="contain"
-                              source={image.uri}
-                              style={{
-                                aspectRatio: getPostPreviewAspectRatio(image),
-                                width: "100%",
-                              }}
-                            />
-                            <Button
-                              accessibilityLabel={`Remove image ${index + 1}`}
-                              className="absolute right-2 top-2 rounded-md bg-background/90"
-                              disabled={isSaving}
-                              size="icon"
-                              variant="outline"
-                              onPress={() =>
-                                setImages((current) =>
-                                  current.filter(
-                                    (candidate) => candidate.uri !== image.uri,
-                                  ),
-                                )
-                              }
-                            >
-                              <Icon as={X} />
-                            </Button>
-                          </View>
-                        ))}
-                      </View>
-                    ) : null}
-                    <Button
-                      className="self-start"
-                      disabled={
-                        images.length >= MAX_IMAGES || isSaving || isPicking
-                      }
-                      variant="outline"
-                      onPress={() => void pickImages()}
-                    >
-                      <Icon as={ImagePlus} />
-                      <Text>
-                        {isPicking
-                          ? "Opening…"
-                          : images.length
-                            ? "Add more photos"
-                            : "Add photos"}
-                      </Text>
-                    </Button>
-                    {pickerError ? (
-                      <Text variant="small" className="text-destructive">
-                        {pickerError}
-                      </Text>
-                    ) : null}
+                    <ImagePickerCarousel
+                      images={images}
+                      onImagesChange={setImages}
+                      maxImages={MAX_IMAGES}
+                      disabled={isSaving}
+                      addLabel="Add photos"
+                    />
                   </View>
                 ) : null}
               </>
@@ -457,14 +449,5 @@ export function ShareComposerScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
-}
-
-function getPostPreviewAspectRatio(image: ImagePicker.ImagePickerAsset) {
-  const naturalRatio =
-    image.width && image.height ? image.width / image.height : 1;
-  return Math.min(
-    MAX_POST_ASPECT_RATIO,
-    Math.max(MIN_POST_ASPECT_RATIO, naturalRatio),
   );
 }

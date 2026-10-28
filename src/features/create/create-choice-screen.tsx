@@ -61,17 +61,15 @@ export function CreateChoiceScreen() {
                 <View className="size-9 items-center justify-center rounded-md bg-elevated">
                   <Icon as={Star} className="text-rating" />
                 </View>
-                <CardTitle className="text-lg">
-                  Share a restaurant rating
-                </CardTitle>
+                <CardTitle className="text-lg">Share a rating</CardTitle>
                 <CardDescription className="leading-5">
-                  Rate a restaurant and add an optional review or photos.
+                  Rate a find and add an optional review or photos.
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0">
                 <Link href={routes.createShare} asChild>
                   <Button variant="outline" className="w-full">
-                    <Text>Rate a restaurant</Text>
+                    <Text>Rate a find</Text>
                     <Icon as={ArrowRight} />
                   </Button>
                 </Link>
@@ -107,7 +105,7 @@ export function CreateChoiceScreen() {
                 </View>
                 <CardTitle className="text-lg">Create a Pick</CardTitle>
                 <CardDescription className="leading-5">
-                  Build an ordered list of restaurants to share.
+                  Build an ordered list of finds to share.
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0">
